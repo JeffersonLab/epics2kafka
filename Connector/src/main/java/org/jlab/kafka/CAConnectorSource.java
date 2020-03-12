@@ -26,6 +26,7 @@ public class CAConnectorSource extends SourceConnector {
     public void start(Map<String, String> props) {
         epicsAddrList = props.get(EPICS_CA_ADDR_LIST_CONFIG);
         pvs = new HashSet<>(Arrays.asList(props.get(PVS_CSV_CONFIG).split(",")));
+        CONFIG_DEF.validate(props);
     }
 
     /**

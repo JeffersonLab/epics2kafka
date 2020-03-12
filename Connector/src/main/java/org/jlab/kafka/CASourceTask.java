@@ -97,7 +97,7 @@ public class CASourceTask extends SourceTask {
         for(String pv: updatedPvs) {
             DBR record = latest.remove(pv);
             String value = dbrToString(record);
-            String topic = pv;
+            String topic = pv.replaceAll(":", "-");
             recordList.add(new SourceRecord(offsetKey(pv), offsetValue, topic, null,
                     null, null, VALUE_SCHEMA, value, epochMillis));
         }
