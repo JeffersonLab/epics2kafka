@@ -5,13 +5,16 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class CAConnectorSource extends SourceConnector {
-
-    public static final String PVS_CSV_CONFIG = "PVS_CSV_CONFIG";
+    public static final String EPICS_CA_ADDR_LIST_CONFIG = "EPICS_CA_ADDR_LIST";
+    public static final String PVS_CSV_CONFIG = "PVS_CSV";
     public static final String version = "0.0.0";
+    private String epicsAddrList;
     private Set<String> pvs; // Set to ensure duplicates are removed
+    private static final ConfigDef CONFIG_DEF = new ConfigDef()
+            .define(EPICS_CA_ADDR_LIST_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "List of CA Addresses")
+            .define(PVS_CSV_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "CSV of PV Names");
 
     /**
      * Start this Connector. This method will only be called on a clean Connector, i.e. it has
@@ -21,6 +24,7 @@ public class CAConnectorSource extends SourceConnector {
      */
     @Override
     public void start(Map<String, String> props) {
+        epicsAddrList = props.get(EPICS_CA_ADDR_LIST_CONFIG);
         pvs = new HashSet<>(Arrays.asList(props.get(PVS_CSV_CONFIG).split(",")));
     }
 
@@ -89,7 +93,7 @@ public class CAConnectorSource extends SourceConnector {
      */
     @Override
     public ConfigDef config() {
-        return null;
+        return CONFIG_DEF;
     }
 
     /**
@@ -123,6 +127,7 @@ public class CAConnectorSource extends SourceConnector {
 
         String csv = toCsv(subset.toArray(new String[]{}));
 
+        config.put(EPICS_CA_ADDR_LIST_CONFIG, epicsAddrList);
         config.put(PVS_CSV_CONFIG, csv);
 
         configs.add(config);
