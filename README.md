@@ -5,6 +5,8 @@ This is a prototype used while we research alarm handler options.
 
 We are examining various APIs for interacting with Kafka and Pulsar.  This project in particular is examining leveraging Kafka as infrastructure - using Kafka "Connector" or "Streams" insteads of basic Producer API such that scaling and high availability are provided.  Why re-invent a custom clustering system, load balancing, etc?
 
+We have a demo server (internal only) at kafkatest.acc.jlab.org.  Instructions on how to setup a server can be found here: [Internal Wiki](https://accwiki.acc.jlab.org/do/view/SysAdmin/ApacheKafka), or use the public docs:  https://kafka.apache.org/.
+
 ## Deploy
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
 
@@ -15,7 +17,6 @@ cp /tmp/Connector.jar /opt/kafka/connectors/ca-source
 cp /tmp/jca-2.3.6.jar /opt/kafka/connectors/ca-source
 cp /tmp/caj-1.1.15.jar /opt/kafka/connectors/ca-source
 ```
-
 2. Update the Kafka config (standalone environment shown):
 ```
 # Edit existing config file for server
