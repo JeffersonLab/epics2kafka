@@ -7,8 +7,8 @@ import org.apache.kafka.connect.source.SourceConnector;
 import java.util.*;
 
 public class CAConnectorSource extends SourceConnector {
-    public static final String EPICS_CA_ADDR_LIST_CONFIG = "EPICS_CA_ADDR_LIST";
-    public static final String PVS_CSV_CONFIG = "PVS_CSV";
+    public static final String EPICS_CA_ADDR_LIST_CONFIG = "addrs";
+    public static final String PVS_CSV_CONFIG = "pvs";
     public static final String version = "0.0.0";
     private String epicsAddrList;
     private Set<String> pvs; // Set to ensure duplicates are removed
