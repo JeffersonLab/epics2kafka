@@ -7,6 +7,17 @@ We are examining various APIs for interacting with Kafka and Pulsar.  This proje
 
 We have a demo server (internal only) at kafkatest.acc.jlab.org.  Instructions on how to setup a server can be found here: [Internal Wiki](https://accwiki.acc.jlab.org/do/view/SysAdmin/ApacheKafka), or use the public docs:  https://kafka.apache.org/.
 
+## Build
+This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
+````
+git clone https://github.com/JeffersonLab/epics2kafka
+cd epics2kafka
+gradlew build -x test
+````
+__Note:__ If you do not already have Gradle installed, it will be installed automatically by the wrapper script included in the source 
+
+__Note:__ A firewall may prevent Gradle from downloading packages and dependencies from the Internet.   You may need to setup a [proxy](https://github.com/JeffersonLab/jmyapi/wiki/JLab-Proxy).   
+
 ## Deploy
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
 
