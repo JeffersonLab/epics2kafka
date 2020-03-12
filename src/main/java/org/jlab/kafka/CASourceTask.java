@@ -75,48 +75,31 @@ public class CASourceTask extends SourceTask {
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
         if(context == null) {
-            try {
-                context = (CAJContext) JCA_LIBRARY.createContext(config);
-
-                List<CAJChannel> channels = new ArrayList<>();
-                for(String pv: pvs) {
-                    channels.add((CAJChannel)context.createChannel(pv));
-            }
-
-                context.pendIO(2.0);
-
-                for(CAJChannel channel: channels) {
-                    CAJMonitor monitor = (CAJMonitor) channel.addMonitor(Monitor.VALUE);
-
-                    monitor.addMonitorListener(new MonitorListener() {
-                        @Override
-                        public void monitorChanged(MonitorEvent ev) {
-                            latest.put(channel.getName(), ev.getDBR());
-                        }
-                    });
-                }
-
-                context.pendIO(2.0);
-
-            } catch(CAException | TimeoutException e) {
-                log.error("Error while trying to create CAJContext");
-                throw new ConnectException(e);
-            }
+            createContext();
         }
 
         synchronized (this) {
-            wait(1000);
+            wait(100); // Max update frequency of 10Hz
         }
 
-        ArrayList<SourceRecord> recordList = new ArrayList<>();
+        ArrayList<SourceRecord> recordList = null; // Must return null if no updates
 
-        for(String pv: pvs) {
-            DBR record = latest.get(pv);
+        Instant timestamp = Instant.now();
+        long epochMillis = timestamp.toEpochMilli();
+        Map<String, Long> offsetValue = offsetValue(epochMillis);
+
+        Set<String> updatedPvs = latest.keySet();
+
+        if(!updatedPvs.isEmpty()) {
+            recordList = new ArrayList<>();
+        }
+
+        for(String pv: updatedPvs) {
+            DBR record = latest.remove(pv);
             String value = dbrToString(record);
-            Instant timestamp = Instant.now();
             String topic = pv;
-            recordList.add(new SourceRecord(offsetKey(pv), offsetValue(timestamp.toEpochMilli()), topic, null,
-                    null, null, VALUE_SCHEMA, value, System.currentTimeMillis()));
+            recordList.add(new SourceRecord(offsetKey(pv), offsetValue, topic, null,
+                    null, null, VALUE_SCHEMA, value, epochMillis));
         }
 
         return recordList;
@@ -133,6 +116,36 @@ public class CASourceTask extends SourceTask {
             log.error("Failed to destroy CAJContext", e);
         }
         notify();
+    }
+
+    private void createContext() {
+        try {
+            context = (CAJContext) JCA_LIBRARY.createContext(config);
+
+            List<CAJChannel> channels = new ArrayList<>();
+            for(String pv: pvs) {
+                channels.add((CAJChannel)context.createChannel(pv));
+            }
+
+            context.pendIO(2.0);
+
+            for(CAJChannel channel: channels) {
+                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(Monitor.VALUE);
+
+                monitor.addMonitorListener(new MonitorListener() {
+                    @Override
+                    public void monitorChanged(MonitorEvent ev) {
+                        latest.put(channel.getName(), ev.getDBR());
+                    }
+                });
+            }
+
+            context.pendIO(2.0);
+
+        } catch(CAException | TimeoutException e) {
+            log.error("Error while trying to create CAJContext");
+            throw new ConnectException(e);
+        }
     }
 
     private Map<String, String> offsetKey(String name) {
