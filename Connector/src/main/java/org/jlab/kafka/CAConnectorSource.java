@@ -4,12 +4,14 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class CAConnectorSource extends SourceConnector {
 
+    public static final String PVS_CSV_CONFIG = "PVS_CSV_CONFIG";
     public static final String version = "0.0.0";
+    private Set<String> pvs; // Set to ensure duplicates are removed
 
     /**
      * Start this Connector. This method will only be called on a clean Connector, i.e. it has
@@ -19,7 +21,7 @@ public class CAConnectorSource extends SourceConnector {
      */
     @Override
     public void start(Map<String, String> props) {
-
+        pvs = new HashSet<>(Arrays.asList(props.get(PVS_CSV_CONFIG).split(",")));
     }
 
     /**
@@ -39,7 +41,37 @@ public class CAConnectorSource extends SourceConnector {
      */
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
-        return null;
+        List<Map<String, String>> configs = new ArrayList<>();
+
+        int pvsPerTask = pvs.size();
+        int remainder = 0;
+
+        if(pvsPerTask > maxTasks) {
+            pvsPerTask = pvsPerTask / maxTasks;
+            remainder = pvsPerTask % maxTasks;
+        }
+
+        List<String> all = new ArrayList<>(pvs);
+
+        int fromIndex = 0;
+        int toIndex = pvsPerTask + remainder;
+
+        // Always at least one - maxTasks ignored if < 1;  Also first one takes remainder
+        if(toIndex > 0) {
+            appendSubsetCsv(configs, all, fromIndex, toIndex);
+        }
+
+        fromIndex = toIndex;
+        toIndex = toIndex + pvsPerTask;
+
+        for(int i = 1; i < maxTasks; i++) {
+            appendSubsetCsv(configs, all, fromIndex, toIndex);
+
+            fromIndex = toIndex;
+            toIndex = toIndex + pvsPerTask;
+        }
+
+        return configs;
     }
 
     /**
@@ -68,5 +100,31 @@ public class CAConnectorSource extends SourceConnector {
     @Override
     public String version() {
         return version;
+    }
+
+    private String toCsv(String[] array) {
+        String csv = "";
+
+        if(array.length > 0) {
+            csv = array[0];
+        }
+
+        for(int i = 1; i < array.length; i++) {
+            csv = csv + "," + array[i];
+        }
+
+        return csv;
+    }
+
+    private void appendSubsetCsv(List<Map<String, String>> configs, List<String> all, int fromIndex, int toIndex) {
+        Map<String, String> config = new HashMap<>();
+
+        List<String> subset = all.subList(fromIndex, toIndex);
+
+        String csv = toCsv(subset.toArray(new String[]{}));
+
+        config.put(PVS_CSV_CONFIG, csv);
+
+        configs.add(config);
     }
 }
