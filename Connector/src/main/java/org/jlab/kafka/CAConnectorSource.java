@@ -48,12 +48,15 @@ public class CAConnectorSource extends SourceConnector {
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         List<Map<String, String>> configs = new ArrayList<>();
 
-        int pvsPerTask = pvs.size();
+        // Default case is same number of pvs as tasks so each task has one
+        int pvsPerTask = 1;
         int remainder = 0;
 
-        if(pvsPerTask > maxTasks) {
+        if(pvs.size() > maxTasks) {
             pvsPerTask = pvsPerTask / maxTasks;
             remainder = pvsPerTask % maxTasks;
+        } else if(pvs.size() < maxTasks) {
+            maxTasks = pvs.size(); // Reduce number of tasks as not enough work to go around!
         }
 
         List<String> all = new ArrayList<>(pvs);
