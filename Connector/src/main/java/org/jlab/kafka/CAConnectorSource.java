@@ -8,13 +8,13 @@ import java.util.*;
 
 public class CAConnectorSource extends SourceConnector {
     public static final String EPICS_CA_ADDR_LIST_CONFIG = "addrs";
-    public static final String PVS_CSV_CONFIG = "pvs";
+    public static final String PVS_LIST_CONFIG = "pvs";
     public static final String version = "0.0.0";
     private String epicsAddrList;
     private Set<String> pvs; // Set to ensure duplicates are removed
     private static final ConfigDef CONFIG_DEF = new ConfigDef()
             .define(EPICS_CA_ADDR_LIST_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "List of CA Addresses")
-            .define(PVS_CSV_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "CSV of PV Names");
+            .define(PVS_LIST_CONFIG, ConfigDef.Type.STRING, ConfigDef.Importance.HIGH, "List of PV Names");
 
     /**
      * Start this Connector. This method will only be called on a clean Connector, i.e. it has
@@ -25,7 +25,7 @@ public class CAConnectorSource extends SourceConnector {
     @Override
     public void start(Map<String, String> props) {
         epicsAddrList = props.get(EPICS_CA_ADDR_LIST_CONFIG);
-        pvs = new HashSet<>(Arrays.asList(props.get(PVS_CSV_CONFIG).split(",")));
+        pvs = new HashSet<>(Arrays.asList(props.get(PVS_LIST_CONFIG).split("\\s+")));
         CONFIG_DEF.validate(props);
     }
 
@@ -63,14 +63,14 @@ public class CAConnectorSource extends SourceConnector {
 
         // Always at least one - maxTasks ignored if < 1;  Also first one takes remainder
         if(toIndex > 0) {
-            appendSubsetCsv(configs, all, fromIndex, toIndex);
+            appendSubsetList(configs, all, fromIndex, toIndex);
         }
 
         fromIndex = toIndex;
         toIndex = toIndex + pvsPerTask;
 
         for(int i = 1; i < maxTasks; i++) {
-            appendSubsetCsv(configs, all, fromIndex, toIndex);
+            appendSubsetList(configs, all, fromIndex, toIndex);
 
             fromIndex = toIndex;
             toIndex = toIndex + pvsPerTask;
@@ -107,29 +107,35 @@ public class CAConnectorSource extends SourceConnector {
         return version;
     }
 
-    private String toCsv(String[] array) {
-        String csv = "";
+    /**
+     * Create a single String space separated list.
+     *
+     * @param array The array of Strings
+     * @return A single String
+     */
+    private String toList(String[] array) {
+        String list = "";
 
         if(array.length > 0) {
-            csv = array[0];
+            list = array[0];
         }
 
         for(int i = 1; i < array.length; i++) {
-            csv = csv + "," + array[i];
+            list = list + "," + array[i];
         }
 
-        return csv;
+        return list;
     }
 
-    private void appendSubsetCsv(List<Map<String, String>> configs, List<String> all, int fromIndex, int toIndex) {
+    private void appendSubsetList(List<Map<String, String>> configs, List<String> all, int fromIndex, int toIndex) {
         Map<String, String> config = new HashMap<>();
 
         List<String> subset = all.subList(fromIndex, toIndex);
 
-        String csv = toCsv(subset.toArray(new String[]{}));
+        String list = toList(subset.toArray(new String[]{}));
 
         config.put(EPICS_CA_ADDR_LIST_CONFIG, epicsAddrList);
-        config.put(PVS_CSV_CONFIG, csv);
+        config.put(PVS_LIST_CONFIG, list);
 
         configs.add(config);
     }
