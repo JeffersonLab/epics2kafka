@@ -1,3 +1,4 @@
 rootProject.name = 'epics2kafka'
 include 'Connector'
+include 'Schema'
 
