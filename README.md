@@ -44,9 +44,9 @@ vi config/ca-source.properties
 # Add the following, editing addrs and pvs as desired:
 name=ca-source
 connector.class=org.jlab.kafka.CAConnectorSource
-tasks.max=1
-addrs=129.57.255.4
-pvs=iocin1:heartbeat
+tasks.max=3
+addrs=129.57.255.4 129.57.255.6 129.57.255.10
+pvs=iocin1:heartbeat iocin2:heartbeat iocin3:heartbeat
 ```
 
 3. Launch the Kafka Connect server:
