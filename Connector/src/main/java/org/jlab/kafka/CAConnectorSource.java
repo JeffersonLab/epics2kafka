@@ -53,8 +53,8 @@ public class CAConnectorSource extends SourceConnector {
         int remainder = 0;
 
         if(pvs.size() > maxTasks) {
-            pvsPerTask = pvsPerTask / maxTasks;
-            remainder = pvsPerTask % maxTasks;
+            pvsPerTask = pvs.size() / maxTasks;
+            remainder = pvs.size() % maxTasks;
         } else if(pvs.size() < maxTasks) {
             maxTasks = pvs.size(); // Reduce number of tasks as not enough work to go around!
         }
