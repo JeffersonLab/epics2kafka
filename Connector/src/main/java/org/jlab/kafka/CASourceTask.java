@@ -3,12 +3,9 @@ package org.jlab.kafka;
 import com.cosylab.epics.caj.CAJChannel;
 import com.cosylab.epics.caj.CAJContext;
 import com.cosylab.epics.caj.CAJMonitor;
-import gov.aps.jca.CAException;
-import gov.aps.jca.JCALibrary;
-import gov.aps.jca.Monitor;
-import gov.aps.jca.TimeoutException;
+import gov.aps.jca.*;
 import gov.aps.jca.configuration.DefaultConfiguration;
-import gov.aps.jca.dbr.DBR;
+import gov.aps.jca.dbr.*;
 import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 import org.apache.kafka.connect.connector.Connector;
@@ -30,7 +27,7 @@ public class CASourceTask extends SourceTask {
     private DefaultConfiguration config = new DefaultConfiguration("config");
     private CAJContext context;
     private List<String> pvs;
-    private Map<String, DBR> latest = new ConcurrentHashMap<>();
+    private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
 
     /**
      * Get the version of this task. Usually this should be the same as the corresponding {@link Connector} class's version.
@@ -95,8 +92,8 @@ public class CASourceTask extends SourceTask {
         }
 
         for(String pv: updatedPvs) {
-            DBR record = latest.remove(pv);
-            String value = dbrToString(record);
+            MonitorEvent record = latest.remove(pv);
+            String value = eventToString(record);
             String topic = pv.replaceAll(":", "-");
             recordList.add(new SourceRecord(offsetKey(pv), offsetValue, topic, null,
                     null, null, VALUE_SCHEMA, value, epochMillis));
@@ -130,12 +127,15 @@ public class CASourceTask extends SourceTask {
             context.pendIO(2.0);
 
             for(CAJChannel channel: channels) {
-                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(Monitor.VALUE);
+
+                DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
+
+                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), Monitor.VALUE | Monitor.ALARM);
 
                 monitor.addMonitorListener(new MonitorListener() {
                     @Override
                     public void monitorChanged(MonitorEvent ev) {
-                        latest.put(channel.getName(), ev.getDBR());
+                        latest.put(channel.getName(), ev);
                     }
                 });
             }
@@ -156,10 +156,52 @@ public class CASourceTask extends SourceTask {
         return Collections.singletonMap("Timestamp", pos);
     }
 
-    private String dbrToString(DBR dbr) {
+    private DBRType getTimeTypeFromFieldType(DBRType fieldType) {
+        DBRType time = null;
+
+        switch(fieldType.getName()) {
+            case "DBR_DOUBLE":
+                time = DBRType.TIME_DOUBLE;
+                break;
+            case "DBR_FLOAT":
+                time = DBRType.TIME_FLOAT;
+                break;
+            case "DBR_INT":
+                time = DBRType.TIME_INT;
+                break;
+            case "DBR_SHORT":
+                time = DBRType.TIME_SHORT;
+                break;
+            case "DBR_ENUM":
+                time = DBRType.TIME_ENUM;
+                break;
+            case "DBR_BYTE":
+                time = DBRType.TIME_BYTE;
+                break;
+            case "DBR_STRING":
+                time = DBRType.TIME_STRING;
+                break;
+        }
+
+        return time;
+    }
+
+    private String eventToString(MonitorEvent event) {
+        DBR dbr = event.getDBR();
+
+        Severity sevr = null;
+
         String result = null;
         try {
+            if(!dbr.isTIME()) {
+                throw new RuntimeException("Should be monitoring time types, but found non-time type!");
+            }
+
             if (dbr.isDOUBLE()) {
+                DBR_TIME_Double time = (DBR_TIME_Double)dbr;
+
+                sevr = time.getSeverity();
+
                 double value = ((gov.aps.jca.dbr.DOUBLE) dbr).getDoubleValue()[0];
                 if (Double.isFinite(value)) {
                     result = String.valueOf(value);
@@ -169,6 +211,10 @@ public class CASourceTask extends SourceTask {
                     result = "Infinity";
                 }
             } else if (dbr.isFLOAT()) {
+                DBR_TIME_Float time = (DBR_TIME_Float)dbr;
+
+                sevr = time.getSeverity();
+
                 float value = ((gov.aps.jca.dbr.FLOAT) dbr).getFloatValue()[0];
                 if (Float.isFinite(value)) {
                     result = String.valueOf(value);
@@ -178,18 +224,38 @@ public class CASourceTask extends SourceTask {
                     result = "Infinity";
                 }
             } else if (dbr.isINT()) {
+                DBR_TIME_Int time = (DBR_TIME_Int)dbr;
+
+                sevr = time.getSeverity();
+
                 int value = ((gov.aps.jca.dbr.INT) dbr).getIntValue()[0];
                 result = String.valueOf(value);
             } else if (dbr.isSHORT()) {
+                DBR_TIME_Short time = (DBR_TIME_Short)dbr;
+
+                sevr = time.getSeverity();
+
                 short value = ((gov.aps.jca.dbr.SHORT) dbr).getShortValue()[0];
                 result = String.valueOf(value);
             } else if (dbr.isENUM()) {
+                DBR_TIME_Enum time = (DBR_TIME_Enum)dbr;
+
+                sevr = time.getSeverity();
+
                 short value = ((gov.aps.jca.dbr.ENUM) dbr).getEnumValue()[0];
                 result = String.valueOf(value);
             } else if (dbr.isBYTE()) {
+                DBR_TIME_Byte time = (DBR_TIME_Byte)dbr;
+
+                sevr = time.getSeverity();
+
                 byte value = ((gov.aps.jca.dbr.BYTE) dbr).getByteValue()[0];
                 result = String.valueOf(value);
             } else {
+                DBR_TIME_String time = (DBR_TIME_String)dbr;
+
+                sevr = time.getSeverity();
+
                 String value = ((gov.aps.jca.dbr.STRING) dbr).getStringValue()[0];
                 result = String.valueOf(value);
             }
@@ -197,6 +263,8 @@ public class CASourceTask extends SourceTask {
             System.err.println("Unable to create String from value: " + e);
             dbr.printInfo();
         }
+
+        result = result + " " + sevr.getName();
 
         return result;
     }
