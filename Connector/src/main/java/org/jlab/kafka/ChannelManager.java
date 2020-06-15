@@ -28,21 +28,21 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private final Logger log = LoggerFactory.getLogger(ChannelManager.class);
     private AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
     private final ConnectorContext context;
-    private final CAConnectorSourceConfig config;
+    private final CASourceConnectorConfig config;
     private HashSet<String> channels = new HashSet<>();
     private KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap;
     private Map<TopicPartition, Long> endOffsets;
     private Long pollMillis;
 
-    public ChannelManager(ConnectorContext context, CAConnectorSourceConfig config) {
+    public ChannelManager(ConnectorContext context, CASourceConnectorConfig config) {
         this.context = context;
         this.config = config;
 
-        String kafkaUrl = config.getString("kafkaUrl");
-        String registryUrl = config.getString("registryUrl");
-        String channelsTopic = config.getString("channelsTopic");
-        String channelsGroup = config.getString("channelsGroup");
+        String kafkaUrl = config.getString("kafka-url");
+        String registryUrl = config.getString("registry-url");
+        String channelsTopic = config.getString("channels-topic");
+        String channelsGroup = config.getString("channels-group");
 
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkaUrl);
@@ -128,6 +128,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
                 if (records != null) {
+                    log.info("Change in channels list ");
                     context.requestTaskReconfiguration();
                     state.set(TRI_STATE.CLOSED);
                 }
