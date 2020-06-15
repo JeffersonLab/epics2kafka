@@ -43,14 +43,17 @@ vi config/ca-source.properties
 name=ca-source
 connector.class=org.jlab.kafka.CASourceConnector
 tasks.max=3
-addrs=129.57.255.4 129.57.255.6 129.57.255.10
-pvs=iocin1:heartbeat iocin2:heartbeat iocin3:heartbeat
+epics.ca.addr.list=129.57.255.4 129.57.255.6 129.57.255.10
+channels.topic=monitored-pvs
+channels.group=ca-source
+kafka.url=localhost:9092
+registry.url=http://localhost:8081
 ```
 
 3. Launch the Kafka Connect server:
 ```
 cd /opt/kafka
-bin/connect-standalone.sh config/connect-standalone.properties config/connect-ca-source.properties
+bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
 
 ## Monitor 
