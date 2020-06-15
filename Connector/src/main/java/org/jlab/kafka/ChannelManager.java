@@ -83,7 +83,12 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             for (ConsumerRecord<String, String> record : records) {
                 String channel = record.key();
-                channels.add(channel);
+
+                if(record.value() == null) {
+                    channels.remove(channel);
+                } else {
+                    channels.add(channel);
+                }
 
                 if(record.offset() == endOffsets.get(assignedPartitionsMap.get(record.partition()))) {
                     partitionEndReached.put(record.partition(), true);
