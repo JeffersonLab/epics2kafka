@@ -3,3 +3,5 @@
 /build/
 /Connector/build/
 /Schema/build/
+/Connector/out/
+/Schema/out/

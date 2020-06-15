@@ -40,7 +40,6 @@ public class CAConnectorSource extends SourceConnector {
 
         channelManager = new ChannelManager(context, config);
 
-        // TODO: We need to grab initial list of channels to stream THEN start listening for changes
         pvs = channelManager.getChannels();
 
         // Start Listening for changes on the "channels" topic
@@ -116,7 +115,7 @@ public class CAConnectorSource extends SourceConnector {
      */
     @Override
     public void stop() {
-
+        channelManager.close();
     }
 
     /**
