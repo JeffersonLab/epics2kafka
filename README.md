@@ -34,12 +34,10 @@ vi config/connect-standalone.properties
 # Uncomment property and set value:
 plugin.path=/opt/kafka/connectors
 
-
-
 # Create new config file for connector
 vi config/ca-source.properties
 
-# Add the following, editing addrs and pvs as desired:
+# Add the following, editing as desired:
 name=ca-source
 connector.class=org.jlab.kafka.CASourceConnector
 tasks.max=3
