@@ -47,7 +47,7 @@ public class CASourceTask extends SourceTask {
     @Override
     public void start(Map<String, String> props) {
 
-        String epicsAddrList = props.get(CASourceConnectorConfig.EPICS_CA_ADDR_LIST_CONFIG);
+        String epicsAddrList = props.get(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
         pvs = Arrays.asList(props.get("task-pvs").split(","));
 
         config.setAttribute("class", JCALibrary.CHANNEL_ACCESS_JAVA);
