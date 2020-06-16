@@ -39,10 +39,15 @@ public class ChannelManager extends Thread implements AutoCloseable {
         this.context = context;
         this.config = config;
 
-        String kafkaUrl = config.getString("kafka-url");
-        String registryUrl = config.getString("registry-url");
-        String channelsTopic = config.getString("channels-topic");
-        String channelsGroup = config.getString("channels-group");
+        log.info("-----------------------");
+        log.info("Creating ChannelManager");
+        log.info("-----------------------");
+
+        String kafkaUrl = config.getString(CASourceConnectorConfig.KAFKA_URL);
+        String registryUrl = config.getString(CASourceConnectorConfig.REGISTRY_URL);
+        String channelsTopic = config.getString(CASourceConnectorConfig.CHANNELS_TOPIC);
+        String channelsGroup = config.getString(CASourceConnectorConfig.CHANNELS_GROUP);
+        pollMillis = config.getLong(CASourceConnectorConfig.POLL_MILLIS);
 
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkaUrl);
@@ -54,8 +59,6 @@ public class ChannelManager extends Thread implements AutoCloseable {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("schema.registry.url", registryUrl);
 
-        pollMillis = config.getLong("pollMillis");
-
         consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(Collections.singletonList(channelsTopic), new ConsumerRebalanceListener() {
@@ -66,6 +69,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             @Override
             public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
+                log.info("seeking to beginning of topic");
                 assignedPartitionsMap = partitions.stream().collect(Collectors.toMap(TopicPartition::partition, p -> p));
                 consumer.seekToBeginning(partitions);
                 endOffsets = consumer.endOffsets(partitions);
@@ -76,27 +80,39 @@ public class ChannelManager extends Thread implements AutoCloseable {
         boolean reachedEnd = false;
         Map<Integer, Boolean> partitionEndReached = new HashMap<>();
 
+        // Note: first poll triggers seek to beginning
+        int tries = 0;
+
         // TODO: Maybe we should just ensure single partition to make this simpler
-        while(reachedEnd) {
+        while(!reachedEnd) {
 
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
+
+            log.info("found " + records.count() + " records");
 
             for (ConsumerRecord<String, String> record : records) {
                 String channel = record.key();
 
+                log.info("examining record: {}, {}", record.key(), record.value());
+
                 if(record.value() == null) {
+                    log.info("removing channel: " + channel);
                     channels.remove(channel);
                 } else {
+                    log.info("adding channel: " + channel);
                     channels.add(channel);
                 }
 
-                if(record.offset() == endOffsets.get(assignedPartitionsMap.get(record.partition()))) {
+                log.info("comparing indexes: {} vs {}", record.offset() + 1, endOffsets.get(assignedPartitionsMap.get(record.partition())));
+
+                if(record.offset() + 1 == endOffsets.get(assignedPartitionsMap.get(record.partition()))) {
+                    log.info("end of partition {} reached", record.partition());
                     partitionEndReached.put(record.partition(), true);
                 }
             }
 
-            if(channels.isEmpty()) {
-                // No channels in topic!
+            if(++tries > 10) {
+                // We only poll a few times before saying enough is enough.
                 reachedEnd = true;
             }
 
@@ -113,32 +129,48 @@ public class ChannelManager extends Thread implements AutoCloseable {
                 reachedEnd = true;
             }
         }
+
+        if(channels.size() == 0) {
+            throw new IllegalArgumentException("No channels set in topic: " + channelsTopic);
+        }
     }
 
     @Override
     public void run() {
+        log.info("----------------------------------");
+        log.info("Starting ChannelManager run method");
+        log.info("----------------------------------");
         try {
             log.info("Starting thread to monitor channels topic");
 
             // Only move to running state if we are currently initialized (don't move to running if closed)
-            state.compareAndSet(TRI_STATE.INITIALIZED, TRI_STATE.RUNNING);
+            boolean transitioned = state.compareAndSet(TRI_STATE.INITIALIZED, TRI_STATE.RUNNING);
+
+            log.info("transitioned: " + transitioned);
 
             // Listen for changes
             while (state.get() == TRI_STATE.RUNNING) {
+                log.info("polling for changes");
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
-                if (records != null) {
+                if (records.count() > 0) {
                     log.info("Change in channels list ");
-                    context.requestTaskReconfiguration();
                     state.set(TRI_STATE.CLOSED);
+                    context.requestTaskReconfiguration();
                 }
             }
+
+            log.info("Change monitor thread exiting cleanly");
+
         } catch (WakeupException e) {
+            log.info("Change monitor thread WakeupException caught");
             // Only a problem if running, ignore exception if closing
             if (state.get() == TRI_STATE.RUNNING) throw e;
         } finally {
             consumer.close();
         }
+
+        log.info("Change monitor thread last line of run");
     }
 
     public Set<String> getChannels() {
