@@ -76,14 +76,14 @@ public class ChannelManager extends Thread implements AutoCloseable {
             }
         });
 
-        // Read all records up to the high water mark (most recent records) / end Offsets
+        // Read all records up to the high water mark (most recent records) / end offsets
         boolean reachedEnd = false;
         Map<Integer, Boolean> partitionEndReached = new HashMap<>();
 
         // Note: first poll triggers seek to beginning
         int tries = 0;
 
-        // TODO: Maybe we should just ensure single partition to make this simpler
+        // Maybe we should just ensure single partition to make this simpler?
         while(!reachedEnd) {
 
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
@@ -103,7 +103,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             if(++tries > 10) {
                 // We only poll a few times before saying enough is enough.
-                reachedEnd = true;
+                throw new RuntimeException("Took too long to obtain initial list of channels");
             }
 
             // If all partitions ends are reached, we are up-to-date
@@ -162,7 +162,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
                         updateChannels(record);
                     }
 
-                    log.info("Change in channels list ");
+                    log.info("Change in channels list: request reconfigure");
                     context.requestTaskReconfiguration();
                 }
             }

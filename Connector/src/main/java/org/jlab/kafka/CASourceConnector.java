@@ -10,7 +10,9 @@ import java.util.*;
 /**
  * Experimental Physics and Industrial Control System (EPICS) Channel Access (CA) Source Connector.
  *
- * Further Reading: A complex source connector example for inspiration: https://github.com/riferrei/kafka-connect-pulsar/tree/master/src/main/java/com/riferrei/kafka/connect/pulsar
+ * Examples for inspiration:
+ *   - https://github.com/riferrei/kafka-connect-pulsar/tree/master/src/main/java/com/riferrei/kafka/connect/pulsar
+ *   - https://github.com/confluentinc/kafka-connect-jdbc/tree/master/src/main/java/io/confluent/connect/jdbc
  */
 public class CASourceConnector extends SourceConnector {
     public static final String version = "0.1.0";
