@@ -15,7 +15,6 @@ import java.util.*;
 public class CASourceConnector extends SourceConnector {
     public static final String version = "0.1.0";
     private ChannelManager channelManager;
-    private Set<String> pvs; // Set to ensure duplicates are removed
     private Map<String, String> props;
     private CASourceConnectorConfig config;
 
@@ -31,9 +30,8 @@ public class CASourceConnector extends SourceConnector {
 
         config = new CASourceConnectorConfig(props);
 
+        // Creating channel manager fetches initial list of channels
         channelManager = new ChannelManager(context, config);
-
-        pvs = channelManager.getChannels();
 
         // Listen for changes
         channelManager.start();
@@ -56,6 +54,8 @@ public class CASourceConnector extends SourceConnector {
      */
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
+        Set<String> pvs = channelManager.getChannels();
+
         int numGroups = Math.min(pvs.size(), maxTasks);
         List<List<String>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());

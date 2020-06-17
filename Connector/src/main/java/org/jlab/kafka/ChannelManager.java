@@ -91,17 +91,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
             log.info("found " + records.count() + " records");
 
             for (ConsumerRecord<String, String> record : records) {
-                String channel = record.key();
-
-                log.info("examining record: {}, {}", record.key(), record.value());
-
-                if(record.value() == null) {
-                    log.info("removing channel: " + channel);
-                    channels.remove(channel);
-                } else {
-                    log.info("adding channel: " + channel);
-                    channels.add(channel);
-                }
+                updateChannels(record);
 
                 log.info("comparing indexes: {} vs {}", record.offset() + 1, endOffsets.get(assignedPartitionsMap.get(record.partition())));
 
@@ -135,6 +125,20 @@ public class ChannelManager extends Thread implements AutoCloseable {
         }
     }
 
+    private void updateChannels(ConsumerRecord<String, String> record) {
+        String channel = record.key();
+
+        log.info("examining record: {}, {}", record.key(), record.value());
+
+        if(record.value() == null) {
+            log.info("removing channel: " + channel);
+            channels.remove(channel);
+        } else {
+            log.info("adding channel: " + channel);
+            channels.add(channel);
+        }
+    }
+
     @Override
     public void run() {
         log.info("----------------------------------");
@@ -154,8 +158,11 @@ public class ChannelManager extends Thread implements AutoCloseable {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
                 if (records.count() > 0) {
+                    for(ConsumerRecord<String, String> record: records) {
+                        updateChannels(record);
+                    }
+
                     log.info("Change in channels list ");
-                    state.set(TRI_STATE.CLOSED);
                     context.requestTaskReconfiguration();
                 }
             }
