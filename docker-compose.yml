@@ -2,6 +2,15 @@
 version: '2'
 
 services:
+  softioc:
+    image: slominskir/softioc:1.0.0
+    hostname: softioc
+    container_name: softioc
+    ports:
+      - "5065:5065"
+    volumes:
+      - ./data:/db
+
   zookeeper:
     image: confluentinc/cp-zookeeper:5.5.0
     hostname: zookeeper

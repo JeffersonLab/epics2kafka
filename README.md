@@ -5,6 +5,12 @@ Leverages Kafka as infrastructure - uses Kafka Connect API instead of the Kafka 
 
 We have a demo server (internal only) at kafkatest.acc.jlab.org.  Instructions on how to setup a server can be found here: [Internal Wiki](https://accwiki.acc.jlab.org/do/view/SysAdmin/ApacheKafka), or use the public docs:  https://kafka.apache.org/.
 
+## Usage
+Quick start with Docker:
+```
+docker-compose up
+```
+
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
 ````
