@@ -6,9 +6,29 @@ Leverages Kafka as infrastructure - uses Kafka Connect API instead of the Kafka 
 We have a demo server (internal only) at kafkatest.acc.jlab.org.  Instructions on how to setup a server can be found here: [Internal Wiki](https://accwiki.acc.jlab.org/do/view/SysAdmin/ApacheKafka), or use the public docs:  https://kafka.apache.org/.
 
 ## Usage
-Quick start with Docker:
+## 1. Start Docker containers (Kafka, Zookeeper, Connect, Softioc:
 ```
 docker-compose up
+```
+
+## 2. Listen to Kafka topic "hello"
+```
+docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
+```
+
+## 3. Configure connector to listen to EPICS CA PV named "hello" and write updates to Kafka topic "hello"
+```
+docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=:" hello:{"topic":"hello"}
+```
+
+## 4. Start CA connector
+```
+curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
+```
+
+## 5. Put value into "hello" PV on [softioc](https://github.com/JeffersonLab/softioc)
+```
+docker exec softioc caput hello 1
 ```
 
 ## Build
