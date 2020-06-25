@@ -17,7 +17,7 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 
 ### 3. Configure a connector to listen to EPICS CA PV named "hello" and write updates to Kafka topic "hello"
 ```
-docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=:" hello:{"topic":"hello"}
+docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator==" hello={"topic":"hello"}
 ```
 
 ### 4. Start CA connector
