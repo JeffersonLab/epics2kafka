@@ -3,7 +3,7 @@ version: '2'
 
 services:
   softioc:
-    image: slominskir/softioc:1.0.0
+    image: slominskir/softioc:1.0.1
     tty: true
     stdin_open: true
     hostname: softioc
