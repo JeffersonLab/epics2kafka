@@ -13,7 +13,7 @@ Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher de
 ```
 docker-compose up
 ```
-**Note**: Docker Compose does aggressive caching.  If running multiple times, and you hose your containers or want to upgrade them use arguments like `--force-recreate`, `--no-cache`, or use commands like `docker compose down` and `docker compose pull`.
+**Note**: Docker Compose does aggressive caching.  If running multiple times, and your containers are buggered or otherwise want to upgrade them use argument `--force-recreate`, or use commands like `docker compose down` and `docker compose pull`.
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings acoordingly.
 ### 2. Listen to Kafka topic "hello"
