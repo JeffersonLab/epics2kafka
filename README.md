@@ -13,7 +13,8 @@ Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher de
 ```
 docker-compose up
 ```
-Note: Docker Compose does aggressive caching.  If running multiple times, and you hose your containers or want to upgrade them use arguments like `--force-recreate`, `--no-cache`, or use commands like `docker compose down` and `docker compose pull`.
+*Note*: Docker Compose does aggressive caching.  If running multiple times, and you hose your containers or want to upgrade them use arguments like `--force-recreate`, `--no-cache`, or use commands like `docker compose down` and `docker compose pull`.
+*Note*: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings acoordingly.
 ### 2. Listen to Kafka topic "hello"
 ```
 docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
@@ -21,7 +22,9 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 
 ### 3. Configure CA connector
 ```
-docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator==" hello={"topic":"hello"}
+docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
+> hello={"topic":"hello"}
+>
 ```
 
 ### 4. Start CA connector
