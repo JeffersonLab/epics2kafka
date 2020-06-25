@@ -78,13 +78,6 @@ registry.url=http://localhost:8081
 cd /opt/kafka
 bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
-
-## Monitor 
-```
-cd /opt/kafka
-bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic iocin1-heartbeat
-```
-__Note__: we substituted a "-" for the ":" in the PV name in order to create a valid Kafka topic name
 ## See Also
    - [Related Projects (External)](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
    - [Research/Prototypes (Internal)](https://github.com/JeffersonLab/epics2pulsar/wiki/Research-Prototype-Projects-(Internal))
