@@ -5,7 +5,11 @@ Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher de
 
 ## Usage
 **Quick Start with Docker**
-### 1. Start Docker containers (Kafka, Zookeeper, Connect, Softioc):
+### 1. Start Docker containers:
+   - [softioc](https://github.com/JeffersonLab/softioc)
+   - Kafka
+   - Zookeeper
+   - Connect
 ```
 docker-compose up
 ```
@@ -15,7 +19,7 @@ docker-compose up
 docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
 ```
 
-### 3. Configure a connector to listen to EPICS CA PV named "hello" and write updates to Kafka topic "hello"
+### 3. Configure CA connector
 ```
 docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator==" hello={"topic":"hello"}
 ```
@@ -25,7 +29,7 @@ docker exec kafka kafka-console-producer --bootstrap-server kafka:9092 --topic m
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
 
-### 5. Put value into "hello" PV on [softioc](https://github.com/JeffersonLab/softioc)
+### 5. Put value into "hello" PV
 ```
 docker exec softioc caput hello 1
 ```
