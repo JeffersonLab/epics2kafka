@@ -34,6 +34,11 @@ docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --top
 >
 ```
 ## Connector Options
+| Option | Description | Default |
+|---|---|---|
+| epics.ca.addr.list | List of EPICS CA addresses | |
+| channels.topic | Name of Kafka topic to monitor for channels list | monitored-pvs |
+| channels.group | Name of Kafka consumer group to use when monitoring channels.topic | ca-source |
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
