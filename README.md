@@ -4,11 +4,21 @@ Transfer [EPICS CA](https://epics-controls.org) messages into [Kafka](https://ka
 Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
 ## Usage
-**Quick Start with Docker**
-### 1. Start Docker containers:
+### Quick Start with Docker
+1. Start Docker containers:
 ```
 docker-compose up
 ```
+2. Listen to Kafka topic "hello"
+```
+docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
+```
+3. Put value into "hello" PV
+```
+docker exec softioc caput hello 1
+```
+
+**Note**: The Docker Compose project creates the following containers: 
    - [softioc](https://github.com/JeffersonLab/softioc)
    - Kafka
    - Zookeeper
@@ -17,14 +27,6 @@ docker-compose up
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings acoordingly.
-### 2. Listen to Kafka topic "hello"
-```
-docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
-```
-### 3. Put value into "hello" PV
-```
-docker exec softioc caput hello 1
-```
 ## Configure CA Channels
 ```
 docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
