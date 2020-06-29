@@ -30,7 +30,7 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         "Name of Kafka topic to monitor for channels list")
                 .define(CASourceConnectorConfig.CHANNELS_GROUP,
                         ConfigDef.Type.STRING,
-                        "ca-connector",
+                        "ca-source",
                         ConfigDef.Importance.HIGH,
                         "Name of Kafka consumer group to use when monitoring CHANNELS_TOPIC")
                 .define(CASourceConnectorConfig.KAFKA_URL,
