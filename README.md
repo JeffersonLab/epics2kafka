@@ -38,7 +38,9 @@ docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --top
 |---|---|---|
 | epics.ca.addr.list | List of EPICS CA addresses | |
 | channels.topic | Name of Kafka topic to monitor for channels list | monitored-pvs |
-| channels.group | Name of Kafka consumer group to use when monitoring channels.topic | ca-source |
+| channels.group | Name of Kafka consumer group to use when monitoring channels.topic | ca-source |  
+
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)).
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
