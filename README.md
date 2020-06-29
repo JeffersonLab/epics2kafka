@@ -27,7 +27,7 @@ docker exec softioc caput hello 1
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings acoordingly.
-## Configure CA Channels
+## Configure EPICS Channels
 ```
 docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
 > hello={"topic":"hello"}
