@@ -3,8 +3,7 @@ Transfer [EPICS CA](https://epics-controls.org) messages into [Kafka](https://ka
 
 Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
-## Usage
-### Quick Start with Docker
+## Quick Start with Docker
 1. Start Docker containers:
 ```
 docker-compose up
