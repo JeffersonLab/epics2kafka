@@ -26,12 +26,6 @@ docker exec softioc caput hello 1
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings accordingly.
-## Configure EPICS Channels
-```
-docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
-> hello={"topic":"hello"}
->
-```
 ## Connector Options
 | Option | Description | Default |
 |---|---|---|
@@ -42,6 +36,13 @@ docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --top
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)).
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
+```
+## Configure EPICS Channels
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)).
+```
+docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
+> hello={"topic":"hello"}
+>
 ```
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
