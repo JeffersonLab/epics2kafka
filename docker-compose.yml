@@ -74,5 +74,8 @@ services:
       CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: "1"
       CONNECT_PLUGIN_PATH: '/usr/share/java'
+    entrypoint:
+      - /usr/share/scripts/autocreate.sh
     volumes:
       - ./build/libs:/usr/share/java/kafka-connect-epics
+      - ./scripts:/usr/share/scripts
