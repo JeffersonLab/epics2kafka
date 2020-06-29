@@ -6,38 +6,35 @@ Leverages Kafka as infrastructure - uses Kafka Connect API to ensure a higher de
 ## Usage
 **Quick Start with Docker**
 ### 1. Start Docker containers:
+```
+docker-compose up
+```
    - [softioc](https://github.com/JeffersonLab/softioc)
    - Kafka
    - Zookeeper
    - Connect
-```
-docker-compose up
-```
-**Note**: Docker Compose does aggressive caching.  If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images and `docker compose pull` to update them.
+
+**Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings acoordingly.
 ### 2. Listen to Kafka topic "hello"
 ```
 docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
 ```
-
-### 3. Configure CA connector
+### 3. Put value into "hello" PV
+```
+docker exec softioc caput hello 1
+```
+## Configure CA Channels
 ```
 docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
 > hello={"topic":"hello"}
 >
 ```
-
-### 4. Start CA connector
+## Connector Options
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
-
-### 5. Put value into "hello" PV
-```
-docker exec softioc caput hello 1
-```
-
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
 ```
