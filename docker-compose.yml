@@ -3,14 +3,16 @@ version: '2'
 
 services:
   softioc:
-    image: slominskir/softioc:1.0.1
+    image: slominskir/softioc:1.1.0
     tty: true
     stdin_open: true
     hostname: softioc
     container_name: softioc
     ports:
-      - "5064:5064"
-      - "5065:5065"
+      - "5064:5064/tcp"
+      - "5065:5065/tcp"
+      - "5064:5064/udp"
+      - "5065:5065/udp"
     volumes:
       - ./data:/db
 
@@ -43,7 +45,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   connect:
-    image: confluentinc/cp-kafka-connect:5.5.0
+    image: confluentinc/cp-kafka-connect-base:5.5.0
     hostname: connect
     container_name: connect
     depends_on:
