@@ -10,6 +10,8 @@ import gov.aps.jca.event.MonitorEvent;
 import gov.aps.jca.event.MonitorListener;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.data.Schema;
+import org.apache.kafka.connect.data.SchemaBuilder;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
@@ -21,13 +23,25 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CASourceTask extends SourceTask {
-    private static final Schema VALUE_SCHEMA = Schema.STRING_SCHEMA;
     private static final Logger log = LoggerFactory.getLogger(CASourceTask.class);
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
     private DefaultConfiguration config = new DefaultConfiguration("config");
     private CAJContext context;
     private List<String> pvs;
     private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
+    private static final Schema VALUE_SCHEMA;
+
+    static {
+        VALUE_SCHEMA = SchemaBuilder.struct()
+                .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access value")
+                .field("timestamp", Schema.INT64_SCHEMA)
+                .field("status", Schema.OPTIONAL_INT8_SCHEMA)
+                .field("severity", Schema.OPTIONAL_INT8_SCHEMA)
+                .field("floatValue", Schema.OPTIONAL_FLOAT64_SCHEMA)
+                .field("stringValue", Schema.OPTIONAL_STRING_SCHEMA)
+                .field("intValue", Schema.OPTIONAL_INT64_SCHEMA)
+                .build();
+    }
 
     /**
      * Get the version of this task. Usually this should be the same as the corresponding {@link Connector} class's version.
@@ -93,7 +107,7 @@ public class CASourceTask extends SourceTask {
 
         for(String pv: updatedPvs) {
             MonitorEvent record = latest.remove(pv);
-            String value = eventToString(record);
+            Struct value = eventToStruct(record);
             String topic = pv.replaceAll(":", "-");
             recordList.add(new SourceRecord(offsetKey(pv), offsetValue, topic, null,
                     null, null, VALUE_SCHEMA, value, epochMillis));
@@ -186,86 +200,61 @@ public class CASourceTask extends SourceTask {
         return time;
     }
 
-    private String eventToString(MonitorEvent event) {
+    private Struct eventToStruct(MonitorEvent event) {
         DBR dbr = event.getDBR();
 
-        Severity sevr = null;
+        Struct struct = new Struct(VALUE_SCHEMA);
 
-        String result = null;
+        TIME time = null;
+
+        String result;
         try {
             if(!dbr.isTIME()) {
                 throw new RuntimeException("Should be monitoring time types, but found non-time type!");
             }
 
             if (dbr.isDOUBLE()) {
-                DBR_TIME_Double time = (DBR_TIME_Double)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Double)dbr;
                 double value = ((gov.aps.jca.dbr.DOUBLE) dbr).getDoubleValue()[0];
-                if (Double.isFinite(value)) {
-                    result = String.valueOf(value);
-                } else if (Double.isNaN(value)) {
-                    result = "NaN";
-                } else {
-                    result = "Infinity";
-                }
+                struct.put("floatValue", value);
             } else if (dbr.isFLOAT()) {
-                DBR_TIME_Float time = (DBR_TIME_Float)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Float)dbr;
                 float value = ((gov.aps.jca.dbr.FLOAT) dbr).getFloatValue()[0];
-                if (Float.isFinite(value)) {
-                    result = String.valueOf(value);
-                } else if (Float.isNaN(value)) {
-                    result = "NaN";
-                } else {
-                    result = "Infinity";
-                }
+                struct.put("floatValue", value);
             } else if (dbr.isINT()) {
-                DBR_TIME_Int time = (DBR_TIME_Int)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Int)dbr;
                 int value = ((gov.aps.jca.dbr.INT) dbr).getIntValue()[0];
-                result = String.valueOf(value);
+                struct.put("intValue", value);
             } else if (dbr.isSHORT()) {
-                DBR_TIME_Short time = (DBR_TIME_Short)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Short)dbr;
                 short value = ((gov.aps.jca.dbr.SHORT) dbr).getShortValue()[0];
-                result = String.valueOf(value);
+                struct.put("intValue", value);
             } else if (dbr.isENUM()) {
-                DBR_TIME_Enum time = (DBR_TIME_Enum)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Enum)dbr;
                 short value = ((gov.aps.jca.dbr.ENUM) dbr).getEnumValue()[0];
-                result = String.valueOf(value);
+                struct.put("intValue", value);
             } else if (dbr.isBYTE()) {
-                DBR_TIME_Byte time = (DBR_TIME_Byte)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_Byte)dbr;
                 byte value = ((gov.aps.jca.dbr.BYTE) dbr).getByteValue()[0];
-                result = String.valueOf(value);
+                struct.put("intValue", value);
             } else {
-                DBR_TIME_String time = (DBR_TIME_String)dbr;
-
-                sevr = time.getSeverity();
-
+                time = (DBR_TIME_String)dbr;
                 String value = ((gov.aps.jca.dbr.STRING) dbr).getStringValue()[0];
-                result = String.valueOf(value);
+                struct.put("stringValue", value);
             }
         } catch (Exception e) {
-            System.err.println("Unable to create String from value: " + e);
+            System.err.println("Unable to create Struct from value: " + e);
             dbr.printInfo();
         }
 
-        result = result + " " + sevr.getName();
+        TimeStamp stamp = time.getTimeStamp();
+        Status status = time.getStatus();
+        Severity severity = time.getSeverity();
 
-        return result;
+        struct.put("timestamp", stamp.secPastEpoch());
+        struct.put("status", (byte)status.getValue());
+        struct.put("severity", (byte)severity.getValue());
+
+        return struct;
     }
 }
