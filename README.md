@@ -27,6 +27,7 @@ docker exec softioc caput hello 1
 
 **Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings accordingly.
 ## Connector Options
+All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
 | Option | Description | Default |
 |---|---|---|
 | epics.ca.addr.list | List of EPICS CA addresses | |
