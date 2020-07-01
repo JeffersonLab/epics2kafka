@@ -47,11 +47,6 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | kafka.url | URL to Kafka used to query command topic | localhost:9092 |
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)).
-### Connector Commands
-You can control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
-```
-curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
-```
 ### Schema
 Internally the connector transforms the EPICS CA API data into Kafka Connector Schema structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
 
@@ -74,6 +69,12 @@ value.converter.schemas.enable=false
 **Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __schema.registry.url__ 
 
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
+
+## Connector Commands
+You can control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
+```
+curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
+```
 
 ## Configure EPICS Channels
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).
