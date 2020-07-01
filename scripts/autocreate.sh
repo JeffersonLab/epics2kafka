@@ -31,7 +31,9 @@ curl -s \
     "epics.ca.addr.list": "softioc",
     "channels.topic": "monitored-pvs",
     "channels.group": "ca-source",
-    "kafka.url": "kafka://kafka:9092"
+    "kafka.url": "kafka://kafka:9092",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "value.converter.schemas.enable": "false"
   }
 }
 '
