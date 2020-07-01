@@ -47,6 +47,8 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | kafka.url | URL to Kafka used to query command topic | localhost:9092 |
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)).
+### Connector Commands
+You can control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
