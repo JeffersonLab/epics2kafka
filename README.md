@@ -49,14 +49,7 @@ Options are specified in JSON format when running the connector in distributed m
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
 ```
-## Configure EPICS Channels
-The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).
-```
-docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
-> hello={"topic":"hello"}
->
-```
-## Schema
+### Schema
 Internally the connector transforms the EPICS CA API data into Kafka Connector Schema structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
 
 | Converter | Description |
@@ -74,6 +67,14 @@ value.converter.schemas.enable=false
 ```
 
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
+
+## Configure EPICS Channels
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).
+```
+docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
+> hello={"topic":"hello"}
+>
+```
 
 ## Deploy
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
