@@ -21,6 +21,10 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 public class CASourceTask extends SourceTask {
     private static final Logger log = LoggerFactory.getLogger(CASourceTask.class);
@@ -30,17 +34,22 @@ public class CASourceTask extends SourceTask {
     private List<String> pvs;
     private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
     private static final Schema VALUE_SCHEMA;
+    private static final Schema FLOAT_ARRAY_SCHEMA;
 
     static {
+        FLOAT_ARRAY_SCHEMA = SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build();
+
         VALUE_SCHEMA = SchemaBuilder.struct()
                 .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access value")
                 .field("timestamp", Schema.INT64_SCHEMA)
                 .field("status", Schema.OPTIONAL_INT8_SCHEMA)
                 .field("severity", Schema.OPTIONAL_INT8_SCHEMA)
-                .field("floatValue", Schema.OPTIONAL_FLOAT64_SCHEMA)
-                .field("stringValue", Schema.OPTIONAL_STRING_SCHEMA)
-                .field("intValue", Schema.OPTIONAL_INT64_SCHEMA)
+                .field("floatValues", FLOAT_ARRAY_SCHEMA)
+                .field("stringValues", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build())
+                .field("intValues", SchemaBuilder.array(Schema.OPTIONAL_INT64_SCHEMA).optional().build())
                 .build();
+
+        VALUE_SCHEMA.field("floatValues").schema();
     }
 
     /**
@@ -215,32 +224,39 @@ public class CASourceTask extends SourceTask {
 
             if (dbr.isDOUBLE()) {
                 time = (DBR_TIME_Double)dbr;
-                double value = ((gov.aps.jca.dbr.DOUBLE) dbr).getDoubleValue()[0];
-                struct.put("floatValue", value);
+                double[] value = ((gov.aps.jca.dbr.DOUBLE) dbr).getDoubleValue();
+                List<Double> list = DoubleStream.of(value).boxed().collect(Collectors.toList());
+                struct.put("floatValues", list);
             } else if (dbr.isFLOAT()) {
                 time = (DBR_TIME_Float)dbr;
-                float value = ((gov.aps.jca.dbr.FLOAT) dbr).getFloatValue()[0];
-                struct.put("floatValue", value);
+                float[] value = ((gov.aps.jca.dbr.FLOAT) dbr).getFloatValue();
+                List<Double> list = IntStream.range(0, value.length).mapToDouble(i -> value[i]).boxed().collect(Collectors.toList());
+                struct.put("floatValues", list);
             } else if (dbr.isINT()) {
                 time = (DBR_TIME_Int)dbr;
-                int value = ((gov.aps.jca.dbr.INT) dbr).getIntValue()[0];
-                struct.put("intValue", value);
+                int[] value = ((gov.aps.jca.dbr.INT) dbr).getIntValue();
+                List<Integer> list = IntStream.of(value).boxed().collect(Collectors.toList());
+                struct.put("intValues", list);
             } else if (dbr.isSHORT()) {
                 time = (DBR_TIME_Short)dbr;
-                short value = ((gov.aps.jca.dbr.SHORT) dbr).getShortValue()[0];
-                struct.put("intValue", value);
+                short[] value = ((gov.aps.jca.dbr.SHORT) dbr).getShortValue();
+                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
+                struct.put("intValues", list);
             } else if (dbr.isENUM()) {
                 time = (DBR_TIME_Enum)dbr;
-                short value = ((gov.aps.jca.dbr.ENUM) dbr).getEnumValue()[0];
-                struct.put("intValue", value);
+                short[] value = ((gov.aps.jca.dbr.ENUM) dbr).getEnumValue();
+                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
+                struct.put("intValues", list);
             } else if (dbr.isBYTE()) {
                 time = (DBR_TIME_Byte)dbr;
-                byte value = ((gov.aps.jca.dbr.BYTE) dbr).getByteValue()[0];
-                struct.put("intValue", value);
+                byte[] value = ((gov.aps.jca.dbr.BYTE) dbr).getByteValue();
+                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
+                struct.put("intValues", list);
             } else {
                 time = (DBR_TIME_String)dbr;
-                String value = ((gov.aps.jca.dbr.STRING) dbr).getStringValue()[0];
-                struct.put("stringValue", value);
+                String[] value = ((gov.aps.jca.dbr.STRING) dbr).getStringValue();
+                List<String> list = Stream.of(value).collect(Collectors.toList());
+                struct.put("stringValues", list);
             }
         } catch (Exception e) {
             System.err.println("Unable to create Struct from value: " + e);
