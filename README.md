@@ -56,6 +56,24 @@ docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --top
 > hello={"topic":"hello"}
 >
 ```
+## Schema
+Internally the connector transforms the EPICS CA API data into Kafka Connector Schema structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
+
+| Converter | Description |
+|-----------|-------------|
+| org.apache.kafka.connect.storage.StringConverter | The default converter - Use the underlying connector struct schema in String form |
+| org.apache.kafka.connect.converters.ByteArrayConverter | Use the underlying connector struct schema in byte form |
+| org.apache.kafka.connect.converters.ByteArrayConverter | Use the underlying connector struct schema in byte form |
+| org.apache.kafka.connect.json.JsonConverter | JSON formatted, by default the schema is embedded and top level keys are __schema__ and __payload__.  Disable embedded schema with additional option __value.converter.schemas.enable=false__ |
+| io.confluent.connect.json.JsonSchemaConverter | Confluent Schema Registry backed JSON format, requires schema registry specified with additional option __schema.registry.url__ |
+
+You can control the value schema using the option __value.converter__.  For example, to set the converter to JSON with an implicit schema (i.e. not included in the message or available to lookup in a registry):
+```
+value.converter=org.apache.kafka.connect.json.JsonConverter
+value.converter.schemas.enable=false
+```
+
+**Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
 ## Deploy
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
