@@ -98,13 +98,16 @@ vi config/connect-standalone.properties
 plugin.path=/opt/kafka/connectors
 
 # Create new config file for connector
-A new file should be created at config/ca-source.properties.  For example: [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)
+vi config/ca-source.properties
+```
 
 3. Launch the Kafka Connect server:
 ```
 cd /opt/kafka
 bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
+Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)
+
 ### Distributed Mode
 You must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
