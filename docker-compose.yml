@@ -79,5 +79,5 @@ services:
       - /usr/share/scripts/autoconfiguredocker.sh
     volumes:
       - ./build/libs:/usr/share/java/kafka-connect-epics
-      - ./scripts:/usr/share/scripts
-      - ./examples/connector-config:/usr/share/config
+      - ./examples/connect-scripts:/usr/share/scripts
+      - ./examples/connect-config:/usr/share/config
