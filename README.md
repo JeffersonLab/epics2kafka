@@ -123,7 +123,7 @@ bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.
 ### Distributed Mode
 You must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
-curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
+curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/ca-source.json http://localhost:8083/connectors
 ```
 
 ## See Also
