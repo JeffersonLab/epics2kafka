@@ -27,7 +27,7 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 ```
 docker exec softioc caput hello 1
 
-# Or feed a continuous self-incrementing stream of values:
+# Or feed a continuous incrementing stream of values:
 docker exec softioc /scripts/feed-ca.sh hello
 ```
 
