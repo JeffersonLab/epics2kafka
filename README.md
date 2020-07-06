@@ -85,7 +85,7 @@ The command topic is Event Sourced so that it can be treated like a database.  T
 ```
 docker exec connect /usr/share/scripts/set-monitored.sh -c hello -u
 ```
-The connector listens to the comamnd topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka Incremental Cooperative Rebalancing attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed (depends on your configured number of connector tasks).  Channel monitors are divided as evenly as possible among the configured number of tasks.
+The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka Incremental Cooperative Rebalancing attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed (depends on your configured number of connector tasks).  Channel monitors are divided as evenly as possible among the configured number of tasks.
 ## Deploy
 ### Standalone Mode
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
