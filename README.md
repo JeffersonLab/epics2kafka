@@ -23,7 +23,7 @@ docker-compose up
 ```
 docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic hello
 ```
-3. Put value into "hello" PV
+3. Put value into "hello" EPICS channel
 ```
 docker exec softioc caput hello 1
 ```
@@ -42,7 +42,7 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | Option | Description | Default |
 |---|---|---|
 | epics.ca.addr.list | List of EPICS CA addresses | |
-| channels.topic | Name of Kafka command topic to monitor for channels list | monitored-pvs |
+| channels.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
 | channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
 | kafka.url | URL to Kafka used to query command topic | localhost:9092 |
 
@@ -71,9 +71,9 @@ value.converter.schemas.enable=false
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
 ## Configure EPICS Channels
-The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a channel name.  The topic to publish the EPICS CA monitor events on must be specified in the command message value since some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  The EPICS CA event mask should also be specified as either "VALUE" or "VALUE ALARM".  You can command the connector to listen to a new EPICS CA PV with a JSON formatted message such as:  
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a channel name.  The topic to publish the EPICS CA monitor events on must be specified in the command message value since some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  The EPICS CA event mask should also be specified as either "VALUE" or "VALUE ALARM".  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
 ```
-docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
+docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
 > hello={"topic":"hello","mask":"VALUE ALARM"}
 >
 ```
