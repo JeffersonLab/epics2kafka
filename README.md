@@ -71,13 +71,20 @@ value.converter.schemas.enable=false
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
 ## Configure EPICS Channels
-The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key is a channel name.  The topic to publish the EPICS CA monitor events on must be specified since some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  The EPICS CA event mask should also be specified as either "VALUE" or "VALUE ALARM".  You can command the connector to listen to a new EPICS CA PV with a JSON formatted message such as:  
 ```
 docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
-> hello={"topic":"hello"}
+> hello={"topic":"hello","mask":"VALUE ALARM"}
 >
 ```
-
+Alternatively, a bash script can be used to simplify the process.  For example to execute the script in the provided docker example:
+```
+docker exec connect /usr/share/scripts/set-monitored.sh -c hello -t hello -m "VALUE ALARM"
+```
+The command channel is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
+```
+docker exec connect /usr/share/scripts/set-monitored.sh -c hello -u
+```
 ## Deploy
 ### Standalone Mode
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
