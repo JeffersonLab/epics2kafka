@@ -70,7 +70,7 @@ value.converter.schemas.enable=false
 
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
-## Connector Commands
+## Connector Deployment
 You can control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
