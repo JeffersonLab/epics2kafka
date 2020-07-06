@@ -52,7 +52,7 @@ Internally the connector transforms the EPICS CA API data into Kafka Connector S
 
 | Converter | Description |
 |-----------|-------------|
-| org.apache.kafka.connect.storage.StringConverter | The default converter - Use the underlying connector struct schema in String form |
+| org.apache.kafka.connect.storage.StringConverter | Use the underlying connector struct schema in String form |
 | org.apache.kafka.connect.converters.ByteArrayConverter | Use the underlying connector struct schema in byte form |
 | org.apache.kafka.connect.json.JsonConverter | JSON formatted, by default the schema is embedded and top level keys are __schema__ and __payload__.  Disable embedded schema with additional option __value.converter.schemas.enable=false__ |
 | io.confluent.connect.json.JsonSchemaConverter | Confluent Schema Registry backed JSON format |
