@@ -70,12 +70,6 @@ value.converter.schemas.enable=false
 
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
-## Connector Deployment
-You can control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
-```
-curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
-```
-
 ## Configure EPICS Channels
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "monitored-pvs" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).
 ```
@@ -85,6 +79,7 @@ docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --top
 ```
 
 ## Deploy
+### Standalone Mode
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
 
 1. Copy the connector and dependency jar files into a plugin directory:
@@ -103,24 +98,19 @@ vi config/connect-standalone.properties
 plugin.path=/opt/kafka/connectors
 
 # Create new config file for connector
-vi config/ca-source.properties
-
-# Add the following, editing as desired:
-name=ca-source
-connector.class=org.jlab.kafka.CASourceConnector
-tasks.max=3
-epics.ca.addr.list=129.57.255.4 129.57.255.6 129.57.255.10
-channels.topic=monitored-pvs
-channels.group=ca-source
-kafka.url=localhost:9092
-registry.url=http://localhost:8081
-```
+A new file should be created at config/ca-source.properties.  For example: [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/config/ca-source.properties)
 
 3. Launch the Kafka Connect server:
 ```
 cd /opt/kafka
 bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
+### Distributed Mode
+You must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
+```
+curl -X POST -H "Content-Type:application/json" -d @./config/ca-source.json http://localhost:8083/connectors
+```
+
 ## See Also
    - [Related Projects (External)](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
    - [Research/Prototypes (Internal)](https://github.com/JeffersonLab/epics2pulsar/wiki/Research-Prototype-Projects-(Internal))
