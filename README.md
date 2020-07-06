@@ -26,6 +26,9 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 3. Put value into "hello" EPICS channel
 ```
 docker exec softioc caput hello 1
+
+# Or feed a continuous self-incrementing stream of values:
+docker exec softioc /scripts/feed-ca.sh hello
 ```
 
 **Note**: The Docker Compose project creates the following containers: 
@@ -84,6 +87,10 @@ docker exec connect /usr/share/scripts/set-monitored.sh -c hello -t hello -m "VA
 The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
 ```
 docker exec connect /usr/share/scripts/set-monitored.sh -c hello -u
+```
+List monitored channels:
+```
+docker exec connect /usr/share/scripts/list-monitored.sh
 ```
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka Incremental Cooperative Rebalancing attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed (depends on your configured number of connector tasks).  Channel monitors are divided as evenly as possible among the configured number of tasks.
 ## Deploy
