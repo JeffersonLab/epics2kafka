@@ -11,14 +11,20 @@ while [ $(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) -
   sleep 5
 done
 
-echo "-----------------------------------------"
-echo "Step 2: Configuring monitored-pvs topic ⌚"
-echo "-----------------------------------------"
-echo 'hello={"topic":"hello"}' | kafka-console-producer --bootstrap-server kafka:9092 --topic monitored-pvs --property "parse.key=true" --property "key.separator=="
+echo "------------------------------------"
+echo "Step 2: Create monitored-pvs topic ⌚"
+echo "------------------------------------"
+/usr/share/scripts/create-command-topic.sh
 
-echo "--------------------------------------"
-echo "Step 3: Creating Kafka Connector ✨ 🩲"
-echo "--------------------------------------"
+
+echo "-----------------------------------------"
+echo "Step 3: Configuring monitored-pvs topic 🩲"
+echo "-----------------------------------------"
+/usr/share/scripts/set-monitored.sh -c hello -t hello -m "VALUE ALARM"
+
+echo "-----------------------------------"
+echo "Step 4: Creating Kafka Connector ✨"
+echo "-----------------------------------"
 curl -s \
      -X "POST" "http://localhost:8083/connectors/" \
      -H "Content-Type: application/json" \
