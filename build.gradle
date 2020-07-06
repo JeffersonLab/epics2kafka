@@ -25,6 +25,6 @@ task kafkaConnect(type: Copy) {
 }
 
 jar {
-    archiveName 'Connector.jar'
+    archiveName 'epics2kafka.jar'
     dependsOn(kafkaConnect)
 }

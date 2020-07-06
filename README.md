@@ -28,7 +28,7 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 docker exec softioc caput hello 1
 
 # Or feed a continuous incrementing stream of values:
-docker exec softioc /scripts/feed-ca.sh hello
+docker exec -it softioc /scripts/feed-ca.sh hello
 ```
 
 **Note**: The Docker Compose project creates the following containers: 
@@ -49,7 +49,7 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
 | kafka.url | URL to Kafka used to query command topic | localhost:9092 |
 
-Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connector-config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connector-config/ca-source.properties)).
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.properties)).
 ### Schema
 Internally the connector transforms the EPICS CA event data into Kafka Connector Schema structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
 
@@ -100,7 +100,7 @@ Three steps are required to deploy the CA Source Connector to an existing Kafka 
 1. Copy the connector and dependency jar files into a plugin directory:
 ```
 mkdir /opt/kafka/connectors/ca-source
-cp /tmp/Connector.jar /opt/kafka/connectors/ca-source
+cp /tmp/epics2kafka.jar /opt/kafka/connectors/ca-source
 cp /tmp/jca-2.3.6.jar /opt/kafka/connectors/ca-source
 cp /tmp/caj-1.1.15.jar /opt/kafka/connectors/ca-source
 ```
@@ -119,7 +119,7 @@ plugin.path=/opt/kafka/connectors
 # Create new config file for connector
 vi config/ca-source.properties
 ```
-Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connector-config/ca-source.properties)
+Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.properties)
 
 3. Launch the Kafka Connect server:
 ```
