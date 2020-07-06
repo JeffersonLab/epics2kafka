@@ -93,7 +93,9 @@ cp /tmp/caj-1.1.15.jar /opt/kafka/connectors/ca-source
 ```
 # Edit existing config file for server
 vi config/connect-standalone.properties
+```
 
+```
 # Uncomment property and set value:
 plugin.path=/opt/kafka/connectors
 ```
