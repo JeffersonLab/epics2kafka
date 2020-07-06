@@ -1,9 +1,4 @@
 /.idea/
 /.gradle/
 /build/
-/Connector/build/
-/Schema/build/
-/Connector/out/
-/Schema/out/
 /out/
-/scripts/TombstoneProducer.class
