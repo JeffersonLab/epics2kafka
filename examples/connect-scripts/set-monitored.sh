@@ -41,7 +41,7 @@ then
   # kafka-console-producer can't write tombstone (null) messages!
   #echo "$channel"= | kafka-console-producer --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
   # Hack - we will just compile and run tiny Java program then!
-  javac -cp /usr/share/java/kafka/kafka-clients-5.5.0-ccs.jar -d /tmp TombstoneProducer.java
+  javac -cp /usr/share/java/kafka/kafka-clients-5.5.0-ccs.jar -d /tmp /usr/share/scripts/TombstoneProducer.java
   java -cp /tmp:/usr/share/java/kafka/kafka-clients-5.5.0-ccs.jar:/usr/share/java/kafka/slf4j-api-1.7.30.jar TombstoneProducer kafka:9092 epics-channels $channel 2> /dev/null
 else
   if [ ! "$topic" ] || [ ! "$mask" ]
