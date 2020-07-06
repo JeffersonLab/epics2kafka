@@ -12,13 +12,13 @@ while [ $(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) -
 done
 
 echo "------------------------------------"
-echo "Step 2: Create monitored-pvs topic ⌚"
+echo "Step 2: Create epics-channels topic ⌚"
 echo "------------------------------------"
 /usr/share/scripts/create-command-topic.sh
 
 
 echo "-----------------------------------------"
-echo "Step 3: Configuring monitored-pvs topic 🩲"
+echo "Step 3: Configuring epics-channels topic 🩲"
 echo "-----------------------------------------"
 /usr/share/scripts/set-monitored.sh -c hello -t hello -m "VALUE ALARM"
 

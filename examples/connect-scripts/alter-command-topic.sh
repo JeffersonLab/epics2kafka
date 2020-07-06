@@ -2,7 +2,7 @@
 
 kafka-configs --bootstrap-server kafka:9092 \
               --entity-type topics \
-              --entity-name monitored-pvs \
+              --entity-name epics-channels \
               --alter \
               --add-config "cleanup.policy=compact, \
               min.cleanable.dirty.ratio=0.01, \

@@ -2,7 +2,7 @@
 
 kafka-topics --bootstrap-server kafka:9092 \
              --create \
-             --topic monitored-pvs \
+             --topic epics-channels \
              --config cleanup.policy=compact \
              --config min.cleanable.dirty.ratio=0.01 \
              --config delete.retention.ms=100 \

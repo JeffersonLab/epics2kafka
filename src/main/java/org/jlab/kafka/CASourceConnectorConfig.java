@@ -25,7 +25,7 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         "List of CA Addresses")
                 .define(CASourceConnectorConfig.CHANNELS_TOPIC,
                         ConfigDef.Type.STRING,
-                        "monitored-pvs",
+                        "epics-channels",
                         ConfigDef.Importance.HIGH,
                         "Name of Kafka topic to monitor for channels list")
                 .define(CASourceConnectorConfig.CHANNELS_GROUP,
