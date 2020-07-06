@@ -28,20 +28,6 @@ echo "-----------------------------------"
 curl -s \
      -X "POST" "http://localhost:8083/connectors/" \
      -H "Content-Type: application/json" \
-     -d '
-{
-  "name" : "ca-source",
-  "config" : {
-    "connector.class" : "org.jlab.kafka.CASourceConnector",
-    "tasks.max" : "1",
-    "epics.ca.addr.list": "softioc",
-    "channels.topic": "monitored-pvs",
-    "channels.group": "ca-source",
-    "kafka.url": "kafka://kafka:9092",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
-    "value.converter.schemas.enable": "false"
-  }
-}
-'
+     -d @/usr/share/config/ca-source.json
 
 sleep infinity
