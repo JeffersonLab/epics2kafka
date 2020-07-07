@@ -78,6 +78,6 @@ services:
     entrypoint:
       - /usr/share/scripts/autoconfiguredocker.sh
     volumes:
-      - ./build/libs:/usr/share/java/kafka-connect-epics
+      - ./build/install/epics2kafka:/usr/share/java/kafka-connect-epics
       - ./examples/connect-scripts:/usr/share/scripts
       - ./examples/connect-config:/usr/share/config

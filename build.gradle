@@ -1,10 +1,11 @@
 plugins {
     id 'java'
+    id 'distribution'
     id 'maven-publish'
 }
 
 group 'org.jlab'
-version '0.1.0'
+version '0.2.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -21,30 +22,19 @@ dependencies {
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
 
-task kafkaConnect(type: Copy) {
-    into "${buildDir}/libs"
-    from configurations.compile.collect()
-}
-
 jar {
     archiveName 'epics2kafka.jar'
-    dependsOn(kafkaConnect)
 }
 
-publishing {
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/jeffersonlab/epics2kafka")
-            credentials {
-                username = project.findProperty("github.user")
-                password = project.findProperty("github.token")
-            }
-        }
-    }
-    publications {
-        gpr(MavenPublication) {
-            from(components.java)
+build {
+    dependsOn(installDist)
+}
+
+distributions {
+    main {
+        contents {
+            from jar
+            from (project.configurations.runtime)
         }
     }
 }
