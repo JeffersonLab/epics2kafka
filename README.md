@@ -3,6 +3,13 @@ Transfer [EPICS CA](https://epics-controls.org) messages into [Kafka](https://ka
 
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
+## Docker
+```
+docker pull slominskir/epics2kafka
+docker image tag slominskir/epics2kafka epics2kafka
+```
+Image hosted on [DockerHub](https://hub.docker.com/r/slominskir/epics2kafka)
+
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
 ```
@@ -14,7 +21,7 @@ __Note:__ If you do not already have Gradle installed, it will be installed auto
 
 __Note:__ A firewall may prevent Gradle from downloading packages and dependencies from the Internet.   You may need to setup a [proxy](https://github.com/JeffersonLab/jmyapi/wiki/JLab-Proxy).   
 
-## Quick Start with Docker
+## Quick Start with Compose
 1. Start Docker containers:
 ```
 docker-compose up
@@ -26,8 +33,9 @@ docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic h
 3. Put value into "hello" EPICS channel
 ```
 docker exec softioc caput hello 1
-
-# Or feed a continuous incrementing stream of values:
+```
+Or feed a continuous incrementing stream of values:
+```
 docker exec -it softioc /scripts/feed-ca.sh hello
 ```
 
