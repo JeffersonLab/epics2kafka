@@ -1,6 +1,6 @@
 #!/bin/bash
 
-kafka-topics --bootstrap-server kafka:9092 \
+/kafka/bin/kafka-topics.sh --bootstrap-server kafka:9092 \
              --create \
              --topic epics-channels \
              --config cleanup.policy=compact \
