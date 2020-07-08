@@ -17,11 +17,15 @@ RUN yum install -y git wget \
       && echo "yes" | $JAVA_HOME/bin/keytool -import -trustcacerts -file customcert.crt -alias custom-ca -keystore $JAVA_HOME/lib/security/cacerts -storepass changeit \
       ; fi \
    && ./gradlew build -x test \
-   && cp -r ./build/install $KAFKA_CONNECT_PLUGINS_DIR \
+   && cp -r ./build/install/* $KAFKA_CONNECT_PLUGINS_DIR \
    && cp -r ./scripts /scripts \
+   && chmod +x /scripts/*.sh \
    && rm -rf ./epics2kafka \
-   && yum remove -y git wget
+   && yum remove -y git wget \
+   && yum clean all \
+   && rm -rf ~/.gradle
 
-USER kafka
+
+#USER kafka
 
 ENTRYPOINT ["/scripts/autoconfiguredocker.sh"]

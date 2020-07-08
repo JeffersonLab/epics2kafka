@@ -49,6 +49,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - CUSTOM_CRT_URL=http://pki.jlab.org/JLabCA.crt
     hostname: connect
     container_name: connect
     depends_on:
