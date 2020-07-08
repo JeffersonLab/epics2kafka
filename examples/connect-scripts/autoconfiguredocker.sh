@@ -21,6 +21,9 @@ echo "-----------------------------------------"
 echo "Step 3: Configuring epics-channels topic "
 echo "-----------------------------------------"
 if [[ -z "${MONITOR_CHANNELS}" ]]; then
+  echo "No channels specified to be monitored"
+else
+  echo "Attempting to setup channel monitors"
   IFS=','
   read -a channels <<< "$MONITOR_CHANNELS"
   for channelStr in "${channels[@]}";
@@ -33,8 +36,6 @@ if [[ -z "${MONITOR_CHANNELS}" ]]; then
       echo "Creating channel ${c} ${t} ${m}"
       /scripts/set-monitored.sh -c "${c}" -t "${t}" -m "${m}"
     done
-else
-  echo "No channels specified to be monitored"
 fi
 
 echo "---------------------------------"
