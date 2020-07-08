@@ -46,7 +46,6 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
 
   connect:
-    #image: confluentinc/cp-kafka-connect-base:5.5.0
     build:
       context: .
       dockerfile: Dockerfile
@@ -63,8 +62,6 @@ services:
       CONFIG_STORAGE_TOPIC: connect-configs
       OFFSET_STORAGE_TOPIC: connect-offsets
       STATUS_STORAGE_TOPIC: connect-status
-    entrypoint:
-      - /scripts/autoconfiguredocker.sh
+      MONITOR_CHANNELS: "hello:hello:VALUE ALARM"
     volumes:
-      - ./examples/connect-scripts:/scripts
       - ./examples/connect-config:/config

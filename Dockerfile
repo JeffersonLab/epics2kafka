@@ -7,4 +7,6 @@ ENV PATH="/kafka/bin:${PATH}"
 COPY ./build/install $KAFKA_CONNECT_PLUGINS_DIR
 
 # Install utility scripts
-COPY ./examples/connect-scripts /scripts
+COPY ./scripts /scripts
+
+ENTRYPOINT ["/scripts/autoconfiguredocker.sh"]
