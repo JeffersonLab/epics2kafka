@@ -65,6 +65,5 @@ services:
       MONITOR_CHANNELS: "hello:hello:VALUE ALARM"
     volumes:
       - ./examples/connect-config:/config
-# For development we override the below volumes, but generally just use the ones packages with the image!
       - ./scripts:/scripts
       - ./build/install:/kafka/connect
