@@ -33,7 +33,7 @@ services:
     ports:
       - "9092:9092"
     environment:
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      ZOOKEEPER_CONNECT: 'zookeeper:2181'
 
   connect:
     build:
@@ -54,6 +54,6 @@ services:
       STATUS_STORAGE_TOPIC: connect-status
       MONITOR_CHANNELS: "channel1:channel1:VALUE ALARM,channel2:channel2:VALUE ALARM,channel3:channel3:VALUE ALARM"
     volumes:
-      - ./examples/connect-config:/config
+      - ./examples/connect-config/distributed:/config
       - ./scripts:/scripts
       - ./build/install:/kafka/connect

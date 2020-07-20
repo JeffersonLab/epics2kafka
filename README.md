@@ -141,6 +141,20 @@ You must copy the Connector jar files to all nodes in the cluster.  You control 
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/ca-source.json http://localhost:8083/connectors
 ```
 
+## Alarm Example
+1. Launch compose
+```
+docker-compose -f docker-compose.yml -f docker-compose-alarms.yml up
+```
+2. Monitor active-alarms
+```
+docker exec -it console /scripts/active-alarms/list-active.py --monitor
+```
+3. Trip an EPICS alarm
+```
+docker exec softioc caput channel1 1
+```
+
 ## See Also
    - [Related Projects (External)](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
    - [Research/Prototypes (Internal)](https://github.com/JeffersonLab/epics2pulsar/wiki/Research-Prototype-Projects-(Internal))
