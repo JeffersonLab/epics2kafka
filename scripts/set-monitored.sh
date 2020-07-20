@@ -1,7 +1,7 @@
 #!/bin/bash
 
 help=$'Usage:\n'
-help+="  Set:   $0 [-c] channel [-t] topic [-m] mask (VALUE or \"VALUE ALARM\")"
+help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va')"
 help+=$'\n'
 help+="  Unset: $0 [-c] channel -u"
 
@@ -50,7 +50,7 @@ else
     exit
   fi
 
-  if [ ! "$mask" = "VALUE" ] && [ ! "$mask" = "VALUE ALARM" ]
+  if [ ! "$mask" = "v" ] && [ ! "$mask" = "va" ] && [ ! "$mask" = "a" ]
   then
       echo "$help"
       exit
