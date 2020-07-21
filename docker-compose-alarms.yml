@@ -34,6 +34,6 @@ services:
 
   connect:
     environment:
-      MONITOR_CHANNELS: "channel1:active-alarm:a,channel2:active-alarm:a,channel3:active-alarm:a"
+      MONITOR_CHANNELS: "channel1:active-alarms:a,channel2:active-alarms:a,channel3:active-alarms:a"
     volumes:
       - ./examples/connect-config/distributed-alarms:/config
