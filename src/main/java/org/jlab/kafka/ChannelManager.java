@@ -1,5 +1,7 @@
 package org.jlab.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -29,7 +31,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
     private final ConnectorContext context;
     private final CASourceConnectorConfig config;
-    private HashSet<String> channels = new HashSet<>();
+    private HashSet<ChannelSpec> channels = new HashSet<>();
     private KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap;
     private Map<TopicPartition, Long> endOffsets;
@@ -126,16 +128,23 @@ public class ChannelManager extends Thread implements AutoCloseable {
     }
 
     private void updateChannels(ConsumerRecord<String, String> record) {
-        String channel = record.key();
+        String name = record.key();
 
         log.info("examining record: {}, {}", record.key(), record.value());
 
         if(record.value() == null) {
-            log.info("removing channel: " + channel);
-            channels.remove(channel);
+            log.info("removing channel: " + name);
+            channels.remove(name);
         } else {
-            log.info("adding channel: " + channel);
-            channels.add(channel);
+            log.info("adding channel: " + name);
+            ChannelSpec spec = null;
+            try {
+                spec = ChannelSpec.fromJSON(record.value());
+            } catch(JsonProcessingException e) {
+                throw new RuntimeException("Unable to parse JSON config from command topic", e);
+            }
+            spec.name = name;
+            channels.add(spec);
         }
     }
 
@@ -180,7 +189,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
         log.info("Change monitor thread last line of run");
     }
 
-    public Set<String> getChannels() {
+    public Set<ChannelSpec> getChannels() {
         return channels;
     }
 
@@ -245,5 +254,78 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
     private enum TRI_STATE {
         INITIALIZED, RUNNING, CLOSED;
+    }
+}
+
+class ChannelSpec {
+    // Accessor methods have been included so that this class is recognized as a "bean" by Jackson ObjectMapper
+    String name;
+    String topic;
+    String mask;
+
+    public String toJSON() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String json = null;
+
+        try {
+            json = objectMapper.writeValueAsString(this);
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException("Nothing a user can do about this; JSON couldn't be created!", e);
+        }
+
+        return json;
+    }
+
+    public static ChannelSpec fromJSON(String json) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.readValue(json, ChannelSpec.class);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChannelSpec that = (ChannelSpec) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getTopic() {
+        return topic;
+    }
+
+    public void setTopic(String topic) {
+        this.topic = topic;
+    }
+
+    public String getMask() {
+        return mask;
+    }
+
+    public void setMask(String mask) {
+        this.mask = mask;
+    }
+
+    @Override
+    public String toString() {
+        return "ChannelSpec{" +
+                "name='" + name + '\'' +
+                ", topic='" + topic + '\'' +
+                ", mask='" + mask + '\'' +
+                '}';
     }
 }

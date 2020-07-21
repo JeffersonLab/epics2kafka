@@ -3,6 +3,8 @@ package org.jlab.kafka;
 import com.cosylab.epics.caj.CAJChannel;
 import com.cosylab.epics.caj.CAJContext;
 import com.cosylab.epics.caj.CAJMonitor;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.aps.jca.*;
 import gov.aps.jca.configuration.DefaultConfiguration;
 import gov.aps.jca.dbr.*;
@@ -31,7 +33,8 @@ public class CASourceTask extends SourceTask {
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
     private DefaultConfiguration config = new DefaultConfiguration("config");
     private CAJContext context;
-    private List<String> pvs;
+    private List<ChannelSpec> channels;
+    private Map<String, ChannelSpec> specLookup = new HashMap<>();
     private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
     private static final Schema VALUE_SCHEMA;
     private static final Schema FLOAT_ARRAY_SCHEMA;
@@ -71,7 +74,18 @@ public class CASourceTask extends SourceTask {
     public void start(Map<String, String> props) {
 
         String epicsAddrList = props.get(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
-        pvs = Arrays.asList(props.get("task-pvs").split(","));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String json = props.get("task-channels");
+
+        try {
+            ChannelSpec[] specArray = objectMapper.readValue(json, ChannelSpec[].class);
+
+            channels = Arrays.asList(specArray);
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException("Unable to parse JSON task config", e);
+        }
 
         config.setAttribute("class", JCALibrary.CHANNEL_ACCESS_JAVA);
         config.setAttribute("auto_addr_list", "false");
@@ -108,17 +122,17 @@ public class CASourceTask extends SourceTask {
         long epochMillis = timestamp.toEpochMilli();
         Map<String, Long> offsetValue = offsetValue(epochMillis);
 
-        Set<String> updatedPvs = latest.keySet();
+        Set<String> updatedChannels = latest.keySet();
 
-        if(!updatedPvs.isEmpty()) {
+        if(!updatedChannels.isEmpty()) {
             recordList = new ArrayList<>();
         }
 
-        for(String pv: updatedPvs) {
-            MonitorEvent record = latest.remove(pv);
+        for(String channel: updatedChannels) {
+            MonitorEvent record = latest.remove(channel);
+            ChannelSpec spec = specLookup.get(channel);
             Struct value = eventToStruct(record);
-            String topic = pv.replaceAll(":", "-");
-            recordList.add(new SourceRecord(offsetKey(pv), offsetValue, topic, null,
+            recordList.add(new SourceRecord(offsetKey(channel), offsetValue, spec.topic, null,
                     null, null, VALUE_SCHEMA, value, epochMillis));
         }
 
@@ -142,18 +156,36 @@ public class CASourceTask extends SourceTask {
         try {
             context = (CAJContext) JCA_LIBRARY.createContext(config);
 
-            List<CAJChannel> channels = new ArrayList<>();
-            for(String pv: pvs) {
-                channels.add((CAJChannel)context.createChannel(pv));
+            List<CAJChannel> cajList = new ArrayList<>();
+            for(ChannelSpec spec: channels) {
+                cajList.add((CAJChannel)context.createChannel(spec.name));
+                specLookup.put(spec.name, spec);
             }
 
             context.pendIO(2.0);
 
-            for(CAJChannel channel: channels) {
+            for(int i = 0; i < cajList.size(); i++) {
+                CAJChannel channel = cajList.get(i);
+
+                ChannelSpec spec = channels.get(i);
+
+                log.info("-------------------------------------");
+                log.info("Creating context for channel spec: {}", spec);
+                log.info("-------------------------------------");
+
+                int mask = 0;
+
+                if(spec.mask.contains("v")) {
+                    mask = mask | Monitor.VALUE;
+                }
+
+                if(spec.mask.contains("a")) {
+                    mask = mask | Monitor.ALARM;
+                }
 
                 DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
 
-                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), Monitor.VALUE | Monitor.ALARM);
+                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), mask);
 
                 monitor.addMonitorListener(new MonitorListener() {
                     @Override

@@ -6,6 +6,7 @@ import org.apache.kafka.connect.source.SourceConnector;
 import org.apache.kafka.connect.util.ConnectorUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Experimental Physics and Industrial Control System (EPICS) Channel Access (CA) Source Connector.
@@ -56,14 +57,15 @@ public class CASourceConnector extends SourceConnector {
      */
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
-        Set<String> pvs = channelManager.getChannels();
+        Set<ChannelSpec> pvs = channelManager.getChannels();
 
         int numGroups = Math.min(pvs.size(), maxTasks);
-        List<List<String>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
+        List<List<ChannelSpec>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());
-        for (List<String> pvGroup : groupedPvs) {
+        for (List<ChannelSpec> group : groupedPvs) {
             Map<String, String> taskProps = new HashMap<>(props);
-            taskProps.put("task-pvs", String.join(",", pvGroup));
+            String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
+            taskProps.put("task-channels", jsonArray);
             taskConfigs.add(taskProps);
         }
         return taskConfigs;
