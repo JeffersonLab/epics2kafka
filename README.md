@@ -157,5 +157,4 @@ docker exec softioc caput channel1 1
 ```
 
 ## See Also
-   - [Related Projects (External)](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
-   - [Research/Prototypes (Internal)](https://github.com/JeffersonLab/epics2pulsar/wiki/Research-Prototype-Projects-(Internal))
+   - [Related Projects](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
