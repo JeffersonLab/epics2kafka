@@ -58,7 +58,7 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
 | kafka.url | URL to Kafka used to query command topic | localhost:9092 |
 
-Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.properties)).
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 ### Schema
 Internally the connector transforms the EPICS CA event data into Kafka Connector Schema structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
 
@@ -128,7 +128,7 @@ plugin.path=/opt/kafka/connectors
 # Create new config file for connector
 vi config/ca-source.properties
 ```
-Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/ca-source.properties)
+Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)
 
 3. Launch the Kafka Connect server:
 ```
