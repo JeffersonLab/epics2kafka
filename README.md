@@ -28,7 +28,7 @@ docker-compose up
 ```
 2. Listen to Kafka topic "channel1"
 ```
-docker exec kafka kafka-console-consumer --bootstrap-server kafka:9092 --topic channel1
+docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic channel1
 ```
 3. Put value into "channel1" EPICS channel
 ```
