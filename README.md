@@ -78,7 +78,7 @@ You can control the value schema using the option __value.converter__.  For exam
 value.converter=org.apache.kafka.connect.json.JsonConverter
 value.converter.schemas.enable=false
 ```
-**Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __schema.registry.url__ 
+**Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __value.converter.schema.registry.url__ 
 
 **Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
 
