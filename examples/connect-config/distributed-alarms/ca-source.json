@@ -7,7 +7,7 @@
     "channels.topic": "epics-channels",
     "channels.group": "ca-source",
     "bootstrap.servers": "kafka://kafka:9092",
-    "value.converter.schemas.enable": "false",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
     "value.converter.schema.registry.url": "http://registry:8081"
   }
