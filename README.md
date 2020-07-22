@@ -80,7 +80,7 @@ value.converter.schemas.enable=false
 ```
 **Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __value.converter.schema.registry.url__ 
 
-**Note**: Output topics do not have a key (null key and null key schema).  The discussion above is for output topic value.
+**Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
 
 ## Configure EPICS Channels
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a channel name.  The topic to publish the EPICS CA monitor events on must be specified in the command message value since some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  The EPICS CA event mask should also be specified as either "VALUE" or "VALUE ALARM".  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
