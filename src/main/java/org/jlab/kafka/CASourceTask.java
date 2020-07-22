@@ -36,23 +36,19 @@ public class CASourceTask extends SourceTask {
     private List<ChannelSpec> channels;
     private Map<String, ChannelSpec> specLookup = new HashMap<>();
     private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
+    private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
-    private static final Schema FLOAT_ARRAY_SCHEMA;
 
     static {
-        FLOAT_ARRAY_SCHEMA = SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build();
-
         VALUE_SCHEMA = SchemaBuilder.struct()
                 .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access value")
                 .field("timestamp", Schema.INT64_SCHEMA)
                 .field("status", Schema.OPTIONAL_INT8_SCHEMA)
                 .field("severity", Schema.OPTIONAL_INT8_SCHEMA)
-                .field("floatValues", FLOAT_ARRAY_SCHEMA)
+                .field("floatValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build())
                 .field("stringValues", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build())
                 .field("intValues", SchemaBuilder.array(Schema.OPTIONAL_INT64_SCHEMA).optional().build())
                 .build();
-
-        VALUE_SCHEMA.field("floatValues").schema();
     }
 
     /**
@@ -133,7 +129,7 @@ public class CASourceTask extends SourceTask {
             ChannelSpec spec = specLookup.get(channel);
             Struct value = eventToStruct(record);
             recordList.add(new SourceRecord(offsetKey(channel), offsetValue, spec.topic, null,
-                    null, null, VALUE_SCHEMA, value, epochMillis));
+                    KEY_SCHEMA, channel, VALUE_SCHEMA, value, epochMillis));
         }
 
         return recordList;
@@ -182,6 +178,8 @@ public class CASourceTask extends SourceTask {
                 if(spec.mask.contains("a")) {
                     mask = mask | Monitor.ALARM;
                 }
+
+                log.info("Mask: {}", mask);
 
                 DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
 
@@ -302,6 +300,8 @@ public class CASourceTask extends SourceTask {
         struct.put("timestamp", stamp.secPastEpoch());
         struct.put("status", (byte)status.getValue());
         struct.put("severity", (byte)severity.getValue());
+
+        log.info("Structure: {}", struct);
 
         return struct;
     }
