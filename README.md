@@ -143,6 +143,7 @@ curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/di
 ```
 
 ## Alarm Example
+Extends the [Kafka Alarm System](https://github.com/JeffersonLab/kafka-alarm-system) with EPICS alarms.
 1. Launch compose
 ```
 docker-compose -f docker-compose.yml -f docker-compose-alarms.yml up
