@@ -56,7 +56,6 @@ public class ChannelManager extends Thread implements AutoCloseable {
         props.put("group.id", channelsGroup);
         props.put("enable.auto.commit", "true");
         props.put("auto.commit.interval.ms", "1000");
-        //props.put("auto.offset.reset", "earliest");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("schema.registry.url", registryUrl);

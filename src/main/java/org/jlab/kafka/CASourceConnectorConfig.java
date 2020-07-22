@@ -9,8 +9,8 @@ public class CASourceConnectorConfig extends AbstractConfig {
     public static final String EPICS_CA_ADDR_LIST = "epics.ca.addr.list";
     public static final String CHANNELS_TOPIC = "channels.topic";
     public static final String CHANNELS_GROUP = "channels.group";
-    public static final String KAFKA_URL = "kafka.url";
-    public static final String REGISTRY_URL = "registry.url";
+    public static final String KAFKA_URL = "bootstrap.servers";
+    public static final String REGISTRY_URL = "schema.registry.url";
     public static final String POLL_MILLIS = "poll.millis";
 
     public CASourceConnectorConfig(Map originals) {
