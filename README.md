@@ -86,12 +86,12 @@ value.converter.schemas.enable=false
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a channel name.  The topic to publish the EPICS CA monitor events on must be specified in the command message value since some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  The EPICS CA event mask should also be specified as either "VALUE" or "VALUE ALARM".  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
 ```
 docker exec -it kafka kafka-console-producer --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
-> channel1={"topic":"channel1","mask":"VALUE ALARM"}
+> channel1={"topic":"channel1","mask":"va"}
 >
 ```
 Alternatively, a bash script can be used to simplify the process.  For example to execute the script in the provided docker example:
 ```
-docker exec connect /usr/share/scripts/set-monitored.sh -c channel1 -t channel1 -m "VALUE ALARM"
+docker exec connect /usr/share/scripts/set-monitored.sh -c channel1 -t channel1 -m va
 ```
 The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
 ```
