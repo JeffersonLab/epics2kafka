@@ -47,7 +47,7 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
-**Note**: The docker containers require at least 3GB of memory - Connect alone is 2GB.   Adjust your Docker settings accordingly.
+**Note**: The docker containers require significant resources; tested with 4 CPUs and 4GB memory allocated.
 ## Connector Options
 All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
 
