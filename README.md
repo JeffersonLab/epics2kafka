@@ -56,7 +56,7 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | epics.ca.addr.list | List of EPICS CA addresses | |
 | channels.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
 | channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
-| kafka.url | URL to Kafka used to query command topic | localhost:9092 |
+| bootstrap.servers | URL to Kafka used to query command topic | localhost:9092 |
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 ### Schema
