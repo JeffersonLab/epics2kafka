@@ -31,7 +31,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
     private final ConnectorContext context;
     private final CASourceConnectorConfig config;
-    private HashSet<ChannelSpec> channels = new HashSet<>();
+    private HashMap<String, ChannelSpec> channels = new HashMap<>();
     private KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap;
     private Map<TopicPartition, Long> endOffsets;
@@ -143,7 +143,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
                 throw new RuntimeException("Unable to parse JSON config from command topic", e);
             }
             spec.name = name;
-            channels.add(spec);
+            channels.put(name, spec);
         }
     }
 
@@ -189,7 +189,9 @@ public class ChannelManager extends Thread implements AutoCloseable {
     }
 
     public Set<ChannelSpec> getChannels() {
-        return channels;
+        log.debug("getChannels()");
+
+        return new HashSet<ChannelSpec>(channels.values());
     }
 
     /**
