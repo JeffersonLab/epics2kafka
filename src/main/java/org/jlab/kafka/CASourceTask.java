@@ -68,6 +68,7 @@ public class CASourceTask extends SourceTask {
      */
     @Override
     public void start(Map<String, String> props) {
+        log.debug("start()");
 
         String epicsAddrList = props.get(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
 
