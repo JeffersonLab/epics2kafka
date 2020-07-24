@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *   - https://github.com/confluentinc/kafka-connect-jdbc/tree/master/src/main/java/io/confluent/connect/jdbc
  */
 public class CASourceConnector extends SourceConnector {
-    public static final String version = "0.1.0";
+    public static final String version = "0.3.0";
     private ChannelManager channelManager;
     private Map<String, String> props;
     private CASourceConnectorConfig config;
