@@ -88,19 +88,19 @@ The connector determines which EPICS channels to publish into Kafka by listening
 Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.  Note that some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  It is also possible to establish multiple monitors on a single channel by specifying unique topics for messages to be produced on.   The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.  
 ### Producing Command Messages
 There are various ways to produce command messages:
-1. Command Message with Interactive kafka-console-producer.sh      
+1. Interactive kafka-console-producer.sh      
 You can command the connector to monitor to a new EPICS CA channel with a JSON formatted message such as:  
 ```
 docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
 > {"topic":"channel1","channel":"channel1"}={"mask":"va"}
 >
 ```
-2. Bulk Command Messages from File      
+2. Bulk from File      
 Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed-alarms/channels) found in the Connect docker image:
 ```
   /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < /config/channels
 ```
-3. Command Message from Script    
+3. Adding Channels by Script    
 Alternatively, a bash script can be used to simplify the process for individual channels.  For example to execute the script in the provided docker example:
 ```
 docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -m va
