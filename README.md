@@ -89,7 +89,12 @@ docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server ka
 > {"topic":"channel1","channel":"channel1"}={"mask":"va"}
 >
 ```
-Alternatively, a bash script can be used to simplify the process.  For example to execute the script in the provided docker example:
+Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed-alarms/channels) found in the Connect docker image:
+```
+  /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < /config/channels
+```
+
+Alternatively, a bash script can be used to simplify the process for individual channels.  For example to execute the script in the provided docker example:
 ```
 docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -m va
 ```
