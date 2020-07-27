@@ -91,11 +91,11 @@ docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server ka
 ```
 Alternatively, a bash script can be used to simplify the process.  For example to execute the script in the provided docker example:
 ```
-docker exec connect /usr/share/scripts/set-monitored.sh -t channel1 -c channel1 -m va
+docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -m va
 ```
 The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
 ```
-docker exec connect /usr/share/scripts/set-monitored.sh -t channel 1 -c channel1 -u
+docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -u
 ```
 List monitored channels:
 ```
