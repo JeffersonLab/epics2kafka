@@ -1,5 +1,6 @@
 package org.jlab.kafka;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerRebalanceListener;
@@ -127,7 +128,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     }
 
     private void updateChannels(ConsumerRecord<String, String> record) {
-        log.info("examining record: {}, {}", record.key(), record.value());
+        log.info("examining record: {}={}", record.key(), record.value());
 
         SpecKey key = null;
 
@@ -266,8 +267,15 @@ public class ChannelManager extends Thread implements AutoCloseable {
 }
 
 class ChannelSpec {
-    private final SpecKey key;
-    private final SpecValue value;
+    @JsonIgnore
+    private SpecKey key;
+    @JsonIgnore
+    private SpecValue value;
+
+    public ChannelSpec() {
+        key = new SpecKey();
+        value = new SpecValue();
+    }
 
     public ChannelSpec(SpecKey key, SpecValue value) {
         this.key = key;
@@ -299,12 +307,24 @@ class ChannelSpec {
         return key.getChannel();
     }
 
+    public void setName(String name) {
+        key.setChannel(name);
+    }
+
     public String getTopic() {
         return key.getTopic();
     }
 
+    public void setTopic(String topic) {
+        key.setTopic(topic);
+    }
+
     public String getMask() {
         return value.getMask();
+    }
+
+    public void setMask(String mask) {
+        value.setMask(mask);
     }
 
     public String toJSON() {
@@ -334,6 +354,10 @@ class ChannelSpec {
 class SpecKey {
     private String topic;
     private String channel;
+
+    public SpecKey() {
+
+    }
 
     public String getTopic() {
         return topic;
@@ -388,6 +412,9 @@ class SpecKey {
 
 class SpecValue {
     private String mask;
+
+    public SpecValue() {
+    }
 
     public String getMask() {
         return mask;
