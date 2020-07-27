@@ -60,7 +60,11 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 ### Schema
-Internally the connector transforms the EPICS CA event data into Kafka Connector [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures.  This internal structure can then be converted to various topic schemas using Converters.  The following are common converters:
+Internally the connector transforms the EPICS CA event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+
+https://github.com/JeffersonLab/epics2kafka/blob/9c3ddd992cf288924b2c37152f9aa3318a74cc24/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52
+
+The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
 
 | Converter | Description |
 |-----------|-------------|
