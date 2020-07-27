@@ -6,8 +6,11 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 [Docker](#docker)  
 [Build](#build)  
 [Quick Start with Compose](#quick-start-with-compose)  
+[Configure EPICS channels](#configure-epics-channels)   
 [Connector Options](#connector-options)  
 [Deploy](#deploy)  
+[Alarm Example](#alarm-example)   
+[See Also](#see-also)   
 
 ## Docker
 ```
