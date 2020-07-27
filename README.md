@@ -85,7 +85,13 @@ value.converter.schemas.enable=false
 ## Configure EPICS Channels
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  
 ### Command Message Format
-Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.  Note that some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  It is also possible to establish multiple monitors on a single channel by specifying unique topics for messages to be produced on.   The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.  
+```
+{"topic":"a valid Kafka topic name to produce messages on","channel":"An EPICS CA channel name"}={"mask":"v, a, or va"}
+```
+Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.    It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  It is also possible to establish multiple monitors on a single channel by specifying unique topics for messages to be produced on.   The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.
+
+**Note**: Kafka topic names generally can only contain alphanumeric characters with a few exceptions (like hyphen, but only if period and underscore are NOT used).  Therefore, some EPICS channel names may be invalid Kafka topic names (such as channels containing the colon character).
+
 ### Producing Command Messages
 There are various ways to produce command messages:
 1. Interactive kafka-console-producer.sh      
