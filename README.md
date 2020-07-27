@@ -3,6 +3,12 @@ Transfer [EPICS CA](https://epics-controls.org) messages into [Kafka](https://ka
 
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
+[Docker](#docker)  
+[Build](#build)  
+[Quick Start with Compose](#quick-start-with-compose)  
+[Connector Options](#connector-options)  
+[Deploy](#deploy)  
+
 ## Docker
 ```
 docker pull slominskir/epics2kafka
@@ -48,56 +54,6 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
 
 **Note**: The docker containers require significant resources; tested with 4 CPUs and 4GB memory allocated.
-## Connector Options
-All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
-
-| Option | Description | Default |
-|---|---|---|
-| epics.ca.addr.list | List of EPICS CA addresses | |
-| channels.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
-| channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
-| bootstrap.servers | URL to Kafka used to query command topic | localhost:9092 |
-
-Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
-### Schema
-Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
-```
-{
-  "timestamp":int64,
-  "status":int8 optional,
-  "severity":int8 optional,
-  "floatValues":[float64] optional,
-  "stringValues":[string] optional,
-  "intValues":[int64] optional
-}
-```
-[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52)
-
-**Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
-
-**Note**: EPICS CA data types include smaller version of float64 and int64, but we consolidated to the largest size for simplicity.  A later version of the schema could include smaller messages using additional fields such as _byteValues_ and _shortValues_.  Additionally _doubleValues_ and _longValues_ could be included and _intValues_ and _floatValues_ redefined to 32 bits.
-
-The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
-
-| Converter | Description |
-|-----------|-------------|
-| org.apache.kafka.connect.storage.StringConverter | Use the underlying connector struct schema in String form |
-| org.apache.kafka.connect.converters.ByteArrayConverter | Use the underlying connector struct schema in byte form |
-| org.apache.kafka.connect.json.JsonConverter | JSON formatted, by default the schema is embedded and top level keys are __schema__ and __payload__.  Disable embedded schema with additional option __value.converter.schemas.enable=false__ |
-| io.confluent.connect.json.JsonSchemaConverter | Confluent Schema Registry backed JSON format |
-| io.confluent.connect.avro.AvroConverter | Confluent Schema Registry backed AVRO format |
-| io.confluent.connect.protobuf.ProtobufConverter | Confluent Schema Registry backed protocolbuffers format |
-
-You can also create your own or use other Converters - they're pluggable.
-
-You can control the value schema using the option __value.converter__.  For example, to set the converter to JSON with an implicit schema (i.e. not included in the message or available to lookup in a registry):
-```
-value.converter=org.apache.kafka.connect.json.JsonConverter
-value.converter.schemas.enable=false
-```
-**Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __value.converter.schema.registry.url__ 
-
-**Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
 
 ## Configure EPICS Channels
 The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  
@@ -140,6 +96,60 @@ docker exec connect /scripts/list-monitored.sh
 ```
 ### Task Rebalancing
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka [Incremental Cooperative Rebalancing](https://www.confluent.io/blog/incremental-cooperative-rebalancing-in-kafka/) attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed.  When an EPICS monitor is established (or re-established) it always reports the current state - so although changes during a rebalance may be missed, the state of the system will be re-reported at the end of the rebalance.  Channel monitors are divided as evenly as possible among the configured number of tasks.   It is recommended to populate the initial set of channels to monitor before starting the connector to avoid task rebalancing being triggered repeatedly.  You may wish to configure `scheduled.rebalance.max.delay.ms` to a small number to avoid long periods of waiting to see if an assigned task is coming back or not in a task failure scenario.
+
+## Connector Options
+All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
+
+| Option | Description | Default |
+|---|---|---|
+| epics.ca.addr.list | List of EPICS CA addresses | |
+| channels.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
+| channels.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
+| bootstrap.servers | URL to Kafka used to query command topic | localhost:9092 |
+
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
+
+### Schema
+Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+```
+{
+  "timestamp":int64,
+  "status":int8 optional,
+  "severity":int8 optional,
+  "floatValues":[float64] optional,
+  "stringValues":[string] optional,
+  "intValues":[int64] optional
+}
+```
+[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52)
+
+**Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
+
+**Note**: EPICS CA data types include smaller versions of float64 and int64, but we consolidated to the largest size for simplicity.  A later version of the schema could include smaller messages using additional fields such as _byteValues_ and _shortValues_.  Additionally _doubleValues_ and _longValues_ could be included and _intValues_ and _floatValues_ redefined to 32 bits.
+
+The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
+
+| Converter | Description |
+|-----------|-------------|
+| org.apache.kafka.connect.storage.StringConverter | Use the underlying connector struct schema in String form |
+| org.apache.kafka.connect.converters.ByteArrayConverter | Use the underlying connector struct schema in byte form |
+| org.apache.kafka.connect.json.JsonConverter | JSON formatted, by default the schema is embedded and top level keys are __schema__ and __payload__.  Disable embedded schema with additional option __value.converter.schemas.enable=false__ |
+| io.confluent.connect.json.JsonSchemaConverter | Confluent Schema Registry backed JSON format |
+| io.confluent.connect.avro.AvroConverter | Confluent Schema Registry backed AVRO format |
+| io.confluent.connect.protobuf.ProtobufConverter | Confluent Schema Registry backed protocolbuffers format |
+
+You can also create your own or use other Converters - they're pluggable.
+
+You can control the value schema using the option __value.converter__.  For example, to set the converter to JSON with an implicit schema (i.e. not included in the message or available to lookup in a registry):
+```
+value.converter=org.apache.kafka.connect.json.JsonConverter
+value.converter.schemas.enable=false
+```
+**Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __value.converter.schema.registry.url__ 
+
+**Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
+
+
 ## Deploy
 ### Standalone Mode
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
