@@ -22,13 +22,16 @@ echo "Step 3: Configuring epics-channels topic "
 echo "-----------------------------------------"
 if [[ -z "${MONITOR_CHANNELS}" ]]; then
   echo "No channels specified to be monitored"
+elif [[ -f "$MONITOR_CHANNELS" ]]; then
+  echo "Attempting to setup channel monitors from file $MONITOR_CHANNELS"
+  /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < $MONITOR_CHANNELS
 else
-  echo "Attempting to setup channel monitors"
+  echo "Attempting to setup channel monitors from CSV string"
   IFS=','
   read -a channels <<< "$MONITOR_CHANNELS"
   for channelStr in "${channels[@]}";
     do
-      IFS=':'
+      IFS='|'
       read -a channel <<< "$channelStr"
       c="${channel[0]}"
       t="${channel[1]}"
