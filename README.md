@@ -83,10 +83,10 @@ value.converter.schemas.enable=false
 **Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
 
 ## Configure EPICS Channels
-The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a channel name.  The topic to publish the EPICS CA monitor events on must be specified in the command message value.  Some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  The EPICS CA event mask should also be specified as either "v" or "a" or "va" representing value, alarm, or both.  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.  Some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
 ```
 docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
-> channel1={"topic":"channel1","mask":"va"}
+> {"topic":"channel1","channel":"channel1"}={"mask":"va"}
 >
 ```
 Alternatively, a bash script can be used to simplify the process.  For example to execute the script in the provided docker example:
