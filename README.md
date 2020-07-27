@@ -60,9 +60,22 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 ### Schema
-Internally the connector transforms the EPICS CA event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+```
+{
+  "timestamp":int64,
+  "status":int8 optional,
+  "severity":int8 optional,
+  "floatValues":[float64] optional,
+  "stringValues":[string] optional,
+  "intValues":[int64] optional
+}
+```
+[Source](https://github.com/JeffersonLab/epics2kafka/blob/9c3ddd992cf288924b2c37152f9aa3318a74cc24/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52)
 
-https://github.com/JeffersonLab/epics2kafka/blob/9c3ddd992cf288924b2c37152f9aa3318a74cc24/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52
+**Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
+
+**Note**: EPICS CA data types include smaller version of float64 and int64, but we consolidated to the largest size for simplicity.  A later version of the schema could include smaller messages using additional fields such as _byteValues_ and _shortValues_.  Additionally _doubleValues_ and _longValues_ could be included and _intValues_ and _floatValues_ redefined to 32 bits.
 
 The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
 
