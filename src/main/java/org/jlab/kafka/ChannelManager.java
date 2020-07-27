@@ -31,7 +31,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
     private final ConnectorContext context;
     private final CASourceConnectorConfig config;
-    private HashMap<String, ChannelSpec> channels = new HashMap<>();
+    private HashMap<SpecKey, ChannelSpec> channels = new HashMap<>();
     private KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap;
     private Map<TopicPartition, Long> endOffsets;
@@ -127,23 +127,30 @@ public class ChannelManager extends Thread implements AutoCloseable {
     }
 
     private void updateChannels(ConsumerRecord<String, String> record) {
-        String name = record.key();
-
         log.info("examining record: {}, {}", record.key(), record.value());
 
+        SpecKey key = null;
+
+        try {
+            key = SpecKey.fromJSON(record.key());
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException("Unable to parse JSON key from command topic", e);
+        }
+
         if(record.value() == null) {
-            log.info("removing channel: " + name);
-            channels.remove(name);
+            log.info("removing channel: " + key);
+            channels.remove(key);
         } else {
-            log.info("adding channel: " + name);
+            log.info("adding channel: " + key);
             ChannelSpec spec = null;
+            SpecValue value = null;
             try {
-                spec = ChannelSpec.fromJSON(record.value());
+                value = SpecValue.fromJSON(record.value());
             } catch(JsonProcessingException e) {
-                throw new RuntimeException("Unable to parse JSON config from command topic", e);
+                throw new RuntimeException("Unable to parse JSON value from command topic", e);
             }
-            spec.name = name;
-            channels.put(name, spec);
+            spec = new ChannelSpec(key, value);
+            channels.put(key, spec);
         }
     }
 
@@ -259,10 +266,46 @@ public class ChannelManager extends Thread implements AutoCloseable {
 }
 
 class ChannelSpec {
-    // Accessor methods have been included so that this class is recognized as a "bean" by Jackson ObjectMapper
-    String name;
-    String topic;
-    String mask;
+    private final SpecKey key;
+    private final SpecValue value;
+
+    public ChannelSpec(SpecKey key, SpecValue value) {
+        this.key = key;
+        this.value = value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChannelSpec that = (ChannelSpec) o;
+        return Objects.equals(key, that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(key);
+    }
+
+    public SpecKey getKey() {
+        return key;
+    }
+
+    public SpecValue getValue() {
+        return value;
+    }
+
+    public String getName() {
+        return key.getChannel();
+    }
+
+    public String getTopic() {
+        return key.getTopic();
+    }
+
+    public String getMask() {
+        return value.getMask();
+    }
 
     public String toJSON() {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -278,32 +321,19 @@ class ChannelSpec {
         return json;
     }
 
-    public static ChannelSpec fromJSON(String json) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        return objectMapper.readValue(json, ChannelSpec.class);
-    }
-
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ChannelSpec that = (ChannelSpec) o;
-        return Objects.equals(name, that.name);
+    public String toString() {
+        return "ChannelSpec{" +
+                "name='" + key.getChannel() + '\'' +
+                ", topic='" + key.getTopic() + '\'' +
+                ", mask='" + value.getMask() + '\'' +
+                '}';
     }
+}
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
+class SpecKey {
+    private String topic;
+    private String channel;
 
     public String getTopic() {
         return topic;
@@ -313,6 +343,52 @@ class ChannelSpec {
         this.topic = topic;
     }
 
+    public String getChannel() {
+        return channel;
+    }
+
+    public void setChannel(String channel) {
+        this.channel = channel;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SpecKey specKey = (SpecKey) o;
+        return Objects.equals(topic, specKey.topic) &&
+                Objects.equals(channel, specKey.channel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(topic, channel);
+    }
+
+    public String toJSON() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String json = null;
+
+        try {
+            json = objectMapper.writeValueAsString(this);
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException("Nothing a user can do about this; JSON couldn't be created!", e);
+        }
+
+        return json;
+    }
+
+    public static SpecKey fromJSON(String json) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.readValue(json, SpecKey.class);
+    }
+}
+
+class SpecValue {
+    private String mask;
+
     public String getMask() {
         return mask;
     }
@@ -321,12 +397,23 @@ class ChannelSpec {
         this.mask = mask;
     }
 
-    @Override
-    public String toString() {
-        return "ChannelSpec{" +
-                "name='" + name + '\'' +
-                ", topic='" + topic + '\'' +
-                ", mask='" + mask + '\'' +
-                '}';
+    public String toJSON() {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String json = null;
+
+        try {
+            json = objectMapper.writeValueAsString(this);
+        } catch(JsonProcessingException e) {
+            throw new RuntimeException("Nothing a user can do about this; JSON couldn't be created!", e);
+        }
+
+        return json;
+    }
+
+    public static SpecValue fromJSON(String json) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        return objectMapper.readValue(json, SpecValue.class);
     }
 }

@@ -34,8 +34,8 @@ public class CASourceTask extends SourceTask {
     private DefaultConfiguration config = new DefaultConfiguration("config");
     private CAJContext context;
     private List<ChannelSpec> channels;
-    private Map<String, ChannelSpec> specLookup = new HashMap<>();
-    private Map<String, MonitorEvent> latest = new ConcurrentHashMap<>();
+    private Map<SpecKey, ChannelSpec> specLookup = new HashMap<>();
+    private Map<SpecKey, MonitorEvent> latest = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
 
@@ -119,18 +119,18 @@ public class CASourceTask extends SourceTask {
         long epochMillis = timestamp.toEpochMilli();
         Map<String, Long> offsetValue = offsetValue(epochMillis);
 
-        Set<String> updatedChannels = latest.keySet();
+        Set<SpecKey> updatedChannels = latest.keySet();
 
         if(!updatedChannels.isEmpty()) {
             recordList = new ArrayList<>();
         }
 
-        for(String channel: updatedChannels) {
-            MonitorEvent record = latest.remove(channel);
-            ChannelSpec spec = specLookup.get(channel);
+        for(SpecKey key: updatedChannels) {
+            MonitorEvent record = latest.remove(key);
+            ChannelSpec spec = specLookup.get(key);
             Struct value = eventToStruct(record);
-            recordList.add(new SourceRecord(offsetKey(channel), offsetValue, spec.topic, null,
-                    KEY_SCHEMA, channel, VALUE_SCHEMA, value, epochMillis));
+            recordList.add(new SourceRecord(offsetKey(key.getChannel()), offsetValue, spec.getTopic(), null,
+                    KEY_SCHEMA, key.getChannel(), VALUE_SCHEMA, value, epochMillis));
         }
 
         return recordList;
@@ -153,18 +153,19 @@ public class CASourceTask extends SourceTask {
         try {
             context = (CAJContext) JCA_LIBRARY.createContext(config);
 
-            List<CAJChannel> cajList = new ArrayList<>();
+            Map<SpecKey, CAJChannel> cajMap = new HashMap<>();
             for(ChannelSpec spec: channels) {
-                cajList.add((CAJChannel)context.createChannel(spec.name));
-                specLookup.put(spec.name, spec);
+                cajMap.put(spec.getKey(), (CAJChannel)context.createChannel(spec.getName()));
+                specLookup.put(spec.getKey(), spec);
             }
 
             context.pendIO(2.0);
 
-            for(int i = 0; i < cajList.size(); i++) {
-                CAJChannel channel = cajList.get(i);
+            Set<SpecKey> keySet = cajMap.keySet();
 
-                ChannelSpec spec = channels.get(i);
+            for(SpecKey key: keySet) {
+                CAJChannel channel = cajMap.get(key);
+                ChannelSpec spec = specLookup.get(key);
 
                 log.info("-------------------------------------");
                 log.info("Creating context for channel spec: {}", spec);
@@ -172,11 +173,11 @@ public class CASourceTask extends SourceTask {
 
                 int mask = 0;
 
-                if(spec.mask.contains("v")) {
+                if(spec.getMask().contains("v")) {
                     mask = mask | Monitor.VALUE;
                 }
 
-                if(spec.mask.contains("a")) {
+                if(spec.getMask().contains("a")) {
                     mask = mask | Monitor.ALARM;
                 }
 
@@ -189,7 +190,7 @@ public class CASourceTask extends SourceTask {
                 monitor.addMonitorListener(new MonitorListener() {
                     @Override
                     public void monitorChanged(MonitorEvent ev) {
-                        latest.put(channel.getName(), ev);
+                        latest.put(key, ev);
                     }
                 });
             }

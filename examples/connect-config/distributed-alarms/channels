@@ -1,6 +1,6 @@
-channel1={"topic":"active-alarms","mask":"a"}
-channel2={"topic":"active-alarms","mask":"a"}
-channel3={"topic":"active-alarms","mask":"a"}
-channel4={"topic":"active-alarms","mask":"a"}
-channel5={"topic":"active-alarms","mask":"a"}
-channel6={"topic":"active-alarms","mask":"a"}
+{"topic":"active-alarms","channel":"channel1"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel2"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel3"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel4"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel5"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel6"}={"mask":"a"}

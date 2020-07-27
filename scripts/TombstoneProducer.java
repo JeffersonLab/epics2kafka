@@ -6,8 +6,11 @@ import java.util.Properties;
 public class TombstoneProducer {
     public static void main(String[] args) {
         String servers = args[0];
-        String topic = args[1];
-        String key = args[2];
+        String commandTopic = args[1];
+        String outTopic = args[2];
+        String channel = args[3];
+
+        String key = "{\"topic\":\"" + outTopic + "\",\"channel\":\"" + channel + "\"}";
 
         Properties props = new Properties();
         props.put("bootstrap.servers", servers);
@@ -15,7 +18,7 @@ public class TombstoneProducer {
         props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
 
         try(KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
-            producer.send(new ProducerRecord<String, String>(topic, key, null));
+            producer.send(new ProducerRecord<String, String>(commandTopic, key, null));
         }
     }
 }
