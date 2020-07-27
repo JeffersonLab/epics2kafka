@@ -41,10 +41,10 @@ public class CASourceTask extends SourceTask {
 
     static {
         VALUE_SCHEMA = SchemaBuilder.struct()
-                .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access value")
-                .field("timestamp", Schema.INT64_SCHEMA)
-                .field("status", Schema.OPTIONAL_INT8_SCHEMA)
-                .field("severity", Schema.OPTIONAL_INT8_SCHEMA)
+                .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access (CA) Time Database Record (DBR) MonitorEvent value")
+                .field("timestamp", SchemaBuilder.int64().doc("UNIX timestamp (seconds from epoch - Jan. 1 1970 UTC less leap seconds)").build())
+                .field("status", SchemaBuilder.int8().optional().doc("CA Alarm Status: 0=NO_ALARM,1=READ,2=WRITE,3=HIHI,4=HIGH,5=LOLO,6=LOW,7=STATE,8=COS,9=COMM,10=TIMEOUT,11=HW_LIMIT,12=CALC,13=SCAN,14=LINK,15=SOFT,16=BAD_SUB,17=UDF,18=DISABLE,19=SIMM,20=READ_ACCESS,21=WRITE_ACCESS").build())
+                .field("severity", SchemaBuilder.int8().optional().doc("CA Alarm Severity: 0=NO_ALARM,1=MINOR,2=MAJOR,3=INVALID").build())
                 .field("floatValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build())
                 .field("stringValues", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build())
                 .field("intValues", SchemaBuilder.array(Schema.OPTIONAL_INT64_SCHEMA).optional().build())
