@@ -83,29 +83,39 @@ value.converter.schemas.enable=false
 **Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
 
 ## Configure EPICS Channels
-The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.  Note that some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  It is also possible to establish multiple monitors on a single channel by specifying unique topics for messages to be produced on.   The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.  You can command the connector to listen to a new EPICS CA channel with a JSON formatted message such as:  
+The connector determines which EPICS channels to publish into Kafka by listening to a Kafka topic for commands, by default the topic "epics-channels" ([configurable](https://github.com/JeffersonLab/epics2kafka#connector-options)).  The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  
+### Command Message Format
+Each message key on the command topic is a JSON object containing the topic to produce messages on and the EPICS channel name to monitor.  Note that some EPICS channel names are invalid Kafka topic names (such as channels containing the colon character).  It is acceptable to re-use the same topic with multiple EPICS channels (merge updates).  It is also possible to establish multiple monitors on a single channel by specifying unique topics for messages to be produced on.   The message value is a JSON object containing the EPICS CA event mask, which should be specified as either "v" or "a" or "va" representing value, alarm, or both.  
+### Producing Command Messages
+There are various ways to produce command messages:
+1. Command Message with Interactive kafka-console-producer.sh      
+You can command the connector to monitor to a new EPICS CA channel with a JSON formatted message such as:  
 ```
 docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
 > {"topic":"channel1","channel":"channel1"}={"mask":"va"}
 >
 ```
+2. Bulk Command Messages from File      
 Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed-alarms/channels) found in the Connect docker image:
 ```
   /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < /config/channels
 ```
-
+3. Command Message from Script    
 Alternatively, a bash script can be used to simplify the process for individual channels.  For example to execute the script in the provided docker example:
 ```
 docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -m va
 ```
-The command topic is Event Sourced so that it can be treated like a database.  Tombstone records are honored, topic compaction should be configured, and clients should rewind and replay messages to determine the full configuration.  You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
+4. Removing Channels by Script    
+You can command the connector to stop listening to a channel by writing a tombstone record (key with null value) or use the example bash script to unset (-u) the record:
 ```
 docker exec connect /scripts/set-monitored.sh -t channel1 -c channel1 -u
 ```
-List monitored channels:
+**Note**: The kafka-console-producer.sh script currently does not support producing tombstone records.
+### List monitored channels:
 ```
 docker exec connect /scripts/list-monitored.sh
 ```
+### Task Rebalancing
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka [Incremental Cooperative Rebalancing](https://www.confluent.io/blog/incremental-cooperative-rebalancing-in-kafka/) attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed.  When an EPICS monitor is established (or re-established) it always reports the current state - so although changes during a rebalance may be missed, the state of the system will be re-reported at the end of the rebalance.  Channel monitors are divided as evenly as possible among the configured number of tasks.   It is recommended to populate the initial set of channels to monitor before starting the connector to avoid task rebalancing being triggered repeatedly.  You may wish to configure `scheduled.rebalance.max.delay.ms` to a small number to avoid long periods of waiting to see if an assigned task is coming back or not in a task failure scenario.
 ## Deploy
 ### Standalone Mode
