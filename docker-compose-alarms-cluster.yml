@@ -5,8 +5,6 @@ services:
   zookeeper:
     hostname: zookeeper-1
     container_name: zookeeper-1
-    volumes:
-    - ./examples/zookeeper-conf/zookeeper-1:/zookeeper/conf.orig
     environment:
       SERVER_COUNT: '3'
 
@@ -18,8 +16,6 @@ services:
       - "2102:2181"
       - "2802:2888"
       - "3802:3888"
-    volumes:
-      - ./examples/zookeeper-conf/zookeeper-2:/zookeeper/conf.orig
     environment:
       SERVER_ID: '2'
       SERVER_COUNT: '3'
@@ -32,8 +28,6 @@ services:
       - "2103:2181"
       - "2803:2888"
       - "3803:3888"
-    volumes:
-      - ./examples/zookeeper-conf/zookeeper-3:/zookeeper/conf.orig
     environment:
       SERVER_ID: '3'
       SERVER_COUNT: '3'
