@@ -6,10 +6,15 @@
 echo "----------------------------------------------------"
 echo "Step 1: Waiting for Kafka Connect to start listening"
 echo "----------------------------------------------------"
-while [ $(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) -eq 000 ] ; do
-  echo -e $(date) " Kafka Connect listener HTTP state: " $(curl -s -o /dev/null -w %{http_code} http://connect:8083/connectors) " (waiting for 200)"
+host=`hostname`
+echo "hostname: $host"
+while [ $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) -eq 000 ] ; do
+  echo -e $(date) " Kafka Connect listener HTTP state: " $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) " (waiting for 200)"
   sleep 5
 done
+
+export BOOTSTRAP_SERVER=$BOOTSTRAP_SERVERS
+echo "BOOTSTRAP_SERVER: $BOOTSTRAP_SERVER"
 
 echo "------------------------------------"
 echo "Step 2: Create epics-channels topic "
@@ -24,7 +29,7 @@ if [[ -z "${MONITOR_CHANNELS}" ]]; then
   echo "No channels specified to be monitored"
 elif [[ -f "$MONITOR_CHANNELS" ]]; then
   echo "Attempting to setup channel monitors from file $MONITOR_CHANNELS"
-  /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < $MONITOR_CHANNELS
+  /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < $MONITOR_CHANNELS
 else
   echo "Attempting to setup channel monitors from CSV string"
   IFS=','
@@ -47,7 +52,7 @@ echo "---------------------------------"
 FILE=/config/ca-source.json
 if [ -f "$FILE" ]; then
     curl -s \
-     -X "POST" "http://connect:8083/connectors/" \
+     -X "POST" "http://$host:8083/connectors/" \
      -H "Content-Type: application/json" \
      -d @/config/ca-source.json
 else

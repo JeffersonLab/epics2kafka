@@ -1,0 +1,73 @@
+---
+version: '2.2'
+
+networks:
+  cluster:
+    name: 'example-cluster'
+
+services:
+  softioc:
+    image: slominskir/softioc:1.1.0
+    tty: true
+    stdin_open: true
+    hostname: softioc
+    container_name: softioc
+    ports:
+      - "5064:5064/tcp"
+      - "5065:5065/tcp"
+      - "5064:5064/udp"
+      - "5065:5065/udp"
+    volumes:
+      - ../softioc-db:/db
+      - ../softioc-scripts:/scripts
+    networks:
+      - cluster
+
+  connect-1:
+    image: slominskir/epics2kafka:0.4.0
+    hostname: connect-1
+    container_name: connect-1
+    ports:
+      - 8083:8083
+    depends_on:
+      - softioc
+    environment:
+      BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+      MONITOR_CHANNELS: "/config/channels"
+    volumes:
+      - ../connect-config/distributed-alarms:/config
+    networks:
+      - cluster
+
+  connect-2:
+    image: slominskir/epics2kafka:0.4.0
+    hostname: connect-2
+    container_name: connect-2
+    ports:
+      - 8002:8083
+    environment:
+      BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+    entrypoint: ["/docker-entrypoint.sh", "start"]
+    networks:
+      - cluster
+
+  connect-3:
+    image: slominskir/epics2kafka:0.4.0
+    hostname: connect-3
+    container_name: connect-3
+    ports:
+      - 8003:8083
+    environment:
+      BOOTSTRAP_SERVERS: "kafka-1:9092,kafka-2:9092,kafka-3:9092"
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+    entrypoint: ["/docker-entrypoint.sh", "start"]
+    networks:
+      - cluster

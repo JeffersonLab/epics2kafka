@@ -1,0 +1,43 @@
+---
+version: '2.2'
+
+networks:
+  cluster:
+    name: 'example-cluster'
+
+services:
+  kafka-1:
+    image: debezium/kafka:1.3
+    hostname: kafka-1
+    container_name: kafka-1
+    ports:
+      - "9092:9092"
+    environment:
+      BROKER_ID: '1'
+      ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+    networks:
+      - cluster
+
+  kafka-2:
+    image: debezium/kafka:1.3
+    hostname: kafka-2
+    container_name: kafka-2
+    ports:
+      - "9002:9092"
+    environment:
+      BROKER_ID: '2'
+      ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+    networks:
+      - cluster
+
+  kafka-3:
+    image: debezium/kafka:1.3
+    hostname: kafka-3
+    container_name: kafka-3
+    ports:
+      - "9003:9092"
+    environment:
+      BROKER_ID: '3'
+      ZOOKEEPER_CONNECT: 'zookeeper-1:2181'
+    networks:
+      - cluster

@@ -75,7 +75,7 @@ services:
       CONFIG_STORAGE_TOPIC: connect-configs
       OFFSET_STORAGE_TOPIC: connect-offsets
       STATUS_STORAGE_TOPIC: connect-status
-    entrypoint: ["/docker-entrypoint.sh"]
+    entrypoint: ["/docker-entrypoint.sh", "start"]
 
   connect3:
     build:
@@ -92,4 +92,4 @@ services:
       CONFIG_STORAGE_TOPIC: connect-configs
       OFFSET_STORAGE_TOPIC: connect-offsets
       STATUS_STORAGE_TOPIC: connect-status
-    entrypoint: ["/docker-entrypoint.sh"]
+    entrypoint: ["/docker-entrypoint.sh", "start"]
