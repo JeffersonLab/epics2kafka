@@ -71,7 +71,7 @@ Each message key on the command topic is a JSON object containing the topic to p
 ### Producing Command Messages
 There are various ways to produce command messages:
 1. Interactive kafka-console-producer.sh      
-You can command the connector to monitor to a new EPICS CA channel with a JSON formatted message such as:  
+You can command the connector to monitor a new EPICS CA channel with a JSON formatted message such as:  
 ```
 docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
 > {"topic":"channel1","channel":"channel1"}={"mask":"va"}
