@@ -23,6 +23,8 @@ services:
     container_name: zookeeper
     ports:
       - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
 
   kafka:
     image: debezium/kafka:1.3
