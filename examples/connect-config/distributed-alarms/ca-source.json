@@ -2,7 +2,7 @@
   "name" : "ca-source",
   "config" : {
     "connector.class" : "org.jlab.kafka.CASourceConnector",
-    "tasks.max" : "1",
+    "tasks.max" : "3",
     "epics.ca.addr.list": "softioc",
     "channels.topic": "epics-channels",
     "channels.group": "ca-source",

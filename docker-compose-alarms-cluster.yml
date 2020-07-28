@@ -59,3 +59,37 @@ services:
     environment:
       BROKER_ID: '3'
       ZOOKEEPER_CONNECT: 'zookeeper:2181'
+
+  connect2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: connect2
+    container_name: connect2
+    depends_on:
+      - connect
+    ports:
+      - 8002:8083
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+    entrypoint: ["/docker-entrypoint.sh"]
+
+  connect3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    hostname: connect3
+    container_name: connect3
+    depends_on:
+      - connect
+    ports:
+      - 8003:8083
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+      CONFIG_STORAGE_TOPIC: connect-configs
+      OFFSET_STORAGE_TOPIC: connect-offsets
+      STATUS_STORAGE_TOPIC: connect-status
+    entrypoint: ["/docker-entrypoint.sh"]
