@@ -13,7 +13,11 @@ while [ $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) -eq
   sleep 5
 done
 
-export BOOTSTRAP_SERVER=$BOOTSTRAP_SERVERS
+# Grab first SERVER from SERVERS CSV env
+IFS=','
+read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+
+export BOOTSTRAP_SERVER=${tmpArray[0]}
 echo "BOOTSTRAP_SERVER: $BOOTSTRAP_SERVER"
 
 echo "------------------------------------"

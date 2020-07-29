@@ -24,7 +24,9 @@ services:
       - cluster
 
   connect-1:
-    image: slominskir/epics2kafka:0.4.0
+    build:
+      context: ../..
+      dockerfile: Dockerfile
     hostname: connect-1
     container_name: connect-1
     ports:
@@ -38,7 +40,9 @@ services:
       STATUS_STORAGE_TOPIC: connect-status
       MONITOR_CHANNELS: "/config/channels"
     volumes:
-      - ../connect-config/distributed-alarms:/config
+      - ../connect-config/distributed-alarms-cluster:/config
+      - ../../scripts:/scripts
+      - ../../build/install:/kafka/connect
     networks:
       - cluster
 
