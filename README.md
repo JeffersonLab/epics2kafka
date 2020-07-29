@@ -209,4 +209,5 @@ docker exec softioc caput channel1 1
 ```
 
 ## See Also
+   - [Clustered Alarm Example](https://github.com/JeffersonLab/epics2kafka/wiki/Clustered-Alarm-System-Example)
    - [Related Projects](https://github.com/JeffersonLab/epics2pulsar/wiki/Related-Projects-(External))
