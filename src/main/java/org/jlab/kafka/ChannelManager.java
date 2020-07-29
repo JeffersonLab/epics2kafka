@@ -61,6 +61,8 @@ public class ChannelManager extends Thread implements AutoCloseable {
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("schema.registry.url", registryUrl);
 
+        log.info("Consume command channel from: " + kafkaUrl);
+
         consumer = new KafkaConsumer<>(props);
 
         consumer.subscribe(Collections.singletonList(channelsTopic), new ConsumerRebalanceListener() {
