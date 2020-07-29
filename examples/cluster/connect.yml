@@ -23,6 +23,18 @@ services:
     networks:
       - cluster
 
+  registry:
+    image: confluentinc/cp-schema-registry:5.5.0
+    hostname: registry
+    container_name: registry
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:9092
+      SCHEMA_REGISTRY_HOST_NAME: registry
+    networks:
+      - cluster
+
   connect-1:
     build:
       context: ../..

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Grab first SERVER from SERVERS CSV env
+IFS=','
+read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+
+BOOTSTRAP_SERVER=${tmpArray[0]}
+
 help=$'Usage:\n'
 help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va')"
 help+=$'\n'
@@ -42,7 +48,7 @@ then
   #echo "$channel"= | kafka-console-producer --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
   # Hack - we will just compile and run tiny Java program then!
   javac -cp /kafka/libs/kafka-clients-2.5.0.jar -d /tmp /scripts/TombstoneProducer.java
-  java -cp /tmp:/kafka/libs/kafka-clients-2.5.0.jar:/kafka/libs/slf4j-api-1.7.30.jar TombstoneProducer kafka:9092 epics-channels $topic $channel 2> /dev/null
+  java -cp /tmp:/kafka/libs/kafka-clients-2.5.0.jar:/kafka/libs/slf4j-api-1.7.30.jar TombstoneProducer $BOOTSTRAP_SERVER epics-channels $topic $channel 2> /dev/null
 else
   if [ ! "$topic" ] || [ ! "$mask" ]
   then
@@ -55,5 +61,5 @@ else
       echo "$help"
       exit
   fi
-  echo \{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\"\} | /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
+  echo \{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\"\} | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
 fi

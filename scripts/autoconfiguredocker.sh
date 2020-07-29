@@ -55,10 +55,7 @@ echo "Step 4: Creating Kafka Connector "
 echo "---------------------------------"
 FILE=/config/ca-source.json
 if [ -f "$FILE" ]; then
-    curl -s \
-     -X "POST" "http://$host:8083/connectors/" \
-     -H "Content-Type: application/json" \
-     -d @/config/ca-source.json
+    /scripts/start.sh
 else
     echo "$FILE does not exist."
 fi

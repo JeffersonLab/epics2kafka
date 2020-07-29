@@ -1,6 +1,12 @@
 #!/bin/bash
 
-kafka-configs --bootstrap-server kafka:9092 \
+# Grab first SERVER from SERVERS CSV env
+IFS=','
+read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+
+BOOTSTRAP_SERVER=${tmpArray[0]}
+
+/kafka/bin/kafka-configs.sh --bootstrap-server $BOOTSTRAP_SERVER \
               --entity-type topics \
               --entity-name epics-channels \
               --alter \

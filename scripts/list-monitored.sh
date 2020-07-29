@@ -4,8 +4,7 @@
 IFS=','
 read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
 
-export BOOTSTRAP_SERVER=${tmpArray[0]}
-#echo "BOOTSTRAP_SERVER: $BOOTSTRAP_SERVER"
+BOOTSTRAP_SERVER=${tmpArray[0]}
 
 /kafka/bin/kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP_SERVER \
                        --topic epics-channels \
