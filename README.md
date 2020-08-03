@@ -26,9 +26,7 @@ git clone https://github.com/JeffersonLab/epics2kafka
 cd epics2kafka
 gradlew build -x test
 ```
-__Note:__ If you do not already have Gradle installed, it will be installed automatically by the wrapper script included in the source 
-
-__Note:__ A firewall may prevent Gradle from downloading packages and dependencies from the Internet.   You may need to setup a [proxy](https://github.com/JeffersonLab/jmyapi/wiki/JLab-Proxy).   
+__Note:__ If you do not already have Gradle installed, it will be installed automatically by the wrapper script included in the source  
 
 ## Quick Start with Compose
 1. Start Docker containers:
