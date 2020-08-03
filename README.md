@@ -3,13 +3,17 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
 
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
-[Docker](https://github.com/JeffersonLab/epics2kafka#docker)  
-[Build](https://github.com/JeffersonLab/epics2kafka#build)  
-[Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)  
-[Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
-[Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
-[Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
-[See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
+---
+
+- [Docker](https://github.com/JeffersonLab/epics2kafka#docker)  
+- [Build](https://github.com/JeffersonLab/epics2kafka#build)  
+- [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)  
+- [Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
+- [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
+- [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
+- [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
+
+---
 
 ## Docker
 ```
