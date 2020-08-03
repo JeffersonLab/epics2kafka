@@ -9,7 +9,6 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 [Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
 [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
 [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
-[Alarm System Example](https://github.com/JeffersonLab/epics2kafka#alarm-system-example)   
 [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ## Docker
