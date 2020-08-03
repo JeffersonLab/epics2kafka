@@ -191,21 +191,7 @@ You must copy the Connector jar files to all nodes in the cluster.  You control 
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
 ```
 
-## Alarm System Example
-Extends the [Kafka Alarm System](https://github.com/JeffersonLab/kafka-alarm-system) with EPICS alarms.
-1. Launch compose
-```
-docker-compose -f docker-compose.yml -f docker-compose-alarms.yml up
-```
-2. Monitor active-alarms
-```
-docker exec -it console /scripts/active-alarms/list-active.py --monitor
-```
-3. Trip an EPICS alarm
-```
-docker exec softioc caput channel1 1
-```
-
 ## See Also
+   - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
    - [Clustered Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Clustered-Alarm-System-Example)
    - [Related Projects](https://github.com/JeffersonLab/epics2kafka/wiki/Related-Projects)
