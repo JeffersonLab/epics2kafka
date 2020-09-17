@@ -19,6 +19,7 @@ dependencies {
     compile 'org.epics:caj:1.1.15'
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
     compileOnly group: 'org.apache.kafka', name: 'connect-api', version: '2.4.0'
+    compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
 }
