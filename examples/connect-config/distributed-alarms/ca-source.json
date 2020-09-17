@@ -16,6 +16,10 @@
     "transforms.renameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
     "transforms.renameField.renames": "severity:priority",
     "transforms.toString.type": "org.apache.kafka.connect.transforms.Cast$Value",
-    "transforms.toString.spec": "priority:string"
+    "transforms.toString.spec": "priority:string",
+    "transforms.substitute.type": "org.jlab.kafka.transforms.Substitute$Value",
+    "transforms.substitute.field.name": "priority",
+    "transforms.substitute.regex": "3",
+    "transforms.substitute.replacement": "300"
   }
 }
