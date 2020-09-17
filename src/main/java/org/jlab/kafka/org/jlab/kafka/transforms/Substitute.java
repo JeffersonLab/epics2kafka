@@ -61,7 +61,7 @@ public abstract class Substitute <R extends ConnectRecord<R>> implements Transfo
     private R applySchemaless(R record) {
         final Map<String, Object> value = requireMap(operatingValue(record), PURPOSE);
 
-        final Map<String, Object> updatedValue = new HashMap<>(value);
+        final Map<String, Object> updatedValue = value; // Simply reuse as the map of fields doesn't change, just one of the field values may
 
         doUpdate(updatedValue);
 
@@ -73,11 +73,7 @@ public abstract class Substitute <R extends ConnectRecord<R>> implements Transfo
 
         Schema updatedSchema = value.schema(); // The schema is never updated, just reuse existing!
 
-        final Struct updatedValue = new Struct(updatedSchema);
-
-        for (Field field : value.schema().fields()) {
-            updatedValue.put(field.name(), value.get(field));
-        }
+        final Struct updatedValue = value; // The struct can simply be reused
 
         // TODO: the below code is a duplicate of doUpdate() method, but with Struct instead of Map.  Duplicate code...
         Object originalValue = updatedValue.get(fieldName);
