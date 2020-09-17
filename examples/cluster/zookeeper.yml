@@ -1,9 +1,5 @@
 ---
-version: '2.2'
-
-networks:
-  cluster:
-    name: 'example-cluster'
+version: '2'
 
 services:
   zookeeper-1:
