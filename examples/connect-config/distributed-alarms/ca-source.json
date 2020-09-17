@@ -9,6 +9,11 @@
     "bootstrap.servers": "kafka://kafka:9092",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
-    "value.converter.schema.registry.url": "http://registry:8081"
+    "value.converter.schema.registry.url": "http://registry:8081",
+    "transforms": "ReplaceField,RenameField",
+    "transforms.ReplaceField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.ReplaceField.blacklist": "timestamp,status,floatValues,stringValues,intValues",
+    "transforms.RenameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
+    "transforms.RenameField.renames": "severity:priority"
   }
 }
