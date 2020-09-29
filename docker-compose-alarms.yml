@@ -4,7 +4,7 @@ version: '2'
 services:
   kafka:
     environment:
-      CREATE_TOPICS: 'alarms:1:1:compact,active-alarms:1:1:compact,shelved-alarms:1:1:compact'
+      CREATE_TOPICS: 'registered-alarms:1:1:compact,active-alarms:1:1:compact,shelved-alarms:1:1:compact'
 
   registry:
     image: confluentinc/cp-schema-registry:5.5.0
