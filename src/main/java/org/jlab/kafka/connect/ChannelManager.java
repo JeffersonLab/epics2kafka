@@ -1,4 +1,4 @@
-package org.jlab.kafka;
+package org.jlab.kafka.connect;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;

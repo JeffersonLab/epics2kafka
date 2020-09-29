@@ -4,7 +4,7 @@ plugins {
     id 'maven-publish'
 }
 
-group 'org.jlab'
+group 'org.jlab.kafka.connect'
 version '0.2.0'
 
 sourceCompatibility = 1.8

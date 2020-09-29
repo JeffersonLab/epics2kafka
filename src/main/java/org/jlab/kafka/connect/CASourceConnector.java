@@ -1,4 +1,4 @@
-package org.jlab.kafka;
+package org.jlab.kafka.connect;
 
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
