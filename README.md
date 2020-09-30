@@ -34,6 +34,7 @@ __Note:__ If you do not already have Gradle installed, it will be installed auto
 ## Quick Start with Compose
 1. Start Docker containers:
 ```
+gradlew build
 docker-compose up
 ```
 2. Listen to Kafka topic "channel1"
@@ -48,6 +49,8 @@ Or feed a continuous incrementing stream of values:
 ```
 docker exec -it softioc /scripts/feed-ca.sh channel1
 ```
+
+**Note**: The build is required because the docker-compose.yml file is setup for development. If you remove the volume _./build/install:/kafka_connect_ then you can skip the gradlew build step and the pre-built version of the connector inside the container will be used, but then you'll not be able to make changes on the fly on your localhost.
 
 **Note**: The Docker Compose project creates the following containers: 
    - [softioc](https://github.com/JeffersonLab/softioc)
