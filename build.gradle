@@ -12,6 +12,9 @@ targetCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+        url  "https://dl.bintray.com/slominskir/maven"
+    }
 }
 
 dependencies {
@@ -22,6 +25,7 @@ dependencies {
     compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testCompileOnly group: 'org.jlab.kafka.connect.transform', name: 'jtransforms', version: '0.1.0'
 }
 
 jar {
@@ -30,6 +34,13 @@ jar {
 
 build {
     dependsOn(installDist)
+}
+
+task alarmTest(type: Copy) {
+    dependsOn(build)
+    into "${buildDir}/install"
+    from configurations.testCompileOnly
+    include '**/jtransforms-*.jar'
 }
 
 distributions {
