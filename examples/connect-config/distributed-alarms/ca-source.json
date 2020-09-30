@@ -10,12 +10,15 @@
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
     "value.converter.schema.registry.url": "http://registry:8081",
-    "transforms": "replaceField,renameField,toString",
+    "transforms": "replaceField,renameField,toString,substitute",
     "transforms.replaceField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
     "transforms.replaceField.blacklist": "timestamp,status,floatValues,stringValues,intValues",
     "transforms.renameField.type": "org.apache.kafka.connect.transforms.ReplaceField$Value",
     "transforms.renameField.renames": "severity:priority",
     "transforms.toString.type": "org.apache.kafka.connect.transforms.Cast$Value",
-    "transforms.toString.spec": "priority:string"
+    "transforms.toString.spec": "priority:string",
+    "transforms.substitute.type": "org.apache.kafka.connect.transforms.MaskField$value",
+    "transforms.substitute.fields": "priority",
+    "transforms.substitute.replacement": "P1_LIFE"
   }
 }
