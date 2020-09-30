@@ -17,7 +17,7 @@
     "transforms.renameField.renames": "severity:priority",
     "transforms.toString.type": "org.apache.kafka.connect.transforms.Cast$Value",
     "transforms.toString.spec": "priority:string",
-    "transforms.substitute.type": "org.apache.kafka.connect.transforms.MaskField$value",
+    "transforms.substitute.type": "org.apache.kafka.connect.transforms.MaskField$Value",
     "transforms.substitute.fields": "priority",
     "transforms.substitute.replacement": "P1_LIFE"
   }
