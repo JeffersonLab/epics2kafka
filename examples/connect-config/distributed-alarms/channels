@@ -1,6 +1,6 @@
-{"topic":"active-alarms","channel":"channel1"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel2"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel3"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel4"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel5"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel6"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel1"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel2"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel3"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel4"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel5"}={"mask":"a"}
+{"topic":"connect-alarms","channel":"channel6"}={"mask":"a"}

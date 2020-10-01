@@ -34,6 +34,10 @@ services:
       KSQL_KSQL_SCHEMA_REGISTRY_URL: http://registry:8081
       KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
       KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
+      KSQL_KSQL_QUERIES_FILE: /scripts/queries.sql
+    volumes:
+    - ./examples/ksqldb/alarms:/scripts
+    command: '/scripts/entrypoint.sh'
 
   ksqldb-cli:
     image: confluentinc/ksqldb-cli:0.12.0
