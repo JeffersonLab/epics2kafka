@@ -117,7 +117,7 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 
 ### Schema
-Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/25/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
 ```
 {
   "timestamp":int64,
@@ -128,7 +128,7 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
   "intValues":[int64] optional
 }
 ```
-[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/CASourceTask.java#L42-L52)
+[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L42-L52)
 
 **Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
 
