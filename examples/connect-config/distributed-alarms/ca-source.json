@@ -2,13 +2,17 @@
   "name" : "ca-source",
   "config" : {
     "connector.class" : "org.jlab.kafka.connect.CASourceConnector",
-    "tasks.max" : "1",
+    "tasks.max" : 1,
     "epics.ca.addr.list": "softioc",
     "channels.topic": "epics-channels",
     "channels.group": "ca-source",
     "bootstrap.servers": "kafka://kafka:9092",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-    "value.converter.schemas.enable": "false",
-    "value.converter": "org.apache.kafka.connect.json.JsonConverter"
+    "value.converter": "io.confluent.connect.avro.AvroConverter",
+    "value.converter.schema.registry.url": "http://registry:8081",
+    "value.converter.enhanced.avro.schema.support":  true,
+    "value.converter.connect.meta.data": false,
+    "transforms": "alarms",
+    "transforms.alarms.type": "org.jlab.kafka.connect.transforms.EpicsToAlarm$Value"
   }
 }

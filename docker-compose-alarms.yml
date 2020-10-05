@@ -19,38 +19,8 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_HOST_NAME: registry
 
-  ksqldb:
-    image: confluentinc/ksqldb-server:0.12.0
-    hostname: ksqldb
-    container_name: ksqldb
-    depends_on:
-      - kafka
-      - registry
-    ports:
-      - "8088:8088"
-    environment:
-      KSQL_LISTENERS: http://0.0.0.0:8088
-      KSQL_BOOTSTRAP_SERVERS: kafka:9092
-      KSQL_KSQL_SCHEMA_REGISTRY_URL: http://registry:8081
-      KSQL_KSQL_LOGGING_PROCESSING_STREAM_AUTO_CREATE: "true"
-      KSQL_KSQL_LOGGING_PROCESSING_TOPIC_AUTO_CREATE: "true"
-      KSQL_KSQL_QUERIES_FILE: /scripts/queries.sql
-    volumes:
-    - ./examples/ksqldb/alarms:/scripts
-    command: '/scripts/entrypoint.sh'
-
-  ksqldb-cli:
-    image: confluentinc/ksqldb-cli:0.12.0
-    hostname: ksqldb-cli
-    container_name: ksqldb-cli
-    depends_on:
-      - kafka
-      - ksqldb
-    entrypoint: /bin/sh
-    tty: true
-
   console:
-    image: slominskir/kafka-alarm-system:0.2.1
+    image: slominskir/kafka-alarm-system:0.4.0
     hostname: console
     container_name: console
     depends_on:
