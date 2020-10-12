@@ -32,6 +32,16 @@ services:
       SCHEMA_REGISTRY: "http://registry:8081"
       ALARM_DEFINITIONS: "channel1|channel1|INJ|RF|/|/,channel2|channel2|INJ|RF|/|/,channel3|channel3|INJ|RF|/|/"
 
+  streams:
+    image: slominskir/registrations2epics:0.2.0
+    hostname: streams
+    container_name: streams
+    depends_on:
+      - registry
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+      SCHEMA_REGISTRY: "http://registry:8081"
+
   connect:
     environment:
       MONITOR_CHANNELS: "/config/channels"
