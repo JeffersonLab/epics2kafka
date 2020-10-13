@@ -1,15 +1,13 @@
 ---
-version: '2.2'
+version: '3.8'
 
 networks:
   cluster:
-    name: 'example-cluster'
+    name: 'alarm-cluster'
 
 services:
   connect-1:
-    build:
-      context: ../..
-      dockerfile: Dockerfile
+    image: slominskir/epics2kafka:0.5.0
     hostname: connect-1
     container_name: connect-1
     ports:
@@ -22,8 +20,6 @@ services:
       MONITOR_CHANNELS: "/config/channels"
     volumes:
       - ../connect-config/distributed-alarms-cluster:/config
-      - ../../scripts:/scripts
-      - ../../build/install:/kafka/connect
     networks:
       - cluster
 
