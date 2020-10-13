@@ -7,7 +7,7 @@ networks:
 
 services:
   connect-1:
-    image: slominskir/epics2kafka:0.5.0
+    image: slominskir/epics2kafka:0.6.0
     hostname: connect-1
     container_name: connect-1
     ports:
@@ -24,7 +24,7 @@ services:
       - cluster
 
   connect-2:
-    image: slominskir/epics2kafka:0.5.0
+    image: slominskir/epics2kafka:0.6.0
     hostname: connect-2
     container_name: connect-2
     ports:
@@ -39,7 +39,7 @@ services:
       - cluster
 
   connect-3:
-    image: slominskir/epics2kafka:0.5.0
+    image: slominskir/epics2kafka:0.6.0
     hostname: connect-3
     container_name: connect-3
     ports:
