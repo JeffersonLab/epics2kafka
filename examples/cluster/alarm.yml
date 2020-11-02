@@ -36,7 +36,7 @@ services:
       - cluster
 
   console:
-    image: slominskir/kafka-alarm-system:0.6.0
+    image: slominskir/kafka-alarm-system:0.7.0
     hostname: console
     container_name: console
     depends_on:

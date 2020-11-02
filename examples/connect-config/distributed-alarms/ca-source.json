@@ -7,12 +7,16 @@
     "channels.topic": "epics-channels",
     "channels.group": "ca-source",
     "bootstrap.servers": "kafka://kafka:9092",
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "key.converter": "io.confluent.connect.avro.AvroConverter",
+    "key.converter.schema.registry.url": "http://registry:8081",
+    "key.converter.enhanced.avro.schema.support":  true,
+    "key.converter.connect.meta.data": false,
     "value.converter": "io.confluent.connect.avro.AvroConverter",
     "value.converter.schema.registry.url": "http://registry:8081",
     "value.converter.enhanced.avro.schema.support":  true,
     "value.converter.connect.meta.data": false,
-    "transforms": "alarms",
-    "transforms.alarms.type": "org.jlab.kafka.connect.transforms.EpicsToAlarm$Value"
+    "transforms": "alarmsKey,alarmsValue",
+    "transforms.alarmsKey.type": "org.jlab.kafka.connect.transforms.EpicsToAlarm$Key",
+    "transforms.alarmsValue.type": "org.jlab.kafka.connect.transforms.EpicsToAlarm$Value"
   }
 }
