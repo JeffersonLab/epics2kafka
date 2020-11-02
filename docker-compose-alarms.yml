@@ -20,7 +20,7 @@ services:
       SCHEMA_REGISTRY_HOST_NAME: registry
 
   console:
-    image: slominskir/kafka-alarm-system:0.4.0
+    image: slominskir/kafka-alarm-system:0.6.0
     hostname: console
     container_name: console
     depends_on:
