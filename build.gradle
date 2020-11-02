@@ -18,18 +18,17 @@ repositories {
 }
 
 dependencies {
-    compile 'org.epics:jca:2.3.6'
-    compile 'org.epics:caj:1.1.15'
+    implementation 'org.epics:jca:2.4.3' // Newer versions in mavenCentral only work with Java 11
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
     compileOnly group: 'org.apache.kafka', name: 'connect-api', version: '2.4.0'
     compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
-    testCompileOnly group: 'org.jlab.kafka.connect.transform', name: 'jtransforms', version: '0.7.0'
+    testImplementation group: 'org.jlab.kafka.connect.transform', name: 'jtransforms', version: '0.7.0'
 }
 
 jar {
-    archiveName 'epics2kafka.jar'
+    archiveFileName = 'epics2kafka.jar'
 }
 
 build {
@@ -39,7 +38,7 @@ build {
 task alarmTest(type: Copy) {
     dependsOn(build)
     into "${buildDir}/install"
-    from configurations.testCompileOnly
+    from configurations.testCompileClasspath
     include '**/jtransforms-*.jar'
 }
 
@@ -47,7 +46,7 @@ distributions {
     main {
         contents {
             from jar
-            from (project.configurations.runtime)
+            from (project.configurations.runtimeClasspath)
         }
     }
 }
