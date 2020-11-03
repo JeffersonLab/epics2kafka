@@ -24,7 +24,7 @@ dependencies {
     compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
-    testImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.13.0'
+    testImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.15.0'
 }
 
 jar {
