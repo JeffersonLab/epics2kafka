@@ -41,13 +41,16 @@ public class CASourceTask extends SourceTask {
 
     static {
         VALUE_SCHEMA = SchemaBuilder.struct()
-                .name("org.jlab.epics.ca.value").version(1).doc("An EPICS Channel Access (CA) Time Database Record (DBR) MonitorEvent value")
+                .name("org.jlab.kafka.connect.EPICS_CA_DBR").version(1).doc("An EPICS Channel Access (CA) Time Database Record (DBR) MonitorEvent value")
                 .field("timestamp", SchemaBuilder.int64().doc("UNIX timestamp (seconds from epoch - Jan. 1 1970 UTC less leap seconds)").build())
                 .field("status", SchemaBuilder.int8().optional().doc("CA Alarm Status: 0=NO_ALARM,1=READ,2=WRITE,3=HIHI,4=HIGH,5=LOLO,6=LOW,7=STATE,8=COS,9=COMM,10=TIMEOUT,11=HW_LIMIT,12=CALC,13=SCAN,14=LINK,15=SOFT,16=BAD_SUB,17=UDF,18=DISABLE,19=SIMM,20=READ_ACCESS,21=WRITE_ACCESS").build())
                 .field("severity", SchemaBuilder.int8().optional().doc("CA Alarm Severity: 0=NO_ALARM,1=MINOR,2=MAJOR,3=INVALID").build())
-                .field("floatValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().build())
-                .field("stringValues", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().build())
-                .field("intValues", SchemaBuilder.array(Schema.OPTIONAL_INT64_SCHEMA).optional().build())
+                .field("doubleValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().doc("EPICS DBR_DOUBLE").build())
+                .field("floatValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT32_SCHEMA).optional().doc("EPICS DBR_FLOAT").build())
+                .field("stringValues", SchemaBuilder.array(Schema.OPTIONAL_STRING_SCHEMA).optional().doc("EPICS DBR_STRING").build())
+                .field("intValues", SchemaBuilder.array(Schema.OPTIONAL_INT32_SCHEMA).optional().doc("EPICS DBR_LONG, but JCA refers to INT32 as DBR_INT; EPICS has no INT64").build())
+                .field("shortValues", SchemaBuilder.array(Schema.OPTIONAL_INT16_SCHEMA).optional().doc("EPICS DBR_SHORT; DBR_INT is alias in EPICS (but not in JCA); Schema has no unsigned types so DBR_ENUM is also here").build())
+                .field("byteValues", SchemaBuilder.array(Schema.OPTIONAL_INT8_SCHEMA).optional().build()) // DBR_CHAR
                 .build();
     }
 
@@ -258,11 +261,11 @@ public class CASourceTask extends SourceTask {
                 time = (DBR_TIME_Double)dbr;
                 double[] value = ((gov.aps.jca.dbr.DOUBLE) dbr).getDoubleValue();
                 List<Double> list = DoubleStream.of(value).boxed().collect(Collectors.toList());
-                struct.put("floatValues", list);
+                struct.put("doubleValues", list);
             } else if (dbr.isFLOAT()) {
                 time = (DBR_TIME_Float)dbr;
                 float[] value = ((gov.aps.jca.dbr.FLOAT) dbr).getFloatValue();
-                List<Double> list = IntStream.range(0, value.length).mapToDouble(i -> value[i]).boxed().collect(Collectors.toList());
+                List<Float> list = toFloatList(value);
                 struct.put("floatValues", list);
             } else if (dbr.isINT()) {
                 time = (DBR_TIME_Int)dbr;
@@ -272,18 +275,18 @@ public class CASourceTask extends SourceTask {
             } else if (dbr.isSHORT()) {
                 time = (DBR_TIME_Short)dbr;
                 short[] value = ((gov.aps.jca.dbr.SHORT) dbr).getShortValue();
-                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
-                struct.put("intValues", list);
+                List<Short> list = toShortList(value);
+                struct.put("shortValues", list);
             } else if (dbr.isENUM()) {
                 time = (DBR_TIME_Enum)dbr;
                 short[] value = ((gov.aps.jca.dbr.ENUM) dbr).getEnumValue();
-                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
-                struct.put("intValues", list);
+                List<Short> list = toShortList(value);
+                struct.put("shortValues", list);
             } else if (dbr.isBYTE()) {
                 time = (DBR_TIME_Byte)dbr;
                 byte[] value = ((gov.aps.jca.dbr.BYTE) dbr).getByteValue();
-                List<Integer> list = IntStream.range(0, value.length).map(i -> value[i]).boxed().collect(Collectors.toList());
-                struct.put("intValues", list);
+                List<Byte> list = toByteList(value);
+                struct.put("byteValues", list);
             } else {
                 time = (DBR_TIME_String)dbr;
                 String[] value = ((gov.aps.jca.dbr.STRING) dbr).getStringValue();
@@ -300,11 +303,47 @@ public class CASourceTask extends SourceTask {
         Severity severity = time.getSeverity();
 
         struct.put("timestamp", stamp.secPastEpoch());
-        struct.put("status", (byte)status.getValue());
-        struct.put("severity", (byte)severity.getValue());
+        struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
+        struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
 
         log.info("Structure: {}", struct);
 
         return struct;
+    }
+
+    private List<Float> toFloatList(float[] value) {
+        List<Float> list = new ArrayList<>();
+
+        if(value != null) {
+            for (float v : value) {
+                list.add(v);
+            }
+        }
+
+        return list;
+    }
+
+    private List<Short> toShortList(short[] value) {
+        List<Short> list = new ArrayList<>();
+
+        if(value != null) {
+            for (short v : value) {
+                list.add(v);
+            }
+        }
+
+        return list;
+    }
+
+    private List<Byte> toByteList(byte[] value) {
+        List<Byte> list = new ArrayList<>();
+
+        if(value != null) {
+            for (byte v : value) {
+                list.add(v);
+            }
+        }
+
+        return list;
     }
 }
