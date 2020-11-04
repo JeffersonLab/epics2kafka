@@ -123,16 +123,17 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
   "timestamp":int64,
   "status":int8 optional,
   "severity":int8 optional,
-  "floatValues":[float64] optional,
+  "doubleValues":[float64] optional,
+  "floatValues":[float32] optional,
   "stringValues":[string] optional,
-  "intValues":[int64] optional
+  "intValues":[int32] optional
+  "shortValues":[int16] optional
+  "byteValues":[int8] optional
 }
 ```
-[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L42-L52)
+[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L42-L55)
 
 **Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
-
-**Note**: EPICS CA data types include smaller versions of float64 and int64, but we consolidated to the largest size for simplicity.  A later version of the schema could include smaller messages using additional fields such as _byteValues_ and _shortValues_.  Additionally _doubleValues_ and _longValues_ could be included and _intValues_ and _floatValues_ redefined to 32 bits.
 
 The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
 
