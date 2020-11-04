@@ -166,8 +166,7 @@ Three steps are required to deploy the CA Source Connector to an existing Kafka 
 ```
 mkdir /opt/kafka/connectors/ca-source
 cp /tmp/epics2kafka.jar /opt/kafka/connectors/ca-source
-cp /tmp/jca-2.3.6.jar /opt/kafka/connectors/ca-source
-cp /tmp/caj-1.1.15.jar /opt/kafka/connectors/ca-source
+cp /tmp/jca-2.4.3.jar /opt/kafka/connectors/ca-source
 ```
 2. Update the Kafka config (standalone environment shown):
 ```
