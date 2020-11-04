@@ -123,12 +123,12 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
   "timestamp":int64,
   "status":int8 optional,
   "severity":int8 optional,
-  "doubleValues":[float64] optional,
-  "floatValues":[float32] optional,
-  "stringValues":[string] optional,
-  "intValues":[int32] optional
-  "shortValues":[int16] optional
-  "byteValues":[int8] optional
+  "doubleValues":float64[] optional,
+  "floatValues":float32[] optional,
+  "stringValues":string[] optional,
+  "intValues":int32[] optional
+  "shortValues":int16[] optional
+  "byteValues":int8[] optional
 }
 ```
 [Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L42-L55)
