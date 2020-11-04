@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'org.jlab.kafka.connect'
-version '0.2.0'
+version '0.3.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -29,6 +29,14 @@ dependencies {
 
 jar {
     archiveFileName = 'epics2kafka.jar'
+}
+
+processResources {
+    filesMatching('release.properties') {
+        filter {
+            String line -> line.replaceAll("@VERSION@", version)
+        }
+    }
 }
 
 build {

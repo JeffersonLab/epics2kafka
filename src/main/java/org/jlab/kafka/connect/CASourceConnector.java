@@ -5,6 +5,8 @@ import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
 import org.apache.kafka.connect.util.ConnectorUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -16,10 +18,25 @@ import java.util.stream.Collectors;
  *   - https://github.com/confluentinc/kafka-connect-jdbc/tree/master/src/main/java/io/confluent/connect/jdbc
  */
 public class CASourceConnector extends SourceConnector {
-    public static final String version = "0.5.0";
+    public static final String version;
     private ChannelManager channelManager;
     private Map<String, String> props;
     private CASourceConnectorConfig config;
+
+    static {
+        try (
+              InputStream releaseIn = CASourceConnector.class.getClassLoader().getResourceAsStream("release.properties")
+        ) {
+            Properties release = new Properties();
+            release.load(releaseIn);
+            version = release.getProperty("VERSION");
+            if(version == null) {
+                throw new IOException("version cannot be null");
+            }
+        } catch (IOException e) {
+            throw new ExceptionInInitializerError("Unable to load release properties.");
+        }
+    }
 
     /**
      * Start this Connector. This method will only be called on a clean Connector, i.e. it has
