@@ -82,7 +82,7 @@ docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server ka
 >
 ```
 2. Bulk from File      
-Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed-alarms/channels) found in the Connect docker image:
+Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/channels) found in the Connect docker image:
 ```
   /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < /config/channels
 ```
