@@ -76,6 +76,8 @@ public class CASourceConnector extends SourceConnector {
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         Set<ChannelSpec> pvs = channelManager.getChannels();
 
+        pvs.add(ChannelSpec.KEEP_ALIVE); // This ensures we don't go into FAILED state from having no work to do
+
         int numGroups = Math.min(pvs.size(), maxTasks);
         List<List<ChannelSpec>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());

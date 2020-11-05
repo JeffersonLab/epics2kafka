@@ -82,7 +82,9 @@ public class CASourceTask extends SourceTask {
         try {
             ChannelSpec[] specArray = objectMapper.readValue(json, ChannelSpec[].class);
 
-            channels = Arrays.asList(specArray);
+            channels = new LinkedList<>(Arrays.asList(specArray));
+
+            channels.remove(ChannelSpec.KEEP_ALIVE); // One lucky task has this placeholder, but don't actually monitor!
         } catch(JsonProcessingException e) {
             throw new RuntimeException("Unable to parse JSON task config", e);
         }

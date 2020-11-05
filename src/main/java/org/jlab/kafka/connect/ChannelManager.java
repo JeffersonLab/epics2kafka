@@ -269,6 +269,13 @@ public class ChannelManager extends Thread implements AutoCloseable {
 }
 
 class ChannelSpec {
+    /**
+     * A special ChannelSpec with null key and null value that is used simply to ensure the Connector does not go into
+     * a failed state because of no channels to monitor.   The CASourceConnector.taskConfigs() adds it to the list of
+     * configs and each task must attempt to remove it during initialization in case it was assigned to it
+     * (only one is).
+     */
+    public static final ChannelSpec KEEP_ALIVE = new ChannelSpec();
     @JsonIgnore
     private SpecKey key;
     @JsonIgnore
