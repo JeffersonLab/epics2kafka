@@ -44,6 +44,6 @@ services:
 
   connect:
     environment:
-      MONITOR_CHANNELS: "/config/channels"
+      MONITOR_CHANNELS: "" # We'll rely on registrations2epics
     volumes:
       - ./examples/connect-config/distributed-alarms:/config

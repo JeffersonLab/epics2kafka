@@ -54,7 +54,8 @@ services:
       CONFIG_STORAGE_TOPIC: connect-configs
       OFFSET_STORAGE_TOPIC: connect-offsets
       STATUS_STORAGE_TOPIC: connect-status
-      MONITOR_CHANNELS: "channel1|channel1|v,channel2|channel2|v,channel3|channel3|v"
+      MONITOR_CHANNELS: "/config/channels"
+      #MONITOR_CHANNELS: "channel1|channel1|v,channel2|channel2|v,channel3|channel3|v"
     volumes:
       - ./examples/connect-config/distributed:/config
       - ./scripts:/scripts
