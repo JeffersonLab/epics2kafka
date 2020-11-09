@@ -36,6 +36,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap;
     private Map<TopicPartition, Long> endOffsets;
+    private boolean reachedEnd = false;
     private Long pollMillis;
 
     public ChannelManager(ConnectorContext context, CASourceConnectorConfig config) {
@@ -65,6 +66,9 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
         consumer = new KafkaConsumer<>(props);
 
+        // Read all records up to the high water mark (most recent records) / end offsets
+        Map<Integer, Boolean> partitionEndReached = new HashMap<>();
+
         consumer.subscribe(Collections.singletonList(channelsTopic), new ConsumerRebalanceListener() {
 
             @Override
@@ -77,12 +81,14 @@ public class ChannelManager extends Thread implements AutoCloseable {
                 assignedPartitionsMap = partitions.stream().collect(Collectors.toMap(TopicPartition::partition, p -> p));
                 consumer.seekToBeginning(partitions);
                 endOffsets = consumer.endOffsets(partitions);
+                for(Map.Entry e: endOffsets.entrySet()) {
+                    if((Long)e.getValue() == 0) {
+                        reachedEnd = true;
+                        log.info("Empty channels list to begin with!");
+                    }
+                }
             }
         });
-
-        // Read all records up to the high water mark (most recent records) / end offsets
-        boolean reachedEnd = false;
-        Map<Integer, Boolean> partitionEndReached = new HashMap<>();
 
         // Note: first poll triggers seek to beginning
         int tries = 0;
@@ -124,9 +130,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
             }
         }
 
-        if(channels.size() == 0) {
-            throw new IllegalArgumentException("No channels set in topic: " + channelsTopic);
-        }
+        log.info("done with constructor");
     }
 
     private void updateChannels(ConsumerRecord<String, String> record) {
