@@ -3,9 +3,7 @@
   "config" : {
     "connector.class" : "org.jlab.kafka.connect.CASourceConnector",
     "tasks.max" : "1",
-    "epics.ca.addr.list": "softioc",
-    "channels.topic": "epics-channels",
-    "channels.group": "ca-source",
+    "monitor.addr.list": "softioc",
     "bootstrap.servers": "kafka://kafka:9092",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter.schemas.enable": "false",

@@ -48,7 +48,6 @@ public class ChannelManager extends Thread implements AutoCloseable {
         log.info("-----------------------");
 
         String kafkaUrl = config.getString(CASourceConnectorConfig.KAFKA_URL);
-        String registryUrl = config.getString(CASourceConnectorConfig.REGISTRY_URL);
         String channelsTopic = config.getString(CASourceConnectorConfig.CHANNELS_TOPIC);
         String channelsGroup = config.getString(CASourceConnectorConfig.CHANNELS_GROUP);
         pollMillis = config.getLong(CASourceConnectorConfig.COMMAND_POLL_MILLIS);
@@ -60,7 +59,6 @@ public class ChannelManager extends Thread implements AutoCloseable {
         props.put("auto.commit.interval.ms", "1000");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
-        props.put("schema.registry.url", registryUrl);
 
         log.info("Consume command channel from: " + kafkaUrl);
 

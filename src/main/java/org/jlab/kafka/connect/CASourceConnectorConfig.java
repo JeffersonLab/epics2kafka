@@ -6,13 +6,12 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.Map;
 
 public class CASourceConnectorConfig extends AbstractConfig {
-    public static final String EPICS_CA_ADDR_LIST = "epics.ca.addr.list";
-    public static final String CHANNELS_TOPIC = "channels.topic";
-    public static final String CHANNELS_GROUP = "channels.group";
-    public static final String KAFKA_URL = "bootstrap.servers";
-    public static final String REGISTRY_URL = "schema.registry.url";
-    public static final String COMMAND_POLL_MILLIS = "command.poll.millis";
+    public static final String EPICS_CA_ADDR_LIST = "monitor.addr.list";
     public static final String MONITOR_POLL_MILLIS = "monitor.poll.millis";
+    public static final String CHANNELS_TOPIC = "command.topic";
+    public static final String CHANNELS_GROUP = "command.group";
+    public static final String COMMAND_POLL_MILLIS = "command.poll.millis";
+    public static final String KAFKA_URL = "bootstrap.servers";
 
     public CASourceConnectorConfig(Map originals) {
         super(configDef(), originals);
@@ -39,16 +38,11 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         "localhost:9092",
                         ConfigDef.Importance.HIGH,
                         "URL for Kafka hosting CHANNELS_TOPIC")
-                .define(CASourceConnectorConfig.REGISTRY_URL,
-                        ConfigDef.Type.STRING,
-                        "http://localhost:8081",
-                        ConfigDef.Importance.HIGH,
-                        "URL for Schema Registry hosting CHANNELS_TOPIC schema")
                 .define(CASourceConnectorConfig.COMMAND_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         5000l,
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds to poll for command topic changes. Reconfigure delay is twice this value since command thread waits for no changes poll response before requesting reconfigure.")
+                        "Milliseconds to poll for command topic changes - reconfigure delay is twice this value since command thread waits for 'no changes' poll response before requesting reconfigure")
                 .define(CASourceConnectorConfig.MONITOR_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         1000l,
