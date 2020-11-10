@@ -114,10 +114,10 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | Option | Description | Default |
 |---|---|---|
 | monitor.addr.list | List of EPICS CA addresses | |
-| monitor.poll.millis | Milliseconds to poll for CA changes - sets max CA monitor update frequency | 1000 |
+| monitor.poll.millis | Milliseconds between polls for CA changes - sets max CA monitor update frequency | 1000 |
 | command.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
 | command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
-| command.poll.millis | Milliseconds to poll for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
+| command.poll.millis | Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
 | command.bootstrap.servers | Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic | localhost:9092 |
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
