@@ -42,7 +42,7 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         ConfigDef.Type.LONG,
                         5000l,
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds to poll for command topic changes - reconfigure delay is twice this value since command thread waits for 'no changes' poll response before requesting reconfigure")
+                        "Milliseconds to poll for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure")
                 .define(CASourceConnectorConfig.MONITOR_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         1000l,
