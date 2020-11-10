@@ -7,9 +7,9 @@ read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
 BOOTSTRAP_SERVER=${tmpArray[0]}
 
 help=$'Usage:\n'
-help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va')"
+help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va') [-o] outkey (optional - defaults to channel)"
 help+=$'\n'
-help+="  Unset: $0 [-c] channel -u"
+help+="  Unset: $0 [-c] channel -t topic -u"
 
 while getopts ":c:t:m:u" opt; do
   case ${opt} in
@@ -24,6 +24,9 @@ while getopts ":c:t:m:u" opt; do
       ;;
     m )
       mask=$OPTARG
+      ;;
+    o )
+      outkey=$OPTARG
       ;;
     \? ) echo "$help"
       ;;
@@ -61,5 +64,13 @@ else
       echo "$help"
       exit
   fi
-  echo \{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\"\} | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
+
+  msg=\{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\"\}
+
+  if [ "$outkey" ]
+  then
+    msg=\{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\",\"outkey\":\"$outkey\"\}
+  fi
+
+  echo $msg | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
 fi

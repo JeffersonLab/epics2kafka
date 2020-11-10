@@ -354,6 +354,14 @@ class ChannelSpec {
         value.setMask(mask);
     }
 
+    public String getOutkey() {
+        return value.getOutkey();
+    }
+
+    public void setOutkey(String outkey) {
+        value.setOutkey(outkey);
+    }
+
     public String toJSON() {
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -374,13 +382,14 @@ class ChannelSpec {
                 "name='" + key.getChannel() + '\'' +
                 ", topic='" + key.getTopic() + '\'' +
                 ", mask='" + value.getMask() + '\'' +
+                ", outkey='" + value.getOutkey() + '\'' +
                 '}';
     }
 }
 
 class SpecKey {
-    private String topic;
-    private String channel;
+    private String topic; // Output topic
+    private String channel; // CA channel to monitor
 
     public SpecKey() {
 
@@ -438,7 +447,8 @@ class SpecKey {
 }
 
 class SpecValue {
-    private String mask;
+    private String mask; // CA monitor mask
+    private String outkey; // output message key (optional - defaults to channel)
 
     public SpecValue() {
     }
@@ -449,6 +459,14 @@ class SpecValue {
 
     public void setMask(String mask) {
         this.mask = mask;
+    }
+
+    public String getOutkey() {
+        return outkey;
+    }
+
+    public void setOutkey(String outkey) {
+        this.outkey = outkey;
     }
 
     public String toJSON() {

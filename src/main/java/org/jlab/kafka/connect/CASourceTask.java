@@ -139,8 +139,15 @@ public class CASourceTask extends SourceTask {
             MonitorEvent record = latest.remove(key);
             ChannelSpec spec = specLookup.get(key);
             Struct value = eventToStruct(record);
-            recordList.add(new SourceRecord(offsetKey(key.getChannel()), offsetValue, spec.getTopic(), null,
-                    KEY_SCHEMA, key.getChannel(), VALUE_SCHEMA, value, epochMillis));
+
+            String outkey = spec.getOutkey();
+
+            if(outkey == null) {
+                outkey = key.getChannel();
+            }
+
+            recordList.add(new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
+                    KEY_SCHEMA, outkey, VALUE_SCHEMA, value, epochMillis));
         }
 
         return recordList;
