@@ -33,7 +33,7 @@ services:
       ALARM_DEFINITIONS: "alarm1|channel1|INJ|RF|/|/,alarm2|channel2|INJ|RF|/|/,alarm3|channel3|INJ|RF|/|/"
 
   streams:
-    image: slominskir/registrations2epics:0.4.0
+    image: slominskir/registrations2epics:0.5.0
     hostname: streams
     container_name: streams
     depends_on:
