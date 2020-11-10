@@ -23,6 +23,11 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         ConfigDef.Type.STRING,
                         ConfigDef.Importance.HIGH,
                         "List of CA Addresses")
+                .define(CASourceConnectorConfig.MONITOR_POLL_MILLIS,
+                        ConfigDef.Type.LONG,
+                        1000l,
+                        ConfigDef.Importance.HIGH,
+                        "Milliseconds between polls for CA changes - sets max CA monitor update frequency")
                 .define(CASourceConnectorConfig.COMMAND_TOPIC,
                         ConfigDef.Type.STRING,
                         "epics-channels",
@@ -33,20 +38,15 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         "ca-source",
                         ConfigDef.Importance.HIGH,
                         "Name of Kafka consumer group to use when monitoring CHANNELS_TOPIC")
-                .define(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS,
-                        ConfigDef.Type.STRING,
-                        "localhost:9092",
-                        ConfigDef.Importance.HIGH,
-                        "Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic")
                 .define(CASourceConnectorConfig.COMMAND_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         5000l,
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds to poll for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure")
-                .define(CASourceConnectorConfig.MONITOR_POLL_MILLIS,
-                        ConfigDef.Type.LONG,
-                        1000l,
+                        "Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure")
+                .define(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS,
+                        ConfigDef.Type.STRING,
+                        "localhost:9092",
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds to poll for CA changes - sets max CA monitor update frequency");
+                        "Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic");
     }
 }
