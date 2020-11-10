@@ -161,7 +161,7 @@ value.converter.schemas.enable=false
 ```
 **Note**: Confluent Schema Registry backed converters require a schema registry server specified with an additional option: __value.converter.schema.registry.url__ 
 
-**Note**: Output topics use channel name as key (String key SCHEMA).  This is especially useful when using a shared output topic, and is necessary for topic compaction.
+**Note**: Output topics use channel name as key (String key SCHEMA) by default, but if _outkey_ is set then that is used instead.  A key is required to support topic compaction and is especially useful when using a shared output topic.
 
 
 ## Deploy
