@@ -76,7 +76,7 @@ public class CASourceTask extends SourceTask {
 
         CASourceConnectorConfig config =  new CASourceConnectorConfig(props);
 
-        String epicsAddrList = config.getString(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
+        String epicsAddrList = config.getString(CASourceConnectorConfig.MONITOR_ADDR_LIST);
 
         pollMillis = config.getLong(CASourceConnectorConfig.MONITOR_POLL_MILLIS);
 

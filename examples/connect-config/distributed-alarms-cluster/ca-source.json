@@ -4,7 +4,7 @@
     "connector.class" : "org.jlab.kafka.connect.CASourceConnector",
     "tasks.max" : "3",
     "monitor.addr.list": "softioc",
-    "bootstrap.servers": "kafka-1:9092",
+    "command.bootstrap.servers": "kafka-1:9092",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter": "io.confluent.connect.avro.AvroConverter",
     "value.converter.schema.registry.url": "http://registry:8081"

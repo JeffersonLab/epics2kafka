@@ -47,9 +47,9 @@ public class ChannelManager extends Thread implements AutoCloseable {
         log.info("Creating ChannelManager");
         log.info("-----------------------");
 
-        String kafkaUrl = config.getString(CASourceConnectorConfig.KAFKA_URL);
-        String channelsTopic = config.getString(CASourceConnectorConfig.CHANNELS_TOPIC);
-        String channelsGroup = config.getString(CASourceConnectorConfig.CHANNELS_GROUP);
+        String kafkaUrl = config.getString(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS);
+        String channelsTopic = config.getString(CASourceConnectorConfig.COMMAND_TOPIC);
+        String channelsGroup = config.getString(CASourceConnectorConfig.COMMAND_GROUP);
         pollMillis = config.getLong(CASourceConnectorConfig.COMMAND_POLL_MILLIS);
 
         Properties props = new Properties();

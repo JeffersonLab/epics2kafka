@@ -6,12 +6,12 @@ import org.apache.kafka.common.config.ConfigDef;
 import java.util.Map;
 
 public class CASourceConnectorConfig extends AbstractConfig {
-    public static final String EPICS_CA_ADDR_LIST = "monitor.addr.list";
+    public static final String MONITOR_ADDR_LIST = "monitor.addr.list";
     public static final String MONITOR_POLL_MILLIS = "monitor.poll.millis";
-    public static final String CHANNELS_TOPIC = "command.topic";
-    public static final String CHANNELS_GROUP = "command.group";
+    public static final String COMMAND_TOPIC = "command.topic";
+    public static final String COMMAND_GROUP = "command.group";
     public static final String COMMAND_POLL_MILLIS = "command.poll.millis";
-    public static final String KAFKA_URL = "bootstrap.servers";
+    public static final String COMMAND_BOOTSTRAP_SERVERS = "command.bootstrap.servers";
 
     public CASourceConnectorConfig(Map originals) {
         super(configDef(), originals);
@@ -19,25 +19,25 @@ public class CASourceConnectorConfig extends AbstractConfig {
 
     protected static ConfigDef configDef() {
         return new ConfigDef()
-                .define(CASourceConnectorConfig.EPICS_CA_ADDR_LIST,
+                .define(CASourceConnectorConfig.MONITOR_ADDR_LIST,
                         ConfigDef.Type.STRING,
                         ConfigDef.Importance.HIGH,
                         "List of CA Addresses")
-                .define(CASourceConnectorConfig.CHANNELS_TOPIC,
+                .define(CASourceConnectorConfig.COMMAND_TOPIC,
                         ConfigDef.Type.STRING,
                         "epics-channels",
                         ConfigDef.Importance.HIGH,
                         "Name of Kafka topic to monitor for channels list")
-                .define(CASourceConnectorConfig.CHANNELS_GROUP,
+                .define(CASourceConnectorConfig.COMMAND_GROUP,
                         ConfigDef.Type.STRING,
                         "ca-source",
                         ConfigDef.Importance.HIGH,
                         "Name of Kafka consumer group to use when monitoring CHANNELS_TOPIC")
-                .define(CASourceConnectorConfig.KAFKA_URL,
+                .define(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS,
                         ConfigDef.Type.STRING,
                         "localhost:9092",
                         ConfigDef.Importance.HIGH,
-                        "URL for Kafka hosting CHANNELS_TOPIC")
+                        "Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic")
                 .define(CASourceConnectorConfig.COMMAND_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         5000l,
