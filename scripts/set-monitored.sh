@@ -11,7 +11,7 @@ help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va') [-o] o
 help+=$'\n'
 help+="  Unset: $0 [-c] channel -t topic -u"
 
-while getopts ":c:t:m:u" opt; do
+while getopts ":c:t:m:o:u" opt; do
   case ${opt} in
     u )
       unset=true
@@ -72,5 +72,5 @@ else
     msg=\{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\",\"outkey\":\"$outkey\"\}
   fi
 
-  echo $msg | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
+  echo "$msg" | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
 fi
