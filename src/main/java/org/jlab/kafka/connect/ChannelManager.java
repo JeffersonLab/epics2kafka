@@ -51,7 +51,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
         String registryUrl = config.getString(CASourceConnectorConfig.REGISTRY_URL);
         String channelsTopic = config.getString(CASourceConnectorConfig.CHANNELS_TOPIC);
         String channelsGroup = config.getString(CASourceConnectorConfig.CHANNELS_GROUP);
-        pollMillis = config.getLong(CASourceConnectorConfig.POLL_MILLIS);
+        pollMillis = config.getLong(CASourceConnectorConfig.COMMAND_POLL_MILLIS);
 
         Properties props = new Properties();
         props.put("bootstrap.servers", kafkaUrl);
@@ -174,18 +174,28 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             log.info("transitioned: " + transitioned);
 
+            // Once set, we wait until changes have settled to avoid call this too frequently with changes happening
+            boolean needReconfig = false;
+
             // Listen for changes
             while (state.get() == TRI_STATE.RUNNING) {
                 log.info("polling for changes");
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
-                if (records.count() > 0) {
+                if (records.count() > 0) { // We have changes
                     for(ConsumerRecord<String, String> record: records) {
                         updateChannels(record);
                     }
 
-                    log.info("Change in channels list: request reconfigure");
-                    context.requestTaskReconfiguration();
+                    log.info("Change in channels list: request reconfigure once settled");
+                    needReconfig = true;
+
+                } else { // No changes, settled
+                    if(needReconfig) {
+                        log.info("No changes (we've settled), so submitting reconfigure request");
+                        context.requestTaskReconfiguration();
+                        needReconfig = false;
+                    }
                 }
             }
 

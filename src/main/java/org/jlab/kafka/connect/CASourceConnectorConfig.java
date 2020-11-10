@@ -11,7 +11,8 @@ public class CASourceConnectorConfig extends AbstractConfig {
     public static final String CHANNELS_GROUP = "channels.group";
     public static final String KAFKA_URL = "bootstrap.servers";
     public static final String REGISTRY_URL = "schema.registry.url";
-    public static final String POLL_MILLIS = "poll.millis";
+    public static final String COMMAND_POLL_MILLIS = "command.poll.millis";
+    public static final String MONITOR_POLL_MILLIS = "monitor.poll.millis";
 
     public CASourceConnectorConfig(Map originals) {
         super(configDef(), originals);
@@ -43,10 +44,15 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         "http://localhost:8081",
                         ConfigDef.Importance.HIGH,
                         "URL for Schema Registry hosting CHANNELS_TOPIC schema")
-                .define(CASourceConnectorConfig.POLL_MILLIS,
+                .define(CASourceConnectorConfig.COMMAND_POLL_MILLIS,
+                        ConfigDef.Type.LONG,
+                        5000l,
+                        ConfigDef.Importance.HIGH,
+                        "Milliseconds to poll for command topic changes. Reconfigure delay is twice this value since command thread waits for no changes poll response before requesting reconfigure.")
+                .define(CASourceConnectorConfig.MONITOR_POLL_MILLIS,
                         ConfigDef.Type.LONG,
                         1000l,
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds to poll for changes, determines max CA monitor update frequency");
+                        "Milliseconds to poll for CA changes - sets max CA monitor update frequency");
     }
 }

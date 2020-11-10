@@ -31,13 +31,14 @@ import java.util.stream.Stream;
 public class CASourceTask extends SourceTask {
     private static final Logger log = LoggerFactory.getLogger(CASourceTask.class);
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
-    private DefaultConfiguration config = new DefaultConfiguration("config");
+    private DefaultConfiguration dc = new DefaultConfiguration("config");
     private CAJContext context;
     private List<ChannelSpec> channels;
     private Map<SpecKey, ChannelSpec> specLookup = new HashMap<>();
     private Map<SpecKey, MonitorEvent> latest = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
+    private long pollMillis;
 
     static {
         VALUE_SCHEMA = SchemaBuilder.struct()
@@ -73,7 +74,11 @@ public class CASourceTask extends SourceTask {
     public void start(Map<String, String> props) {
         log.debug("start()");
 
-        String epicsAddrList = props.get(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
+        CASourceConnectorConfig config =  new CASourceConnectorConfig(props);
+
+        String epicsAddrList = config.getString(CASourceConnectorConfig.EPICS_CA_ADDR_LIST);
+
+        pollMillis = config.getLong(CASourceConnectorConfig.MONITOR_POLL_MILLIS);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -89,9 +94,9 @@ public class CASourceTask extends SourceTask {
             throw new RuntimeException("Unable to parse JSON task config", e);
         }
 
-        config.setAttribute("class", JCALibrary.CHANNEL_ACCESS_JAVA);
-        config.setAttribute("auto_addr_list", "false");
-        config.setAttribute("addr_list", epicsAddrList);
+        dc.setAttribute("class", JCALibrary.CHANNEL_ACCESS_JAVA);
+        dc.setAttribute("auto_addr_list", "false");
+        dc.setAttribute("addr_list", epicsAddrList);
     }
 
     /**
@@ -115,7 +120,7 @@ public class CASourceTask extends SourceTask {
         }
 
         synchronized (this) {
-            wait(100); // Max update frequency of 10Hz
+            wait(pollMillis); // Max update frequency; too fast is taxing and unnecessary work; too slow means delayed monitor updates and Connector pause action delay
         }
 
         ArrayList<SourceRecord> recordList = null; // Must return null if no updates
@@ -156,7 +161,7 @@ public class CASourceTask extends SourceTask {
 
     private void createContext() {
         try {
-            context = (CAJContext) JCA_LIBRARY.createContext(config);
+            context = (CAJContext) JCA_LIBRARY.createContext(dc);
 
             Map<SpecKey, CAJChannel> cajMap = new HashMap<>();
             for(ChannelSpec spec: channels) {
