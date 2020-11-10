@@ -78,13 +78,17 @@ public class ChannelManager extends Thread implements AutoCloseable {
             @Override
             public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
                 log.info("seeking to beginning of topic");
+                if(partitions.size() != 1) { // I think the code below actually handles multiple partitions fine, but  it's the principle of the matter!
+                    throw new IllegalArgumentException("The command topic must have exactly one partition");
+                }
                 assignedPartitionsMap = partitions.stream().collect(Collectors.toMap(TopicPartition::partition, p -> p));
                 consumer.seekToBeginning(partitions);
                 endOffsets = consumer.endOffsets(partitions);
-                for(Map.Entry e: endOffsets.entrySet()) {
-                    if((Long)e.getValue() == 0) {
-                        reachedEnd = true;
-                        log.info("Empty channels list to begin with!");
+                for(TopicPartition p: endOffsets.keySet()) {
+                    Long value = endOffsets.get(p);
+                    if(value == 0) {
+                        partitionEndReached.put(p.partition(), true);
+                        log.info("Empty channels list to begin with on partition: " + p.partition());
                     }
                 }
             }
