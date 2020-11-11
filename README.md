@@ -136,7 +136,7 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
   "byteValues":int8[] optional
 }
 ```
-[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L42-L55)
+[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L43-L55)
 
 **Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
 
