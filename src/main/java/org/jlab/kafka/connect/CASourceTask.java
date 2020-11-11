@@ -221,7 +221,7 @@ public class CASourceTask extends SourceTask {
     }
 
     private Map<String, String> offsetKey(String name) {
-        return Collections.singletonMap("PV_NAME", name);
+        return Collections.singletonMap("NAME", name);
     }
 
     private Map<String, Long> offsetValue(Long pos) {
