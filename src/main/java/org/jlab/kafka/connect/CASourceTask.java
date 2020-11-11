@@ -43,7 +43,6 @@ public class CASourceTask extends SourceTask {
     static {
         VALUE_SCHEMA = SchemaBuilder.struct()
                 .name("org.jlab.kafka.connect.EPICS_CA_DBR").version(1).doc("An EPICS Channel Access (CA) Time Database Record (DBR) MonitorEvent value")
-                .field("timestamp", SchemaBuilder.int64().doc("UNIX timestamp (seconds from epoch - Jan. 1 1970 UTC less leap seconds)").build())
                 .field("status", SchemaBuilder.int8().optional().doc("CA Alarm Status: 0=NO_ALARM,1=READ,2=WRITE,3=HIHI,4=HIGH,5=LOLO,6=LOW,7=STATE,8=COS,9=COMM,10=TIMEOUT,11=HW_LIMIT,12=CALC,13=SCAN,14=LINK,15=SOFT,16=BAD_SUB,17=UDF,18=DISABLE,19=SIMM,20=READ_ACCESS,21=WRITE_ACCESS").build())
                 .field("severity", SchemaBuilder.int8().optional().doc("CA Alarm Severity: 0=NO_ALARM,1=MINOR,2=MAJOR,3=INVALID").build())
                 .field("doubleValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().doc("EPICS DBR_DOUBLE").build())
@@ -125,10 +124,6 @@ public class CASourceTask extends SourceTask {
 
         ArrayList<SourceRecord> recordList = null; // Must return null if no updates
 
-        Instant timestamp = Instant.now();
-        long epochMillis = timestamp.toEpochMilli();
-        Map<String, Long> offsetValue = offsetValue(epochMillis);
-
         Set<SpecKey> updatedChannels = latest.keySet();
 
         if(!updatedChannels.isEmpty()) {
@@ -145,6 +140,11 @@ public class CASourceTask extends SourceTask {
             if(outkey == null) {
                 outkey = key.getChannel();
             }
+
+            TimeStamp stamp = ((TIME)record.getDBR()).getTimeStamp();
+            Instant timestamp = Instant.ofEpochSecond(stamp.secPastEpoch(), stamp.nsec());
+            long epochMillis = timestamp.toEpochMilli();
+            Map<String, Long> offsetValue = offsetValue(epochMillis);
 
             recordList.add(new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
                     KEY_SCHEMA, outkey, VALUE_SCHEMA, value, epochMillis));
@@ -265,7 +265,6 @@ public class CASourceTask extends SourceTask {
 
         TIME time = null;
 
-        String result;
         try {
             if(!dbr.isTIME()) {
                 throw new RuntimeException("Should be monitoring time types, but found non-time type!");
@@ -312,11 +311,9 @@ public class CASourceTask extends SourceTask {
             dbr.printInfo();
         }
 
-        TimeStamp stamp = time.getTimeStamp();
         Status status = time.getStatus();
         Severity severity = time.getSeverity();
 
-        struct.put("timestamp", stamp.secPastEpoch());
         struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
         struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
 
