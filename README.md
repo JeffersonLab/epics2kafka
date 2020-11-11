@@ -126,7 +126,6 @@ Options are specified in JSON format when running the connector in distributed m
 Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
 ```
 {
-  "timestamp":int64,
   "status":int8 optional,
   "severity":int8 optional,
   "doubleValues":float64[] optional,
@@ -163,6 +162,8 @@ value.converter.schemas.enable=false
 
 **Note**: Output topics use channel name as key (String key SCHEMA) by default, but if _outkey_ is set then that is used instead.  A key is required to support topic compaction and is especially useful when using a shared output topic.
 
+### Timestamp
+The timestamp provided by the Channel Access DBR_TIME record is inserted into the Kafka timestamp message metadata field, and therefore it is unnecessary to include the timestamp as part of the message value.   The Kafka configuration options [message.timestamp.type](https://kafka.apache.org/documentation/#message.timestamp.type) defaults to CreateTime, which preserves the timestamp as provided by CA.   The option [message.difference.max.ms](https://kafka.apache.org/documentation/#message.timestamp.difference.max.ms) defaults to 9223372036854775807 (max long), which effectively disables difference checking, but if a smaller value is provided and an EPICS CA IOC provides a timestamp greater than the difference between the broker's LogAppendTime the message will be dropped.   Use message.timestamp.type LogAppendTime to ignore the CA timestamp, which may be unreliable, and instead use the broker time (better order guarentees).   If both timestamps are desired a connect transform could be used to copy the timestamp metadata into a field in the message value the message can be routed to a new topic with LogAppendTime type - the options are per topic (with broker defaults).
 
 ## Deploy
 ### Standalone Mode
