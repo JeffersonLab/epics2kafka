@@ -17,6 +17,10 @@ repositories {
     }
 }
 
+configurations {
+    testImplementation.extendsFrom compileOnly
+}
+
 dependencies {
     implementation 'org.epics:jca:2.4.3' // Newer versions in mavenCentral only work with Java 11
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'

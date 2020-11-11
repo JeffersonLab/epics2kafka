@@ -393,6 +393,11 @@ class SpecKey {
 
     }
 
+    public SpecKey(String topic, String channel) {
+        this.topic = topic;
+        this.channel = channel;
+    }
+
     public String getTopic() {
         return topic;
     }
@@ -449,6 +454,11 @@ class SpecValue {
     private String outkey; // output message key (optional - defaults to channel)
 
     public SpecValue() {
+    }
+
+    public SpecValue(String mask, String outkey) {
+        this.mask = mask;
+        this.outkey = outkey;
     }
 
     public String getMask() {
