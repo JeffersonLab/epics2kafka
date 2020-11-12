@@ -54,6 +54,14 @@ public class BasicIntegrationTest {
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
 
+    public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka")
+            .withNetwork(network)
+            .withEnv("CONFIG_STORAGE_TOPIC", "connect-configs")
+            .withEnv("OFFSET_STORAGE_TOPIC", "connect-offsets")
+            .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
+            .withEnv("MONITOR_CHANNELS", "/config/channels")
+            .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
+
     @BeforeClass
     public static void setUp() throws CAException {
         softioc.start();
@@ -61,20 +69,31 @@ public class BasicIntegrationTest {
         String hostname = softioc.getHost();
         //Integer port = softioc.getFirstMappedPort();
 
-        String bootstrapServers = kafka.getBootstrapServers();
-
         kafka.start();
+
+        String bootstrapServers = kafka.getBootstrapServers(); // kafka.getNetworkAliases().get(0)+":9092"
+        connect.addEnv("BOOTSTRAP_SERVERS", bootstrapServers);
+
+        System.err.println("bootstrap: " + bootstrapServers);
+
+        connect.start();
     }
 
     @AfterClass
     public static void tearDown() {
         softioc.stop();
+        connect.stop();
         kafka.stop();
     }
 
     @Test
     public void testBasicMonitor() throws InterruptedException, IOException {
         Container.ExecResult result = softioc.execInContainer("caput", "channel1", "1");
+        System.out.println("err: " + result.getStderr());
+        System.out.println("out: " + result.getStdout());
+        System.out.println("exit: " + result.getExitCode());
+
+        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server kafka:9092", "--topic channel1");
         System.out.println("err: " + result.getStderr());
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
