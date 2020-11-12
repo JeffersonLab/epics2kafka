@@ -2,12 +2,6 @@ package org.jlab.kafka.connect;
 
 import com.cosylab.epics.caj.cas.util.examples.CounterProcessVariable;
 import gov.aps.jca.CAException;
-import gov.aps.jca.CAStatus;
-import gov.aps.jca.cas.ProcessVariable;
-import gov.aps.jca.cas.ProcessVariableReadCallback;
-import gov.aps.jca.cas.ProcessVariableWriteCallback;
-import gov.aps.jca.dbr.DBR;
-import gov.aps.jca.dbr.DBRType;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
 import org.jlab.kafka.connect.org.jlab.kafka.connect.embedded.EmbeddedIoc;
