@@ -60,4 +60,7 @@ else
     echo "$FILE does not exist."
 fi
 
+# TestContainers waits for this message before declaring container ready!
+echo "Done setting up epics2kafka connector"
+
 sleep infinity
