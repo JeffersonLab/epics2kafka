@@ -1,4 +1,4 @@
-package org.jlab.kafka.connect.org.jlab.kafka.connect.integration;
+package org.jlab.kafka.connect.integration;
 
 import com.github.dockerjava.api.command.CreateContainerCmd;
 import gov.aps.jca.CAException;
