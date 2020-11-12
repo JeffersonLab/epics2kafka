@@ -33,8 +33,18 @@ public class BasicIntegrationTest {
             .withNetwork(network)
             .withExposedPorts(2181);
 
-    public static GenericContainer<?> kafka = new GenericContainer<>("debezium/kafka:1.3")
+    public static GenericContainer<?> kafka = new GenericContainer("debezium/kafka:1.3") {
+        {
+            this.addFixedExposedPort(9092, 9092, InternetProtocol.TCP);
+        }
+    }
             .withNetwork(network)
+            .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
+                @Override
+                public void accept(CreateContainerCmd cmd) {
+                    cmd.withHostName("kafka");
+                }
+            })
             .withExposedPorts(9092);
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
@@ -51,7 +61,6 @@ public class BasicIntegrationTest {
                             .withTty(true);
                 }
             })
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER))
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
 
@@ -62,6 +71,8 @@ public class BasicIntegrationTest {
             .withEnv("OFFSET_STORAGE_TOPIC", "connect-offsets")
             .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
             .withEnv("MONITOR_CHANNELS", "/config/channels")
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER))
+            .waitingFor(Wait.forLogMessage("Done setting up epics2kafka connector", 1))
             .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
 
     private static String BOOTSTRAP_SERVERS;
@@ -101,7 +112,7 @@ public class BasicIntegrationTest {
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
 
-        result = connect.execInContainer("/scripts/show-status.sh");
+        result = connect.execInContainer("cat", "/kafka/logs/connect-service.log");
         System.out.println("err: " + result.getStderr());
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
