@@ -11,6 +11,7 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 - [Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
 - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
 - [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
+- [Tests](https://github.com/JeffersonLab/epics2kafka#tests)
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ---
@@ -202,6 +203,12 @@ bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.
 You must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
+```
+
+## Tests
+JUnit tests are performed by the Gradle build unless the "-x test" argument is used.  The tests use an Embedded EPICS CA IOC (Java).   Integration tests using Docker containers are separate and can be run with:
+```
+gradlew integrationTest
 ```
 
 ## See Also
