@@ -30,13 +30,12 @@ public class BasicIntegrationTest {
             this.addFixedExposedPort(5065, 5065, InternetProtocol.UDP);
         }
     }
-            //.withExposedPorts(5064, 5065)
             .withNetwork(network)
+            .withPrivilegedMode(true)
             .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
                 @Override
                 public void accept(CreateContainerCmd cmd) {
                     cmd
-                            .withPrivileged(true) // not sure what is the non-deprecated way to do this, not found in docs...
                             .withHostName("softioc") // Fixed hostname so we can stop/start and check if monitors automatically recover
                             .withUser("root")
                             .withAttachStdin(true)
@@ -46,7 +45,6 @@ public class BasicIntegrationTest {
             })
             .withLogConsumer(new Slf4jLogConsumer(LOGGER))
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
-            //.withClasspathResourceMapping("softioc.db", "/db/softioc.db", BindMode.READ_ONLY)
             .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
 
     @BeforeClass
