@@ -11,13 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.*;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.utility.DockerImageName;
-import sun.jvm.hotspot.ui.tree.BooleanTreeNodeAdapter;
-import sun.net.www.content.text.Generic;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BasicIntegrationTest {
