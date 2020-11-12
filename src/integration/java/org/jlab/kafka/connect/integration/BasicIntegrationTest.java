@@ -12,6 +12,8 @@ import org.testcontainers.containers.*;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import sun.jvm.hotspot.ui.tree.BooleanTreeNodeAdapter;
+import sun.net.www.content.text.Generic;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,9 +34,13 @@ public class BasicIntegrationTest {
     //@ClassRule
     //public static DockerComposeContainer environment = new DockerComposeContainer(new File("docker-compose.yml"));
 
-    @ClassRule
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
-            .withNetwork(network);
+    public static GenericContainer<?> zookeeper = new GenericContainer<>("debezium/zookeeper:1.3")
+            .withNetwork(network)
+            .withExposedPorts(2181);
+
+    public static GenericContainer<?> kafka = new GenericContainer<>("debezium/kafka:1.3")
+            .withNetwork(network)
+            .withExposedPorts(9092);
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
             .withNetwork(network)
@@ -56,25 +62,31 @@ public class BasicIntegrationTest {
 
     public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka")
             .withNetwork(network)
+            .withExposedPorts(8083)
             .withEnv("CONFIG_STORAGE_TOPIC", "connect-configs")
             .withEnv("OFFSET_STORAGE_TOPIC", "connect-offsets")
             .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
             .withEnv("MONITOR_CHANNELS", "/config/channels")
             .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
 
+    private static String BOOTSTRAP_SERVERS;
+
     @BeforeClass
     public static void setUp() throws CAException {
+        zookeeper.start();
+
         softioc.start();
 
         String hostname = softioc.getHost();
         //Integer port = softioc.getFirstMappedPort();
 
+        kafka.addEnv("ZOOKEEPER_CONNECT", zookeeper.getNetworkAliases().get(0) + ":2181");
+
         kafka.start();
 
-        String bootstrapServers = kafka.getBootstrapServers(); // kafka.getNetworkAliases().get(0)+":9092"
-        connect.addEnv("BOOTSTRAP_SERVERS", bootstrapServers);
+        BOOTSTRAP_SERVERS = kafka.getNetworkAliases().get(0) + ":9092";
 
-        System.err.println("bootstrap: " + bootstrapServers);
+        connect.addEnv("BOOTSTRAP_SERVERS", BOOTSTRAP_SERVERS);
 
         connect.start();
     }
@@ -84,6 +96,7 @@ public class BasicIntegrationTest {
         softioc.stop();
         connect.stop();
         kafka.stop();
+        zookeeper.stop();
     }
 
     @Test
@@ -93,7 +106,12 @@ public class BasicIntegrationTest {
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
 
-        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server kafka:9092", "--topic channel1");
+        result = connect.execInContainer("/scripts/show-status.sh");
+        System.out.println("err: " + result.getStderr());
+        System.out.println("out: " + result.getStdout());
+        System.out.println("exit: " + result.getExitCode());
+
+        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "1000");
         System.out.println("err: " + result.getStderr());
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
