@@ -17,11 +17,15 @@ repositories {
     }
 }
 
+// We define two extra sets: integration tests (intTest) and alarmTest (docker-compose alarms example dependencies)
 sourceSets {
     intTest {
         java.srcDir "${projectDir}/src/integration/java"
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
+    }
+    alarmTest {
+        // No source, just dependencies
     }
 }
 
@@ -38,7 +42,7 @@ dependencies {
     compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
     compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
     testImplementation group: 'junit', name: 'junit', version: '4.13'
-    testImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.15.0'
+    alarmTestImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.15.0'
     intTestImplementation "org.testcontainers:testcontainers:1.14.3"
     intTestImplementation 'org.slf4j:slf4j-simple:1.6.1'
 }
@@ -81,7 +85,7 @@ build {
 task alarmTest(type: Copy) {
     dependsOn(build)
     into "${buildDir}/install"
-    from configurations.testCompileClasspath
+    from configurations.alarmTestCompileClasspath
     include '**/kafka-transform-epics-*.jar'
 }
 
