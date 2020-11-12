@@ -13,9 +13,6 @@ public class EmbeddedIoc {
     private ServerContext context;
 
     public EmbeddedIoc() throws CAException {
-        // Ignore name resolution from these addresses
-        //System.setProperty("com.cosylab.epics.caj.cas.CAJServerContext.ignore_addr_list", "127.0.0.1:5064 localhost:5064");
-
         jca = JCALibrary.getInstance();
 
         server = new DefaultServerImpl();
@@ -39,17 +36,6 @@ public class EmbeddedIoc {
 
     public void start() {
         new Thread(new Runnable() {
-            /**
-             * When an object implementing interface <code>Runnable</code> is used
-             * to create a thread, starting the thread causes the object's
-             * <code>run</code> method to be called in that separately executing
-             * thread.
-             * <p>
-             * The general contract of the method <code>run</code> is that it may
-             * take any action whatsoever.
-             *
-             * @see Thread#run()
-             */
             @Override
             public void run() {
                 try {
