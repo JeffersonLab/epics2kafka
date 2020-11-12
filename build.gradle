@@ -45,6 +45,7 @@ dependencies {
     alarmsImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.15.0'
     integrationImplementation "org.testcontainers:testcontainers:1.14.3"
     integrationImplementation 'org.slf4j:slf4j-simple:1.6.1'
+    integrationImplementation "org.testcontainers:kafka:1.15.0"
 }
 
 task integrationTest(type: Test) {
@@ -64,6 +65,7 @@ task integrationTest(type: Test) {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+    options.compilerArgs += "-Xlint:unchecked"
 }
 
 jar {

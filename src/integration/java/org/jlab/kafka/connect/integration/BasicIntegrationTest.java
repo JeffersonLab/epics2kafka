@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.*;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class BasicIntegrationTest {
@@ -21,15 +24,19 @@ public class BasicIntegrationTest {
     @ClassRule
     public static Network network = Network.newNetwork();
 
+    /**
+     * We don't use docker-compose support because it is limited and fails to launch if compose file contains
+     * container names for example.   This means a custom compose file would need to be created, and instead
+     * we simply use the testcontainers Container API directly to have full control.
+     */
+    //@ClassRule
+    //public static DockerComposeContainer environment = new DockerComposeContainer(new File("docker-compose.yml"));
 
-    public static GenericContainer softioc = new GenericContainer("slominskir/softioc") {
-        {
-            this.addFixedExposedPort(5064, 5064, InternetProtocol.TCP);
-            this.addFixedExposedPort(5065, 5065, InternetProtocol.TCP);
-            this.addFixedExposedPort(5064, 5064, InternetProtocol.UDP);
-            this.addFixedExposedPort(5065, 5065, InternetProtocol.UDP);
-        }
-    }
+    @ClassRule
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:5.4.3"))
+            .withNetwork(network);
+
+    public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
             .withNetwork(network)
             .withPrivilegedMode(true)
             .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
@@ -53,11 +60,16 @@ public class BasicIntegrationTest {
 
         String hostname = softioc.getHost();
         //Integer port = softioc.getFirstMappedPort();
+
+        String bootstrapServers = kafka.getBootstrapServers();
+
+        kafka.start();
     }
 
     @AfterClass
     public static void tearDown() {
         softioc.stop();
+        kafka.stop();
     }
 
     @Test
