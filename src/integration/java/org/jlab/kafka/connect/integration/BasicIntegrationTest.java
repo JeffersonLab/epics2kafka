@@ -33,19 +33,10 @@ public class BasicIntegrationTest {
             .withNetwork(network)
             .withExposedPorts(2181);
 
-    public static GenericContainer<?> kafka = new GenericContainer("debezium/kafka:1.3") {
-        {
-            this.addFixedExposedPort(9092, 9092, InternetProtocol.TCP);
-        }
-    }
+    public static GenericContainer<?> kafka = new FixedHostPortGenericContainer<>("debezium/kafka:1.3")
             .withNetwork(network)
-            .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
-                @Override
-                public void accept(CreateContainerCmd cmd) {
-                    cmd.withHostName("kafka");
-                }
-            })
-            .withExposedPorts(9092);
+            .withExposedPorts(9092)
+            .withCreateContainerCmdModifier(cmd -> cmd.withHostName("kafka"));
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
             .withNetwork(network)
