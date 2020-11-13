@@ -33,25 +33,21 @@ public class BasicIntegrationTest {
             .withNetwork(network)
             .withExposedPorts(2181);
 
-    public static GenericContainer<?> kafka = new FixedHostPortGenericContainer<>("debezium/kafka:1.3")
+    public static GenericContainer<?> kafka = new GenericContainer<>("debezium/kafka:1.3")
             .withNetwork(network)
             .withExposedPorts(9092)
-            .withCreateContainerCmdModifier(cmd -> cmd.withHostName("kafka"));
+            .withCreateContainerCmdModifier(cmd -> cmd.withHostName("kafka").withName("kafka"));
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
             .withNetwork(network)
             .withPrivilegedMode(true)
-            .withCreateContainerCmdModifier(new Consumer<CreateContainerCmd>() {
-                @Override
-                public void accept(CreateContainerCmd cmd) {
-                    cmd
-                            .withHostName("softioc") // Fixed hostname so we can stop/start and check if monitors automatically recover
-                            .withUser("root")
-                            .withAttachStdin(true)
-                            .withStdinOpen(true)
-                            .withTty(true);
-                }
-            })
+            .withCreateContainerCmdModifier(cmd -> cmd
+                    .withHostName("softioc")
+                    .withName("softioc")
+                    .withUser("root")
+                    .withAttachStdin(true)
+                    .withStdinOpen(true)
+                    .withTty(true))
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
 
