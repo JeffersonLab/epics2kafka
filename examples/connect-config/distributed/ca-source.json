@@ -4,7 +4,7 @@
     "connector.class" : "org.jlab.kafka.connect.CASourceConnector",
     "tasks.max" : "1",
     "monitor.addr.list": "softioc",
-    "command.bootstrap.servers": "kafka://kafka:9092",
+    "command.bootstrap.servers": "kafka:9092",
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
     "value.converter.schemas.enable": "false",
     "value.converter": "org.apache.kafka.connect.json.JsonConverter"
