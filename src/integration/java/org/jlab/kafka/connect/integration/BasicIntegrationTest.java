@@ -59,7 +59,7 @@ public class BasicIntegrationTest {
             .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
             .withEnv("MONITOR_CHANNELS", "/config/channels")
             .withLogConsumer(new Slf4jLogConsumer(LOGGER))
-            .waitingFor(Wait.forLogMessage("Done setting up epics2kafka connector", 1))
+            .waitingFor(Wait.forLogMessage(".*polling for changes.*", 1))
             .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
 
     private static String BOOTSTRAP_SERVERS;
@@ -99,12 +99,14 @@ public class BasicIntegrationTest {
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
 
-        result = connect.execInContainer("cat", "/kafka/logs/connect-service.log");
+        Thread.sleep(2000);
+
+        result = connect.execInContainer("/scripts/show-connectors.sh");
         System.out.println("err: " + result.getStderr());
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
 
-        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "1000");
+        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "3000", "--from-beginning");
         System.out.println("err: " + result.getStderr());
         System.out.println("out: " + result.getStdout());
         System.out.println("exit: " + result.getExitCode());
