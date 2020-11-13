@@ -34,7 +34,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     private final CASourceConnectorConfig config;
     private HashMap<SpecKey, ChannelSpec> channels = new HashMap<>();
     private KafkaConsumer<String, String> consumer;
-    private Map<Integer, TopicPartition> assignedPartitionsMap;
+    private Map<Integer, TopicPartition> assignedPartitionsMap = new HashMap<>(); // empty map initially to avoid NPE
     private Map<TopicPartition, Long> endOffsets;
     private boolean reachedEnd = false;
     private Long pollMillis;
