@@ -40,12 +40,12 @@ dependencies {
     compileOnly group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.10.2'
     compileOnly group: 'org.apache.kafka', name: 'connect-api', version: '2.4.0'
     compileOnly group: 'org.apache.kafka', name: 'connect-transforms', version: '2.4.0'
-    compileOnly group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
-    testImplementation group: 'junit', name: 'junit', version: '4.13'
-    alarmsImplementation group: 'org.jlab.kafka.connect.transform', name: 'kafka-transform-epics', version: '0.15.0'
-    integrationImplementation "org.testcontainers:testcontainers:1.14.3"
-    integrationImplementation 'org.slf4j:slf4j-simple:1.6.1'
-    integrationImplementation "org.testcontainers:kafka:1.15.0"
+    compileOnly 'org.slf4j:slf4j-log4j12:1.7.28'
+    testImplementation 'junit:junit:4.13'
+    alarmsImplementation 'org.jlab.kafka.connect.transform:kafka-transform-epics:0.15.0'
+    integrationImplementation 'org.testcontainers:testcontainers:1.14.3'
+    integrationImplementation 'org.slf4j:slf4j-log4j12:1.7.28'
+    integrationImplementation 'org.testcontainers:kafka:1.15.0'
 }
 
 task integrationTest(type: Test) {
