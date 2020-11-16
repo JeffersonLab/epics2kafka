@@ -26,11 +26,13 @@ public class BasicIntegrationTest {
 
     public static GenericContainer<?> zookeeper = new GenericContainer<>("debezium/zookeeper:1.3")
             .withNetwork(network)
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("zookeeper"))
             .withExposedPorts(2181);
 
     public static GenericContainer<?> kafka = new GenericContainer<>("debezium/kafka:1.3")
             .withNetwork(network)
             .withExposedPorts(9092)
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("kafka"))
             .withCreateContainerCmdModifier(cmd -> cmd.withHostName("kafka").withName("kafka"));
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
@@ -43,6 +45,7 @@ public class BasicIntegrationTest {
                     .withAttachStdin(true)
                     .withStdinOpen(true)
                     .withTty(true))
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("softioc"))
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
 
