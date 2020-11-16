@@ -217,8 +217,12 @@ Uses Docker containers and are separate from unit tests.  Can be run with:
 ```
 gradlew integrationTest
 ```
+An HTML test report is generated at the path:
+```
+build/reports/tests/integrationTest/index.html
+```
 ## Logging
-Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by modifying the log4j.properties file, and there is a separate one in the resource directory of each of the project modules: main, test, and integration.
+Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by including a _log4j.properties_ file on the classpath.   The unit tests have a separate configuration file in the test/resources directory and the _org.jlab.kafka.connect_ logger is set to TRACE.  The integration tests use the simple SLF4J logger (all messages are streamed to standard out) since each Docker container exposes its logs as a standard output stream.
 
 ## See Also
    - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
