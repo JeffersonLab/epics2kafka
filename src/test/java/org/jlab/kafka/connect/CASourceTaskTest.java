@@ -1,7 +1,10 @@
 package org.jlab.kafka.connect;
 
+import com.cosylab.epics.caj.cas.util.MemoryProcessVariable;
 import com.cosylab.epics.caj.cas.util.examples.CounterProcessVariable;
 import gov.aps.jca.CAException;
+import gov.aps.jca.dbr.DBRType;
+import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
 import org.jlab.kafka.connect.org.jlab.kafka.connect.embedded.EmbeddedIoc;
@@ -28,12 +31,15 @@ public class CASourceTaskTest {
 
         List<ChannelSpec> group = new ArrayList<>();
         group.add(new ChannelSpec(new SpecKey("topic1", "channel1"), new SpecValue("a", null)));
+        group.add(new ChannelSpec(new SpecKey("topic2", "channel2"), new SpecValue("a", null)));
+
 
         String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
 
-        ioc.registerPv(new CounterProcessVariable("channel1", null, 0, Integer.MAX_VALUE, 1, 1000, 10, 20, 0, 100));
+        ioc.registerPv(new CounterProcessVariable("channel1", null, 0, Integer.MAX_VALUE, 1, 1000, 0, 100, 0, 100));
+        ioc.registerPv(new MemoryProcessVariable("channel2", null, DBRType.STRING, new String[]{"Hello!"}));
 
-        props.put(CASourceConnectorConfig.MONITOR_ADDR_LIST, ioc.getUrl());
+        props.put(CASourceConnectorConfig.MONITOR_ADDR_LIST, ioc.getAddress());
         props.put("task-channels", jsonArray);
 
         task = new CASourceTask();
@@ -50,16 +56,22 @@ public class CASourceTaskTest {
 
     @Test
     public void basicTest() throws InterruptedException {
-        List<SourceRecord> records = task.poll();
+        List<SourceRecord> records = task.poll(); // Grabs most recent update, if any
 
-        int actual = records.size();
-
-        System.out.println("Record Count: " + records.size());
+        int actualCount = records.size();
+        String actualC2Value = null;
 
         for(SourceRecord record: records) {
-            System.out.println(record);
+            String channel = (String)record.key();
+
+            if("channel2".equals(channel)) {
+                Struct struct = (Struct)record.value();
+                List<String> strArray = struct.getArray("stringValues");
+                actualC2Value = strArray.get(0);
+            }
         }
 
-        Assert.assertEquals(1, actual);
+        Assert.assertEquals(2, actualCount);
+        Assert.assertEquals("Hello!", actualC2Value);
     }
 }

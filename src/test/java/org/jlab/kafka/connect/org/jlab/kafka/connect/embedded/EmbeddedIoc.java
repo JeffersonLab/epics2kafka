@@ -20,7 +20,7 @@ public class EmbeddedIoc {
         context = jca.createServerContext(JCALibrary.CHANNEL_ACCESS_SERVER_JAVA, server);
     }
 
-    public String getUrl() {
+    public String getAddress() {
         return "localhost:" + jca.getProperty("com.cosylab.epics.caj.cas.CAJServerContext.server_port", "5064");
     }
 
