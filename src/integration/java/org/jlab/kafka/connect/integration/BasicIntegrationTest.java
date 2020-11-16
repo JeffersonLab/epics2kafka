@@ -1,11 +1,7 @@
 package org.jlab.kafka.connect.integration;
 
-import com.github.dockerjava.api.command.CreateContainerCmd;
 import gov.aps.jca.CAException;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.*;
@@ -13,7 +9,6 @@ import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.io.IOException;
-import java.util.function.Consumer;
 
 public class BasicIntegrationTest {
     private static Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
@@ -58,7 +53,7 @@ public class BasicIntegrationTest {
             .withEnv("OFFSET_STORAGE_TOPIC", "connect-offsets")
             .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
             .withEnv("MONITOR_CHANNELS", "/config/channels")
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER))
+            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("connect"))
             .waitingFor(Wait.forLogMessage(".*polling for changes.*", 1))
             .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
 
@@ -94,21 +89,11 @@ public class BasicIntegrationTest {
 
     @Test
     public void testBasicMonitor() throws InterruptedException, IOException {
-        Container.ExecResult result = softioc.execInContainer("caput", "channel1", "1");
-        System.out.println("err: " + result.getStderr());
-        System.out.println("out: " + result.getStdout());
-        System.out.println("exit: " + result.getExitCode());
+        softioc.execInContainer("caput", "channel1", "1");
 
-        Thread.sleep(2000);
+        Container.ExecResult result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "3000", "--from-beginning");
 
-        result = connect.execInContainer("/scripts/show-connectors.sh");
-        System.out.println("err: " + result.getStderr());
-        System.out.println("out: " + result.getStdout());
-        System.out.println("exit: " + result.getExitCode());
-
-        result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "3000", "--from-beginning");
-        System.out.println("err: " + result.getStderr());
-        System.out.println("out: " + result.getStdout());
-        System.out.println("exit: " + result.getExitCode());
+        Assert.assertEquals(0, result.getExitCode());
+        Assert.assertEquals("{\"status\":3,\"severity\":2,\"doubleValues\":[1.0],\"floatValues\":null,\"stringValues\":null,\"intValues\":null,\"shortValues\":null,\"byteValues\":null}\n", result.getStdout());
     }
 }

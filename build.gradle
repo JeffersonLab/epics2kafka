@@ -21,6 +21,7 @@ repositories {
 sourceSets {
     integration {
         java.srcDir "${projectDir}/src/integration/java"
+        resources.srcDir "${projectDir}/src/integration/resources"
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
     }
