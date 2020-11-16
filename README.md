@@ -12,6 +12,7 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
 - [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
 - [Tests](https://github.com/JeffersonLab/epics2kafka#tests)
+- [Logging](https://github.com/JeffersonLab/epics2kafka#logging)
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ---
