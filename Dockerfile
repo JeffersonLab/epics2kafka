@@ -19,6 +19,7 @@ ENV PATH="/kafka/bin:${PATH}"
 
 COPY --from=builder /epics2kafka/build/install $KAFKA_CONNECT_PLUGINS_DIR
 COPY --from=builder /epics2kafka/scripts /scripts
+COPY --from=builder /epics2kafka/examples/logging/log4j.properties /kafka/config
 
 WORKDIR /scripts
 
