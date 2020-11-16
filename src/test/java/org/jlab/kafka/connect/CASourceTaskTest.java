@@ -33,7 +33,6 @@ public class CASourceTaskTest {
         group.add(new ChannelSpec(new SpecKey("topic1", "channel1"), new SpecValue("a", null)));
         group.add(new ChannelSpec(new SpecKey("topic2", "channel2"), new SpecValue("a", null)));
 
-
         String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
 
         ioc.registerPv(new CounterProcessVariable("channel1", null, 0, Integer.MAX_VALUE, 1, 1000, 0, 100, 0, 100));

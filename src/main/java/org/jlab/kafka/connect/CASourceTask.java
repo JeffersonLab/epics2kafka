@@ -184,9 +184,7 @@ public class CASourceTask extends SourceTask {
                 CAJChannel channel = cajMap.get(key);
                 ChannelSpec spec = specLookup.get(key);
 
-                log.info("-------------------------------------");
-                log.info("Creating context for channel spec: {}", spec);
-                log.info("-------------------------------------");
+                log.debug("Creating monitor for channel: {}", spec);
 
                 int mask = 0;
 
@@ -198,18 +196,11 @@ public class CASourceTask extends SourceTask {
                     mask = mask | Monitor.ALARM;
                 }
 
-                log.info("Mask: {}", mask);
-
                 DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
 
                 CAJMonitor monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), mask);
 
-                monitor.addMonitorListener(new MonitorListener() {
-                    @Override
-                    public void monitorChanged(MonitorEvent ev) {
-                        latest.put(key, ev);
-                    }
-                });
+                monitor.addMonitorListener(ev -> latest.put(key, ev));
             }
 
             context.pendIO(2.0);
@@ -317,7 +308,7 @@ public class CASourceTask extends SourceTask {
         struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
         struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
 
-        log.info("Structure: {}", struct);
+        log.debug("New value: {}", struct);
 
         return struct;
     }
