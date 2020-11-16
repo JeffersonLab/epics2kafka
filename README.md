@@ -222,7 +222,7 @@ An HTML test report is generated at the path:
 build/reports/tests/integrationTest/index.html
 ```
 ## Logging
-Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by including a _log4j.properties_ file on the classpath.   The unit tests have a separate configuration file in the test/resources directory and the _org.jlab.kafka.connect_ logger is set to TRACE.  The integration tests use the simple SLF4J logger (all messages are streamed to standard out) since each Docker container exposes its logs as a standard output stream.
+Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by including a _log4j.properties_ file on the classpath.   The unit tests have a separate configuration file in the test/resources directory and the _org.jlab.kafka.connect_ logger is set to TRACE.  The integration tests use the simple SLF4J logger and have minimal formatting configured at _integration/resources/log4j.properties_ since container messages are streamed to standard out and already include multiple columns such as timestamp, level, and class.
 
 ## See Also
    - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
