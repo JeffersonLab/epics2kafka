@@ -18,8 +18,6 @@ public class EmbeddedIoc {
         server = new DefaultServerImpl();
 
         context = jca.createServerContext(JCALibrary.CHANNEL_ACCESS_SERVER_JAVA, server);
-
-        context.printInfo();
     }
 
     public String getUrl() {
@@ -35,14 +33,11 @@ public class EmbeddedIoc {
     }
 
     public void start() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    context.run(0);
-                } catch (CAException e) {
-                    e.printStackTrace();
-                }
+        new Thread(() -> {
+            try {
+                context.run(0);
+            } catch (CAException e) {
+                e.printStackTrace();
             }
         }).start();
     }
