@@ -43,9 +43,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
         this.context = context;
         this.config = config;
 
-        log.info("-----------------------");
-        log.info("Creating ChannelManager");
-        log.info("-----------------------");
+        log.debug("Creating ChannelManager");
 
         String kafkaUrl = config.getString(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS);
         String channelsTopic = config.getString(CASourceConnectorConfig.COMMAND_TOPIC);
@@ -75,7 +73,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             @Override
             public void onPartitionsAssigned(Collection<TopicPartition> partitions) {
-                log.info("seeking to beginning of topic");
+                log.debug("Seeking to beginning of topic");
                 if(partitions.size() != 1) { // I think the code below actually handles multiple partitions fine, but  it's the principle of the matter!
                     throw new IllegalArgumentException("The command topic must have exactly one partition");
                 }
@@ -100,15 +98,15 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
-            log.info("found " + records.count() + " records");
+            log.debug("found " + records.count() + " records");
 
             for (ConsumerRecord<String, String> record : records) {
                 updateChannels(record);
 
-                log.info("comparing indexes: {} vs {}", record.offset() + 1, endOffsets.get(assignedPartitionsMap.get(record.partition())));
+                log.debug("comparing indexes: {} vs {}", record.offset() + 1, endOffsets.get(assignedPartitionsMap.get(record.partition())));
 
                 if(record.offset() + 1 == endOffsets.get(assignedPartitionsMap.get(record.partition()))) {
-                    log.info("end of partition {} reached", record.partition());
+                    log.debug("end of partition {} reached", record.partition());
                     partitionEndReached.put(record.partition(), true);
                 }
             }
@@ -132,11 +130,11 @@ public class ChannelManager extends Thread implements AutoCloseable {
             }
         }
 
-        log.info("done with constructor");
+        log.trace("done with ChannelManager constructor");
     }
 
     private void updateChannels(ConsumerRecord<String, String> record) {
-        log.info("examining record: {}={}", record.key(), record.value());
+        log.debug("examining record update: {}={}", record.key(), record.value());
 
         SpecKey key = null;
 
@@ -147,10 +145,10 @@ public class ChannelManager extends Thread implements AutoCloseable {
         }
 
         if(record.value() == null) {
-            log.info("removing channel: " + key);
+            log.info("removing channel: {}", key.getChannel());
             channels.remove(key);
         } else {
-            log.info("adding channel: " + key);
+            log.info("adding channel: {}", key.getChannel());
             ChannelSpec spec = null;
             SpecValue value = null;
             try {
@@ -165,16 +163,12 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
     @Override
     public void run() {
-        log.info("----------------------------------");
-        log.info("Starting ChannelManager run method");
-        log.info("----------------------------------");
+        log.debug("Starting ChannelManager run method");
         try {
-            log.info("Starting thread to monitor channels topic");
-
             // Only move to running state if we are currently initialized (don't move to running if closed)
             boolean transitioned = state.compareAndSet(TRI_STATE.INITIALIZED, TRI_STATE.RUNNING);
 
-            log.info("transitioned: " + transitioned);
+            log.trace("State transitioned?: " + transitioned);
 
             // Once set, we wait until changes have settled to avoid call this too frequently with changes happening
             boolean needReconfig = false;
@@ -200,18 +194,15 @@ public class ChannelManager extends Thread implements AutoCloseable {
                     }
                 }
             }
-
-            log.info("Change monitor thread exiting cleanly");
-
         } catch (WakeupException e) {
-            log.info("Change monitor thread WakeupException caught");
+            log.debug("Change monitor thread WakeupException caught");
             // Only a problem if running, ignore exception if closing
             if (state.get() == TRI_STATE.RUNNING) throw e;
         } finally {
             consumer.close();
         }
 
-        log.info("Change monitor thread last line of run");
+        log.trace("Change monitor thread exited cleanly");
     }
 
     public Set<ChannelSpec> getChannels() {
