@@ -9,7 +9,6 @@ import gov.aps.jca.*;
 import gov.aps.jca.configuration.DefaultConfiguration;
 import gov.aps.jca.dbr.*;
 import gov.aps.jca.event.MonitorEvent;
-import gov.aps.jca.event.MonitorListener;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
