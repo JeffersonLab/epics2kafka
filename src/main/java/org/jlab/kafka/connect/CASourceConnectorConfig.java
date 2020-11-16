@@ -14,7 +14,7 @@ public class CASourceConnectorConfig extends AbstractConfig {
     public static final String COMMAND_BOOTSTRAP_SERVERS = "command.bootstrap.servers";
 
     public CASourceConnectorConfig(Map originals) {
-        super(configDef(), originals);
+        super(configDef(), originals, false);
     }
 
     protected static ConfigDef configDef() {
