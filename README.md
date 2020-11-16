@@ -206,7 +206,8 @@ curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/di
 ```
 
 ## Tests
-JUnit tests are performed by the Gradle build unless the "-x test" argument is used.  The tests use an Embedded EPICS CA IOC (Java).   An HTML test report is generated at the path:
+### Unit Tests
+Uses JUnit and are performed by the Gradle build unless the "-x test" argument is used.  The tests use an Embedded EPICS CA IOC (Java).   An HTML test report is generated at the path:
 ```
 build/reports/tests/test/index.html
 ```
@@ -216,7 +217,7 @@ Uses Docker containers and are separate from unit tests.  Can be run with:
 gradlew integrationTest
 ```
 ## Logging
-Kafka uses the SLF4J logger with Log4J, and therefore epics2kafka uses them as well.  Log levels can be controlled by modifying the log4j.properties file, and there is a separate one in the resource directory of each of the project modules: main, test, and integration.
+Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by modifying the log4j.properties file, and there is a separate one in the resource directory of each of the project modules: main, test, and integration.
 
 ## See Also
    - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
