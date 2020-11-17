@@ -103,7 +103,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
             for (ConsumerRecord<String, String> record : records) {
                 updateChannels(record);
 
-                log.debug("comparing indexes: {} vs {}", record.offset() + 1, endOffsets.get(assignedPartitionsMap.get(record.partition())));
+                log.trace("Looking for last index: {}, found: {}", endOffsets.get(assignedPartitionsMap.get(record.partition())), record.offset() + 1);
 
                 if(record.offset() + 1 == endOffsets.get(assignedPartitionsMap.get(record.partition()))) {
                     log.debug("end of partition {} reached", record.partition());
