@@ -1,27 +1,31 @@
 package org.jlab.kafka.connect.org.jlab.kafka.connect.embedded;
 
+import com.cosylab.epics.caj.cas.CAJServerContext;
 import com.cosylab.epics.caj.cas.util.DefaultServerImpl;
 import gov.aps.jca.CAException;
 import gov.aps.jca.JCALibrary;
 import gov.aps.jca.cas.ProcessVariable;
-import gov.aps.jca.cas.ServerContext;
 
 public class EmbeddedIoc {
 
     private JCALibrary jca;
     private DefaultServerImpl server;
-    private ServerContext context;
+    private CAJServerContext context;
 
     public EmbeddedIoc() throws CAException {
         jca = JCALibrary.getInstance();
 
         server = new DefaultServerImpl();
+        context = new CAJServerContext();
+        //context.setServerPort(0); // 0 means dynamically assign
+        context.setServerPort(5064);
+        context.initialize(server);
 
-        context = jca.createServerContext(JCALibrary.CHANNEL_ACCESS_SERVER_JAVA, server);
+        context.printInfo();
     }
 
     public String getAddress() {
-        return "localhost:" + jca.getProperty("com.cosylab.epics.caj.cas.CAJServerContext.server_port", "5064");
+        return "localhost:" + context.getServerPort();
     }
 
     public void registerPv(ProcessVariable pv) {
