@@ -142,7 +142,7 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
 
 **Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Schema language.
 
-The internal Schema structure can be converted to various topic schemas using Converters.  The following are common converters:
+The internal Schema structure can be serialized to various forms using Converters.  The following are common converters:
 
 | Converter | Description |
 |-----------|-------------|
