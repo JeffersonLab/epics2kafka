@@ -36,7 +36,7 @@ __Note:__ If you do not already have Gradle installed, it will be installed auto
 ## Quick Start with Compose
 1. Start Docker containers:
 ```
-gradlew build
+gradlew build -x test
 docker-compose up
 ```
 2. Listen to Kafka topic "channel1"
