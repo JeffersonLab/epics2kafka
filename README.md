@@ -9,6 +9,7 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 - [Build](https://github.com/JeffersonLab/epics2kafka#build)  
 - [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)  
 - [Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
+- [Schema](https://github.com/JeffersonLab/epics2kafka#schema)   
 - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
 - [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
 - [Tests](https://github.com/JeffersonLab/epics2kafka#tests)
@@ -110,21 +111,7 @@ docker exec connect /scripts/list-monitored.sh
 ### Task Rebalancing
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka [Incremental Cooperative Rebalancing](https://www.confluent.io/blog/incremental-cooperative-rebalancing-in-kafka/) attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed.  When an EPICS monitor is established (or re-established) it always reports the current state - so although changes during a rebalance may be missed, the state of the system will be re-reported at the end of the rebalance.  Channel monitors are divided as evenly as possible among the configured number of tasks.   It is recommended to populate the initial set of channels to monitor before starting the connector to avoid task rebalancing being triggered repeatedly.  You may wish to configure `scheduled.rebalance.max.delay.ms` to a small number to avoid long periods of waiting to see if an assigned task is coming back or not in a task failure scenario.
 
-## Connector Options
-All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
-
-| Option | Description | Default |
-|---|---|---|
-| monitor.addr.list | List of EPICS CA addresses | |
-| monitor.poll.millis | Milliseconds between polls for CA changes - sets max CA monitor update frequency | 1000 |
-| command.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
-| command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
-| command.poll.millis | Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
-| command.bootstrap.servers | Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic | localhost:9092 |
-
-Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
-
-### Schema
+## Schema
 Internally the connector transforms the EPICS CA time Database Record (DBR_TIME) event data into Kafka Connect [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
 ```
 {
@@ -144,6 +131,21 @@ Internally the connector transforms the EPICS CA time Database Record (DBR_TIME)
 
 **Note**: Channel Access supports various extended DBR types,  but DBR_TIME types are the only ones that provide a [timestamp](https://github.com/JeffersonLab/epics2kafka#timestamp), which is often useful for monitoring.  As a consequence alarm status and severity are always included as DBR_TIME types always include them.   If not needed they can be ignored, or a Kafka Connect Transform can be used to drop the fields.   Other extended types such as DBR_CTRL and DBR_GR are not supported by this Connector, as it rarely makes sense for these complex structures to be monitored as a whole.  However, individual fields can be explicitly monitored by overriding the default field of .VAL.  For example the fields for limits, precision, or units can be monitored individually using pv suffixes such as .PREC, .UNITS, .HOPR, .LOPR.
 
+## Connector Options
+All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
+
+| Option | Description | Default |
+|---|---|---|
+| monitor.addr.list | List of EPICS CA addresses | |
+| monitor.poll.millis | Milliseconds between polls for CA changes - sets max CA monitor update frequency | 1000 |
+| command.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
+| command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
+| command.poll.millis | Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
+| command.bootstrap.servers | Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic | localhost:9092 |
+
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
+
+### Converters
 The internal Schema structure can be serialized to various forms using Converters.  The following are common converters:
 
 | Converter | Description |
