@@ -125,11 +125,11 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 
 ### Schema
-Internally the connector transforms the EPICS CA time Database Record (DBR) event data into Kafka Connect [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
+Internally the connector transforms the EPICS CA time Database Record (DBR_TIME) event data into Kafka Connect [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
 ```
 {
-  "status":int8 optional,
-  "severity":int8 optional,
+  "status":int8,
+  "severity":int8,
   "doubleValues":float64[] optional,
   "floatValues":float32[] optional,
   "stringValues":string[] optional,
@@ -141,6 +141,8 @@ Internally the connector transforms the EPICS CA time Database Record (DBR) even
 [Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L43-L55)
 
 **Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Connect Schema language.
+
+**Note**: Channel Access supports various extended DBR types,  but DBR_TIME types are the only ones that provide a timestamp, which is often useful for monitoring.  As a consequence alarm status and severity are always included as DBR_TIME types always include them.   If not needed they can be ignored, or a Kafka Connect Transform can be used to drop the fields.   Other extended types such as DBR_CTRL and DBR_GR are not supported by this Connector, as it rarely make sense for these complex structures to be monitored.   If one of the fields such as limits, precision, or units needs to be monitored it can still be monitored individually using pv suffixes such as .PREC, .UNITS, .HOPR, .LOPR.
 
 The internal Schema structure can be serialized to various forms using Converters.  The following are common converters:
 
