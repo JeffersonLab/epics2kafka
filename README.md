@@ -23,16 +23,21 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 
 ## Deploy
 ## Quick Start with Compose
-1. Start Docker containers:
+1. Download Project
+```
+git clone https://github.com/JeffersonLab/epics2kafka
+cd epics2kafka
+```
+2. Start Docker containers:
 ```
 gradlew build -x test
 docker-compose up
 ```
-2. Listen to Kafka topic "channel1"
+3. Listen to Kafka topic "channel1"
 ```
 docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic channel1
 ```
-3. Put value into "channel1" EPICS channel
+4. Put value into "channel1" EPICS channel
 ```
 docker exec softioc caput channel1 1
 ```
@@ -53,14 +58,14 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 
 **Note**: The docker containers require significant resources; tested with 4 CPUs and 4GB memory allocated.
 
-### Standalone Mode
-Three steps are required to deploy the CA Source Connector to an existing Kafka installation:
+### Standalone
+Three steps are required to deploy the CA Source Connector to an existing Kafka installation in standalone mode:
 
 1. Copy the connector and dependency jar files into a plugin directory:
 ```
 mkdir /opt/kafka/connectors/ca-source
 cp /tmp/epics2kafka.jar /opt/kafka/connectors/ca-source
-cp /tmp/jca-2.4.3.jar /opt/kafka/connectors/ca-source
+cp /tmp/jca-2.4.6.jar /opt/kafka/connectors/ca-source
 ```
 2. Update the Kafka config (standalone environment shown):
 ```
@@ -85,8 +90,8 @@ cd /opt/kafka
 bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
 
-### Distributed Mode
-You must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
+### Distributed
+For distributed mode you must copy the Connector jar files to all nodes in the cluster.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
 ```
