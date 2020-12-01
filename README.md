@@ -1,3 +1,7 @@
+<p>
+<img align="right" width="100" height="100" src="https://raw.githubusercontent.com/github/explore/c883cba01679b6d613c92953df8f5c9426b980cd/topics/epics/epics.png"/>     
+</p>
+
 # epics2kafka [![Build Status](https://travis-ci.com/JeffersonLab/epics2kafka.svg?branch=master)](https://travis-ci.com/JeffersonLab/epics2kafka)    
 Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [Kafka](https://kafka.apache.org) via the [Kafka Connect](https://kafka.apache.org/documentation/#connect) interface.
 
