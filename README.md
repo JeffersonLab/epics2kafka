@@ -61,7 +61,7 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 ### Standalone
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation in standalone mode:
 
-1. Copy the connector and dependency jar files into a plugin directory:
+1. Copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://github.com/JeffersonLab/epics2kafka/raw/master/lib/jca-2.4.6.jar) jar files into a plugin directory:
 ```
 mkdir /opt/kafka/connectors/ca-source
 cp /tmp/epics2kafka.jar /opt/kafka/connectors/ca-source
