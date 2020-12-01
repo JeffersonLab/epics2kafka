@@ -9,25 +9,14 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 
 ---
 
-- [Docker](https://github.com/JeffersonLab/epics2kafka#docker)  
 - [Build](https://github.com/JeffersonLab/epics2kafka#build)  
 - [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)  
 - [Configure EPICS channels](https://github.com/JeffersonLab/epics2kafka#configure-epics-channels)   
-- [Schema](https://github.com/JeffersonLab/epics2kafka#schema)   
 - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
 - [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)  
-- [Tests](https://github.com/JeffersonLab/epics2kafka#tests)
-- [Logging](https://github.com/JeffersonLab/epics2kafka#logging)
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ---
-
-## Docker
-```
-docker pull slominskir/epics2kafka
-docker image tag slominskir/epics2kafka epics2kafka
-```
-Image hosted on [DockerHub](https://hub.docker.com/r/slominskir/epics2kafka)
 
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
@@ -115,26 +104,6 @@ docker exec connect /scripts/list-monitored.sh
 ### Task Rebalancing
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka [Incremental Cooperative Rebalancing](https://www.confluent.io/blog/incremental-cooperative-rebalancing-in-kafka/) attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed.  When an EPICS monitor is established (or re-established) it always reports the current state - so although changes during a rebalance may be missed, the state of the system will be re-reported at the end of the rebalance.  Channel monitors are divided as evenly as possible among the configured number of tasks.   It is recommended to populate the initial set of channels to monitor before starting the connector to avoid task rebalancing being triggered repeatedly.  You may wish to configure `scheduled.rebalance.max.delay.ms` to a small number to avoid long periods of waiting to see if an assigned task is coming back or not in a task failure scenario.
 
-## Schema
-Internally the connector transforms the EPICS CA time Database Record (DBR_TIME) event data into Kafka Connect [Schema](https://kafka.apache.org/26/javadoc/org/apache/kafka/connect/data/Schema.html) structures of the form:
-```
-{
-  "status":int8,
-  "severity":int8,
-  "doubleValues":float64[] optional,
-  "floatValues":float32[] optional,
-  "stringValues":string[] optional,
-  "intValues":int32[] optional
-  "shortValues":int16[] optional
-  "byteValues":int8[] optional
-}
-```
-[Source](https://github.com/JeffersonLab/epics2kafka/blob/master/src/main/java/org/jlab/kafka/connect/CASourceTask.java#L43-L55)
-
-**Note**: Only one of the values arrays will be non-null, but union types are expressed with optional (nullable) fields in Kafka Connect Schema language.
-
-**Note**: Channel Access supports various extended DBR types,  but DBR_TIME types are the only ones that provide a [timestamp](https://github.com/JeffersonLab/epics2kafka#timestamp), which is often useful for monitoring.  As a consequence alarm status and severity are always included as DBR_TIME types always include them.   If not needed they can be ignored, or a Kafka Connect Transform can be used to drop the fields.   Other extended types such as DBR_CTRL and DBR_GR are not supported by this Connector, as it rarely makes sense for these complex structures to be monitored as a whole.  However, individual fields can be explicitly monitored by overriding the default field of .VAL.  For example the fields for precision, units, or limits can be monitored individually using pv suffixes such as .PREC, .UNITS, .HOPR, .LOPR.
-
 ## Connector Options
 All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
 
@@ -214,25 +183,8 @@ You must copy the Connector jar files to all nodes in the cluster.  You control 
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
 ```
 
-## Tests
-### Unit Tests
-Uses JUnit and are performed by the Gradle build unless the "-x test" argument is used.  The tests use an Embedded EPICS CA IOC (Java).   An HTML test report is generated at the path:
-```
-build/reports/tests/test/index.html
-```
-### Integration Tests
-Uses Docker containers and are separate from unit tests.  Can be run with:
-```
-gradlew integrationTest
-```
-An HTML test report is generated at the path:
-```
-build/reports/tests/integrationTest/index.html
-```
-## Logging
-Kafka uses the [SLF4J](http://www.slf4j.org/) logger with [Log4J](https://logging.apache.org/log4j/2.x/), and therefore epics2kafka uses them as well.  Log levels can be controlled by including a _log4j.properties_ file on the classpath.  The epics2kafka logger root begins with _org.jlab.kafka.connect_.   The unit tests have a separate configuration file in the _test/resources_ directory and the epics2kafka logger is set to TRACE.  The integration tests have minimal formatting configured at _integration/resources/log4j.properties_ since container messages are streamed to standard out and already include multiple columns such as timestamp, level, and class.  The Dockerfile includes both a _logging.properties_ and _log4j.properties_ from _examples/logging_ to help quiet noisy messages from various dependencies.
-
 ## See Also
+   - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
    - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
    - [Clustered Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Clustered-Alarm-System-Example)
    - [Related Projects](https://github.com/JeffersonLab/epics2kafka/wiki/Related-Projects)
