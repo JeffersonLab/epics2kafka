@@ -1,4 +1,4 @@
-# epics2kafka    
+# epics2kafka [![Build Status](https://travis-ci.com/JeffersonLab/epics2kafka.svg?branch=master)](https://travis-ci.com/JeffersonLab/epics2kafka)    
 Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [Kafka](https://kafka.apache.org) via the [Kafka Connect](https://kafka.apache.org/documentation/#connect) interface.
 
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
