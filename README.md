@@ -1,5 +1,5 @@
 <p>
-<img align="right" width="100" height="100" src="https://raw.githubusercontent.com/github/explore/c883cba01679b6d613c92953df8f5c9426b980cd/topics/epics/epics.png"/>     
+<a href="#"><img align="right" width="100" height="100" src="https://raw.githubusercontent.com/github/explore/c883cba01679b6d613c92953df8f5c9426b980cd/topics/epics/epics.png"/></a>     
 </p>
 
 # epics2kafka [![Build Status](https://travis-ci.com/JeffersonLab/epics2kafka.svg?branch=master)](https://travis-ci.com/JeffersonLab/epics2kafka)    
