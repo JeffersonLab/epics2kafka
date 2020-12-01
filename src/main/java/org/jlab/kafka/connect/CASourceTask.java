@@ -157,10 +157,12 @@ public class CASourceTask extends SourceTask {
      */
     @Override
     public synchronized void stop() {
-        try {
-            context.destroy();
-        } catch(CAException e) {
-            log.error("Failed to destroy CAJContext", e);
+        if(context != null) {
+            try {
+                context.destroy();
+            } catch (CAException e) {
+                log.error("Failed to destroy CAJContext", e);
+            }
         }
         notify();
     }

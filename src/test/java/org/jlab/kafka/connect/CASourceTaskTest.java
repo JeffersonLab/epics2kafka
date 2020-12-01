@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CASourceTaskTest {
-    private CASourceTask task;
+    private CASourceTask task = new CASourceTask();
     private SourceTaskContext context;
     private Map<String, String> props = new HashMap<>();
     private EmbeddedIoc ioc;
@@ -41,7 +41,6 @@ public class CASourceTaskTest {
         props.put(CASourceConnectorConfig.MONITOR_ADDR_LIST, ioc.getAddress());
         props.put("task-channels", jsonArray);
 
-        task = new CASourceTask();
         task.initialize(context);
         ioc.start();
         task.start(props);
@@ -50,7 +49,10 @@ public class CASourceTaskTest {
     @After
     public void tearDown() throws CAException {
         task.stop();
-        ioc.stop();
+
+        if(ioc != null) {
+            ioc.stop();
+        }
     }
 
     @Test
