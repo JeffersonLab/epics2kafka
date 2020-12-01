@@ -63,6 +63,13 @@ task integrationTest(type: Test) {
 
 //check.dependsOn integrationTest
 
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
+
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
     options.compilerArgs += "-Xlint:unchecked"
