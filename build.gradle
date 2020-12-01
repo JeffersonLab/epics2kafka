@@ -37,7 +37,8 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.epics:jca:2.4.3' // Newer versions in mavenCentral only work with Java 11
+    implementation files('lib/jca-2.4.6.jar')
+    //implementation 'org.epics:jca:2.4.6' // Only works with Java 11 runtime
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
     compileOnly 'org.apache.kafka:connect-api:2.4.0'
     compileOnly 'org.apache.kafka:connect-transforms:2.4.0'
