@@ -2,7 +2,7 @@
 <a href="#"><img align="right" width="100" height="100" src="https://raw.githubusercontent.com/github/explore/c883cba01679b6d613c92953df8f5c9426b980cd/topics/epics/epics.png"/></a>     
 </p>
 
-# epics2kafka [![Build Status](https://travis-ci.com/JeffersonLab/epics2kafka.svg?branch=master)](https://travis-ci.com/JeffersonLab/epics2kafka)    
+# epics2kafka [![Build Status](https://travis-ci.com/JeffersonLab/epics2kafka.svg?branch=master)](https://travis-ci.com/JeffersonLab/epics2kafka) ![Docker Image Version (latest semver)](https://img.shields.io/docker/v/slominskir/epics2kafka?sort=semver)  
 Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [Kafka](https://kafka.apache.org) via the [Kafka Connect](https://kafka.apache.org/documentation/#connect) interface.
 
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
