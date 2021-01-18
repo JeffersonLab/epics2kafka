@@ -7,6 +7,7 @@ public class SnapshotConsumer {
 
     public static void main(String[] args) {
         String servers = args[0];
+        String topic = args[1];
 
         Properties props = new Properties();
         props.put("bootstrap.servers", servers);
@@ -17,7 +18,7 @@ public class SnapshotConsumer {
         OffsetInfo info = new OffsetInfo();
 
         try(KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
-                consumer.subscribe(Collections.singletonList("epics-channels"), new ConsumerRebalanceListener() {
+                consumer.subscribe(Collections.singletonList(topic), new ConsumerRebalanceListener() {
 
                 @Override
                 public void onPartitionsRevoked(Collection<TopicPartition> partitions) {}

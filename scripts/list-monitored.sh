@@ -18,4 +18,4 @@ RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_COR
 
 javac -cp $CLIENTS_JAR -d /tmp SnapshotConsumer.java
 
-java -cp $RUN_CP SnapshotConsumer $BOOTSTRAP_SERVER 
+java -cp $RUN_CP SnapshotConsumer $BOOTSTRAP_SERVER epics-channels 
