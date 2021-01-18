@@ -4,6 +4,18 @@
 
 [ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
 
-javac -cp $KAFKA_HOME/libs/kafka-clients-2.7.0.jar -d /tmp SnapshotConsumer.java
+CWD=$(readlink -f "$(dirname "$0")")
+CLIENTS_JAR=`ls $KAFKA_HOME/libs/kafka-clients-*`
+JACK_CORE=`ls $KAFKA_HOME/libs/jackson-core-*`
+JACK_BIND=`ls $KAFKA_HOME/libs/jackson-databind-*`
+JACK_ANN=`ls $KAFKA_HOME/libs/jackson-annotations-*`
+SLF4J_API=`ls $KAFKA_HOME/libs/slf4j-api-*`
+SLF4J_IMP=`ls $KAFKA_HOME/libs/slf4j-log4j*`
+LOG4J_IMP=`ls $KAFKA_HOME/libs/log4j-*`
+LOG4J_CONF=$CWD
 
-java -cp /tmp:$KAFKA_HOME/libs/kafka-clients-2.7.0.jar:$KAFKA_HOME/libs/slf4j-api-1.7.30.jar:/scripts/slf4j-simple-1.7.30.jar:$KAFKA_HOME/libs/jackson-core-2.10.2.jar:$KAFKA_HOME/libs/jackson-databind-2.10.2.jar:$KAFKA_HOME/libs/jackson-annotations-2.10.2.jar SnapshotConsumer $BOOTSTRAP_SERVER 
+RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_CORE:$JACK_BIND:$JACK_ANN"
+
+javac -cp $CLIENTS_JAR -d /tmp SnapshotConsumer.java
+
+java -cp $RUN_CP SnapshotConsumer $BOOTSTRAP_SERVER 
