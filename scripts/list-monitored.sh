@@ -4,10 +4,6 @@
 
 [ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
 
-$KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP_SERVER \
-                       --topic epics-channels \
-                       --property print.key=true \
-                       --property key.separator="=" \
-                       --from-beginning \
-                       --timeout-ms 1000 \
-                       2> /dev/null 
+javac -cp $KAFKA_HOME/libs/kafka-clients-2.7.0.jar -d /tmp SnapshotConsumer.java
+
+java -cp /tmp:$KAFKA_HOME/libs/kafka-clients-2.7.0.jar:$KAFKA_HOME/libs/slf4j-api-1.7.30.jar:/scripts/slf4j-simple-1.7.30.jar:$KAFKA_HOME/libs/jackson-core-2.10.2.jar:$KAFKA_HOME/libs/jackson-databind-2.10.2.jar:$KAFKA_HOME/libs/jackson-annotations-2.10.2.jar SnapshotConsumer $BOOTSTRAP_SERVER 
