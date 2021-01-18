@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Grab first SERVER from SERVERS CSV env
-IFS=','
-read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+[ -z "$KAFKA_HOME" ] && echo "KAFKA_HOME environment required" && exit 1;
 
-BOOTSTRAP_SERVER=${tmpArray[0]}
+[ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
 
-/kafka/bin/kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP_SERVER \
+$KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP_SERVER \
                        --topic epics-channels \
                        --property print.key=true \
                        --property key.separator="=" \

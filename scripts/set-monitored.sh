@@ -1,10 +1,8 @@
 #!/bin/bash
 
-# Grab first SERVER from SERVERS CSV env
-IFS=','
-read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+[ -z "$KAFKA_HOME" ] && echo "KAFKA_HOME environment required" && exit 1;
 
-BOOTSTRAP_SERVER=${tmpArray[0]}
+[ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
 
 help=$'Usage:\n'
 help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va') [-o] outkey (optional - defaults to channel)"
@@ -48,10 +46,9 @@ fi
 if [ "$unset" ]
 then
   # kafka-console-producer can't write tombstone (null) messages!
-  #echo "$channel"= | kafka-console-producer --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator=="
   # Hack - we will just compile and run tiny Java program then!
-  javac -cp /kafka/libs/kafka-clients-2.6.0.jar -d /tmp /scripts/TombstoneProducer.java
-  java -cp /tmp:/kafka/libs/kafka-clients-2.6.0.jar:/kafka/libs/slf4j-api-1.7.30.jar:/scripts/slf4j-simple-1.7.30.jar:/kafka/libs/jackson-core-2.10.2.jar:/kafka/libs/jackson-databind-2.10.2.jar:/kafka/libs/jackson-annotations-2.10.2.jar TombstoneProducer $BOOTSTRAP_SERVER epics-channels $topic $channel 2> /dev/null
+  javac -cp $KAFKA_HOME/libs/kafka-clients-2.7.0.jar -d /tmp TombstoneProducer.java
+  java -cp /tmp:$KAFKA_HOME/libs/kafka-clients-2.7.0.jar:$KAFKA_HOME/libs/slf4j-api-1.7.30.jar:/scripts/slf4j-simple-1.7.30.jar:$KAFKA_HOME/libs/jackson-core-2.10.2.jar:$KAFKA_HOME/libs/jackson-databind-2.10.2.jar:$KAFKA_HOME/libs/jackson-annotations-2.10.2.jar TombstoneProducer $BOOTSTRAP_SERVER epics-channels $topic $channel 2> /dev/null
 else
   if [ ! "$topic" ] || [ ! "$mask" ]
   then
@@ -72,5 +69,5 @@ else
     msg=\{\"topic\":\""$topic"\",\"channel\":\""$channel"\"\}=\{\"mask\":\""$mask"\",\"outkey\":\"$outkey\"\}
   fi
 
-  echo "$msg" | /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
+  echo "$msg" | $KAFKA_HOME/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator=="
 fi
