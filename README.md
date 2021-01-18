@@ -182,6 +182,14 @@ value.converter.schemas.enable=false
 
 **Note**: Output topics use channel name as key (String key SCHEMA) by default, but if _outkey_ is set then that is used instead.  A key is required to support topic compaction and is especially useful when using a shared output topic.
 
+### Scripts
+The following environment variables are required by the scripts:
+
+| Name | Description |
+|----------|---------|
+| BOOTSTRAP_SERVER | Host and port pair pointing to a Kafka server to bootstrap the client connection to a Kafka Cluser; example: `kafka:9092` |
+| KAFKA_HOME | Path to Kafka installation; example: `/opt/kafka` |
+
 ## Build
 This project uses the [Gradle](https://gradle.org) build tool to automatically download dependencies and build the project from source:
 ```
