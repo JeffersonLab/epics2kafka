@@ -58,7 +58,7 @@ SLF4J_IMP=`ls $KAFKA_HOME/libs/slf4j-log4j*`
 LOG4J_IMP=`ls $KAFKA_HOME/libs/log4j-*`
 LOG4J_CONF=$CWD
 
-RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_CORE:$JACK_BIND:$JACK_ANN"CWD=$(readlink -f "$(dirname "$0")")
+RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_CORE:$JACK_BIND:$JACK_ANN"
 
   javac -cp $CLIENTS_JAR -d /tmp TombstoneProducer.java
   java -cp $RUN_CP TombstoneProducer $BOOTSTRAP_SERVER epics-channels $topic $channel 
