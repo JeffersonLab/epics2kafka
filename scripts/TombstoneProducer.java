@@ -12,9 +12,6 @@ public class TombstoneProducer {
 
         String key = "{\"topic\":\"" + outTopic + "\",\"channel\":\"" + channel + "\"}";
 
-        System.err.println("key: " + key);
-        System.err.println("command topic: " + commandTopic);
-
         Properties props = new Properties();
         props.put("bootstrap.servers", servers);
         props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
@@ -23,8 +20,6 @@ public class TombstoneProducer {
         try(KafkaProducer<String, String> producer = new KafkaProducer<>(props)) {
             producer.send(new ProducerRecord<String, String>(commandTopic, key, null));
         }
-
-        System.err.println("I guess it worked?");
     }
 }
 
