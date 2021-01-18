@@ -9,5 +9,5 @@ $KAFKA_HOME/bin/kafka-console-consumer.sh --bootstrap-server $BOOTSTRAP_SERVER \
                        --property print.key=true \
                        --property key.separator="=" \
                        --from-beginning \
-                       --timeout-ms 500 \
-                        2> /dev/null
+                       --timeout-ms 1000 \
+                       2> /dev/null 
