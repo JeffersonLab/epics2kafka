@@ -208,5 +208,5 @@ gradlew build
 
 ## See Also
    - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
-   - [Kafka Alarm System](https://github.com/JeffersonLab/kafka-alarm-system)
+   - [epics2kafka transform for Kafka Alarm System](https://github.com/JeffersonLab/epics2kafka-alarms)
    - [Related Projects](https://github.com/JeffersonLab/epics2kafka/wiki/Related-Projects)
