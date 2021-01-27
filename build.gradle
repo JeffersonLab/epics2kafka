@@ -5,7 +5,7 @@ plugins {
 }
 
 group 'org.jlab.kafka.connect'
-version '0.10.0'
+version '1.0.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -17,16 +17,12 @@ repositories {
     }
 }
 
-// We define two extra sets: integration tests and alarms (docker-compose alarms example dependencies)
 sourceSets {
     integration {
         java.srcDir "${projectDir}/src/integration/java"
         resources.srcDir "${projectDir}/src/integration/resources"
         compileClasspath += sourceSets.main.output
         runtimeClasspath += sourceSets.main.output
-    }
-    alarms {
-        // No source, just dependencies
     }
 }
 
@@ -37,14 +33,12 @@ configurations {
 }
 
 dependencies {
-    implementation files('lib/jca-2.4.6.jar')
-    //implementation 'org.epics:jca:2.4.6' // Only works with Java 11 runtime
+    implementation 'org.epics:jca:2.4.6'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
     compileOnly 'org.apache.kafka:connect-api:2.4.0'
     compileOnly 'org.apache.kafka:connect-transforms:2.4.0'
     compileOnly 'org.slf4j:slf4j-log4j12:1.7.28'
     testImplementation 'junit:junit:4.13'
-    alarmsImplementation 'org.jlab.kafka.connect.transform:kafka-transform-epics:0.15.0'
     integrationImplementation 'org.testcontainers:testcontainers:1.14.3'
     integrationImplementation 'org.slf4j:slf4j-log4j12:1.7.28'
 }
@@ -90,13 +84,6 @@ processResources {
 
 build {
     dependsOn(installDist)
-}
-
-task alarmTest(type: Copy) {
-    dependsOn(build)
-    into "${buildDir}/install"
-    from configurations.alarmsCompileClasspath
-    include '**/kafka-transform-epics-*.jar'
 }
 
 distributions {
