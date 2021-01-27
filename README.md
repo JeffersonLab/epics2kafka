@@ -208,6 +208,5 @@ gradlew build
 
 ## See Also
    - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
-   - [Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Alarm-System-Example)
-   - [Clustered Alarm System Example](https://github.com/JeffersonLab/epics2kafka/wiki/Clustered-Alarm-System-Example)
+   - [Kafka Alarm System](https://github.com/JeffersonLab/kafka-alarm-system)
    - [Related Projects](https://github.com/JeffersonLab/epics2kafka/wiki/Related-Projects)
