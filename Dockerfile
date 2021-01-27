@@ -7,7 +7,7 @@ RUN git clone https://github.com/JeffersonLab/epics2kafka \
    && cd epics2kafka \
    && gradle build -x test
 
-FROM debezium/connect-base:1.3
+FROM debezium/connect-base:1.4.0.Final
 
 USER root
 RUN yum install epel-release -y \

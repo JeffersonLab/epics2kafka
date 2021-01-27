@@ -35,8 +35,7 @@ configurations {
 dependencies {
     implementation 'org.epics:jca:2.4.6'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.10.2'
-    compileOnly 'org.apache.kafka:connect-api:2.4.0'
-    compileOnly 'org.apache.kafka:connect-transforms:2.4.0'
+    compileOnly 'org.apache.kafka:connect-api:2.6.1'
     compileOnly 'org.slf4j:slf4j-log4j12:1.7.28'
     testImplementation 'junit:junit:4.13'
     integrationImplementation 'org.testcontainers:testcontainers:1.14.3'
