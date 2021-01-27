@@ -1,12 +1,11 @@
-FROM gradle:6.6.1-jdk8 as builder
+FROM gradle:6.6.1-jdk11 as builder
 
 USER root
 WORKDIR /
 
 RUN git clone https://github.com/JeffersonLab/epics2kafka \
    && cd epics2kafka \
-   && gradle build -x test \
-   && chmod +x ./scripts/*.sh
+   && gradle build -x test
 
 FROM debezium/connect-base:1.3
 
@@ -24,4 +23,4 @@ COPY --from=builder /epics2kafka/examples/logging/logging.properties /kafka/conf
 
 WORKDIR /scripts
 
-ENTRYPOINT ["/scripts/autoconfiguredocker.sh"]
+ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
