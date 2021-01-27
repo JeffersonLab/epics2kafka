@@ -24,14 +24,13 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 
 ## Deploy
 ## Quick Start with Compose
-1. Download Project
+1. Grab Project
 ```
 git clone https://github.com/JeffersonLab/epics2kafka
 cd epics2kafka
 ```
-2. Start Docker containers:
+2. Launch Docker:
 ```
-gradlew build -x test
 docker-compose up
 ```
 3. Listen to Kafka topic "channel1"
@@ -47,7 +46,10 @@ Or feed a continuous incrementing stream of values:
 docker exec -it softioc /scripts/feed-ca.sh channel1
 ```
 
-**Note**: The build is required because the docker-compose.yml file is setup for development. If you remove the volume _./build/install:/kafka_connect_ then you can skip the gradlew build step and the pre-built version of the connector inside the container will be used, but then you'll not be able to make changes on the fly on your localhost.
+**Note**: When developing the app you can mount the build artifact into the container by substituting the `docker-compose up` command with:
+```
+docker-compose -f docker-compose.yml -f docker-compose-dev.yml up
+```
 
 **Note**: The Docker Compose project creates the following containers: 
    - [softioc](https://github.com/JeffersonLab/softioc)
