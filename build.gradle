@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'distribution'
-    id 'maven-publish'
+    id 'com.github.jk1.dependency-license-report' version '1.16'
 }
 
 group 'org.jlab.kafka.connect'
@@ -85,11 +85,19 @@ build {
     dependsOn(installDist)
 }
 
+installDist.dependsOn(generateLicenseReport)
+distTar.dependsOn(generateLicenseReport)
+distZip.dependsOn(generateLicenseReport)
+
+
 distributions {
     main {
         contents {
             from jar
             from (project.configurations.runtimeClasspath)
+            from("build/reports/dependency-license") {
+                into "dependency-license"
+            }
         }
     }
 }
