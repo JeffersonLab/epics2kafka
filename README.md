@@ -33,17 +33,16 @@ cd epics2kafka
 ```
 docker-compose up
 ```
-3. Listen to Kafka topic "channel1"
-```
-docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic channel1
-```
-4. Put value into "channel1" EPICS channel
+3. Put value into "channel1" EPICS channel
 ```
 docker exec softioc caput channel1 1
-```
-Or feed a continuous incrementing stream of values:
-```
+
+// Or feed a continuous incrementing stream of values:
 docker exec -it softioc /scripts/feed-ca.sh channel1
+```
+4. Listen to Kafka topic "channel1"
+```
+docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic channel1 --from-beginning
 ```
 
 **Note**: When developing the app you can mount the build artifact into the container by substituting the `docker-compose up` command with:
