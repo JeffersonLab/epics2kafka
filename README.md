@@ -36,8 +36,10 @@ docker-compose up
 3. Put a value into the "channel1" EPICS channel
 ```
 docker exec softioc caput channel1 1
+```
+Or feed a continuous incrementing stream of values:
 
--- Or feed a continuous incrementing stream of values:
+```
 docker exec -it softioc /scripts/feed-ca.sh channel1
 ```
 4. Listen to the Kafka topic "channel1"
