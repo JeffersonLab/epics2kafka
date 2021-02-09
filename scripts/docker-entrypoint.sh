@@ -49,8 +49,9 @@ else
       c="${channel[0]}"
       t="${channel[1]}"
       m="${channel[2]}"
-      echo "Creating channel ${c} ${t} ${m}"
-      /scripts/set-monitored.sh -c "${c}" -t "${t}" -m "${m}"
+      o="${channel[3]}"
+      echo "Creating channel ${c} ${t} ${m}" "${o}"
+      /scripts/set-monitored.sh -c "${c}" -t "${t}" -m "${m}" -o "${o}"
     done
 fi
 
