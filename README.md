@@ -191,7 +191,7 @@ The following environment variables are required by the scripts:
 
 | Name | Description |
 |----------|---------|
-| BOOTSTRAP_SERVERS | CSV of Host and port pairs pointing to a Kafka server to bootstrap the client connection to a Kafka Cluser; example: `kafka:9092` |
+| BOOTSTRAP_SERVERS | Comma separated values list of host and port pairs pointing to a Kafka server to bootstrap the client connection to a Kafka Cluser; example: `kafka:9092` |
 | KAFKA_HOME | Path to Kafka installation; example: `/opt/kafka` |
 
 **Note**: The scripts are Bash (Linux) and wrap the scripts provided with Kafka; plus two single-file java apps are included due to limitations with Kafka provided scripts: TombstoneProducer.java produces tombstone messages and SnapshotConsumer.java consumes a snashot of a topic (rewinds to beginning, replays all messages, and exits once last message is read).  
