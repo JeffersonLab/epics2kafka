@@ -1,6 +1,6 @@
-{"topic":"active-alarms","channel":"channel1"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel2"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel3"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel4"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel5"}={"mask":"a"}
-{"topic":"active-alarms","channel":"channel6"}={"mask":"a"}
+{"topic":"active-alarms","channel":"channel1"}={"mask":"a", "outkey": "alarm1"}
+{"topic":"active-alarms","channel":"channel2"}={"mask":"a", "outkey": "alarm2"}
+{"topic":"active-alarms","channel":"channel3"}={"mask":"a", "outkey": "alarm3"}
+{"topic":"active-alarms","channel":"channel4"}={"mask":"a", "outkey": "alarm4"}
+{"topic":"active-alarms","channel":"channel5"}={"mask":"a", "outkey": "alarm5"}
+{"topic":"active-alarms","channel":"channel6"}={"mask":"a", "outkey": "alarm6"}
