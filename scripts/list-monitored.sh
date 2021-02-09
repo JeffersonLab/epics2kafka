@@ -2,7 +2,7 @@
 
 [ -z "$KAFKA_HOME" ] && echo "KAFKA_HOME environment required" && exit 1;
 
-[ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
+[ -z "$BOOTSTRAP_SERVERS" ] && echo "BOOTSTRAP_SERVERS environment required" && exit 1;
 
 CWD=$(readlink -f "$(dirname "$0")")
 CLIENTS_JAR=`ls $KAFKA_HOME/libs/kafka-clients-*`
@@ -18,4 +18,4 @@ RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_COR
 
 javac -cp $CLIENTS_JAR -d /tmp SnapshotConsumer.java
 
-java -cp $RUN_CP SnapshotConsumer $BOOTSTRAP_SERVER epics-channels 
+java -cp $RUN_CP SnapshotConsumer $BOOTSTRAP_SERVERS epics-channels
