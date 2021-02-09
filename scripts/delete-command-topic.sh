@@ -11,6 +11,5 @@ read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
 BOOTSTRAP_SERVER=${tmpArray[0]}
 
 $KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server $BOOTSTRAP_SERVER \
-             --create \
-             --topic epics-channels \
-             --config cleanup.policy=compact
+             --delete  \
+             --topic epics-channels
