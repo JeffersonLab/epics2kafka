@@ -2,7 +2,13 @@
 
 [ -z "$KAFKA_HOME" ] && echo "KAFKA_HOME environment required" && exit 1;
 
-[ -z "$BOOTSTRAP_SERVER" ] && echo "BOOTSTRAP_SERVER environment required" && exit 1;
+[ -z "$BOOTSTRAP_SERVERS" ] && echo "BOOTSTRAP_SERVERS environment required" && exit 1;
+
+# Grab first SERVER from SERVERS CSV env
+IFS=','
+read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
+
+BOOTSTRAP_SERVER=${tmpArray[0]}
 
 help=$'Usage:\n'
 help+="  Set:   $0 [-c] channel [-t] topic [-m] mask ('v' or 'a' or 'va') [-o] outkey (optional - defaults to channel)"
@@ -61,7 +67,7 @@ LOG4J_CONF=$CWD
 RUN_CP="/tmp:$CLIENTS_JAR:$SLF4J_API:$SLF4J_IMP:$LOG4J_IMP:$LOG4J_CONF:$JACK_CORE:$JACK_BIND:$JACK_ANN"
 
   javac -cp $CLIENTS_JAR -d /tmp TombstoneProducer.java
-  java -cp $RUN_CP TombstoneProducer $BOOTSTRAP_SERVER epics-channels $topic $channel 
+  java -cp $RUN_CP TombstoneProducer $BOOTSTRAP_SERVERS epics-channels $topic $channel
 else
   if [ ! "$topic" ] || [ ! "$mask" ]
   then
