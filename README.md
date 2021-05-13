@@ -42,7 +42,7 @@ Or feed a continuous incrementing stream of values:
 ```
 docker exec -it softioc /scripts/feed-ca.sh channel1
 ```
-4. Listen to the Kafka topic "channel1"
+4. Listen to the Kafka topic "topic1"
 ```
 docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic topic1 --from-beginning
 ```
