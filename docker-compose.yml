@@ -18,7 +18,7 @@ services:
       - ./examples/softioc-scripts:/scripts
 
   zookeeper:
-    image: debezium/zookeeper:1.4.0.Final
+    image: debezium/zookeeper:1.5.0.Final
     hostname: zookeeper
     container_name: zookeeper
     ports:
@@ -27,7 +27,7 @@ services:
       - "3888:3888"
 
   kafka:
-    image: debezium/kafka:1.4.0.Final
+    image: debezium/kafka:1.5.0.Final
     hostname: kafka
     container_name: kafka
     depends_on:
@@ -41,6 +41,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - CUSTOM_CRT_URL=http://pki.jlab.org/JLabCA.crt
     hostname: connect
     container_name: connect
     depends_on:

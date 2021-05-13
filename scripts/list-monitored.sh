@@ -7,7 +7,7 @@
 CWD=$(readlink -f "$(dirname "$0")")
 CLIENTS_JAR=`ls $KAFKA_HOME/libs/kafka-clients-*`
 JACK_CORE=`ls $KAFKA_HOME/libs/jackson-core-*`
-JACK_BIND=`ls $KAFKA_HOME/libs/jackson-databind-*`
+JACK_BIND=`ls $KAFKA_HOME/libs/jackson-databind-* | head -n 1`
 JACK_ANN=`ls $KAFKA_HOME/libs/jackson-annotations-*`
 SLF4J_API=`ls $KAFKA_HOME/libs/slf4j-api-*`
 SLF4J_IMP=`ls $KAFKA_HOME/libs/slf4j-log4j*`
