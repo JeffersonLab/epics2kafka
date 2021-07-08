@@ -28,17 +28,19 @@ public class SnapshotConsumer {
                     consumer.seekToBeginning(partitions);
                     
                     info.lastOffset = consumer.endOffsets(partitions).values().toArray(new Long[0])[0] - 1;
+			
+		    if(info.lastOffset == -1) {
+		        info.empty = true;
+		    }
                 }
             });
 
-            boolean empty = false;
-
-            while (!empty) {
+            while (!info.empty) {
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
 
                 for (ConsumerRecord<String, String> record : records) {
                     System.out.printf("%s=%s%n", record.key(), record.value());
-                    empty = (info.lastOffset == record.offset());
+                    info.empty = (info.lastOffset == record.offset());
 		}
            }
 	}
@@ -46,6 +48,7 @@ public class SnapshotConsumer {
 
     static class OffsetInfo {
        public long lastOffset = 0;
+       public boolean empty = false;
     }
 }
 
