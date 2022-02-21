@@ -173,6 +173,8 @@ public class ChannelManager extends Thread implements AutoCloseable {
             // Once set, we wait until changes have settled to avoid call this too frequently with changes happening
             boolean needReconfig = false;
 
+            log.info("ChannelManager started"); // INTEGRATION TESTS LOOK FOR THESE EXACT WORDS IN LOG!  DON'T TOUCH!
+
             // Listen for changes
             while (state.get() == TRI_STATE.RUNNING) {
                 log.trace("ChannelManager.run polling for command changes");

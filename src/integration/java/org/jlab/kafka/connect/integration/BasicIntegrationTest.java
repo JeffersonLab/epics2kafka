@@ -47,7 +47,7 @@ public class BasicIntegrationTest {
             .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
             .withEnv("MONITOR_CHANNELS", "/config/channels")
             .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("connect"))
-            .waitingFor(Wait.forLogMessage(".*polling for changes.*", 1))
+            .waitingFor(Wait.forLogMessage(".*ChannelManager started.*", 1))
             .withFileSystemBind("examples/integration/connect", "/config", BindMode.READ_ONLY);
 
     private static String INTERNAL_BOOTSTRAP_SERVERS;
