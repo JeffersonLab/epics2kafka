@@ -1,4 +1,4 @@
-ARG BUILD_IMAGE=gradle:6.6.1-jdk11
+ARG BUILD_IMAGE=gradle:7.4-jdk17
 
 # BUILD_TYPE should be one of 'remote-src' or 'local-src'
 ARG BUILD_TYPE=remote-src

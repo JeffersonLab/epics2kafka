@@ -75,6 +75,10 @@ jar {
     archiveFileName = 'epics2kafka.jar'
 }
 
+processIntegrationResources {
+    duplicatesStrategy 'include'
+}
+
 processResources {
     filesMatching('release.properties') {
         filter {
