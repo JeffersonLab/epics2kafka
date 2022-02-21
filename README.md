@@ -56,6 +56,8 @@ docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:
 
 **Note**: The docker containers require significant resources; tested with 4 CPUs and 4GB memory allocated.
 
+**See**: [Docker Compose Strategy](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c)
+
 ### Standalone
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation in standalone mode:
 
@@ -204,7 +206,13 @@ gradlew build
 
 **Note**: When developing the app you can mount the build artifact into the container by substituting the `docker-compose up` command with:
 ```
-docker-compose -f docker-compose.yml -f docker-compose-dev.yml up
+docker-compose -f docker-compose.dev.yml up
+```
+
+To build from local source (as opposed from tagged remote):
+
+```
+docker build . --build-arg BUILD_TYPE=local-src
 ```
 
 ## See Also
