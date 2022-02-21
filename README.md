@@ -209,7 +209,7 @@ gradlew build
 docker-compose -f docker-compose.dev.yml up
 ```
 
-To build from local source (as opposed from tagged remote):
+To build from local source (as opposed from remote):
 
 ```
 docker build . --build-arg BUILD_TYPE=local-src
