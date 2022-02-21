@@ -56,7 +56,7 @@ public class BasicIntegrationTest {
     private static String EXTERNAL_BOOTSTRAP_SERVERS;
 
     @BeforeClass
-    public static void setUp() throws CAException {
+    public static void setUp() throws CAException, IOException, InterruptedException {
         softioc.start();
 
         kafka.start();
@@ -64,6 +64,12 @@ public class BasicIntegrationTest {
         EXTERNAL_BOOTSTRAP_SERVERS = kafka.getBootstrapServers();
 
         INTERNAL_BOOTSTRAP_SERVERS = kafka.getNetworkAliases().get(0)+":9092";
+
+        // Setup topics with compact (Connector automatically creates topics without compact)
+        Container.ExecResult result = kafka.execInContainer("kafka-topics", "--bootstrap-server", INTERNAL_BOOTSTRAP_SERVERS, "--create", "--topic", "channela", "--config", "cleanup.policy=compact");
+        warnIfError(result);
+        result = kafka.execInContainer("kafka-topics", "--bootstrap-server", INTERNAL_BOOTSTRAP_SERVERS, "--create", "--topic", "channelb", "--config", "cleanup.policy=compact");
+        warnIfError(result);
 
         connect.addEnv("BOOTSTRAP_SERVERS", INTERNAL_BOOTSTRAP_SERVERS);
 
@@ -75,6 +81,14 @@ public class BasicIntegrationTest {
         softioc.stop();
         connect.stop();
         kafka.stop();
+    }
+
+    public static void warnIfError(Container.ExecResult result) {
+        if(result.getExitCode() != 0) {
+            System.out.println("Return code: " + result.getExitCode());
+            System.out.println("STDOUT: " + result.getStdout());
+            System.out.println("STDERR: " + result.getStderr());
+        }
     }
 
     @Test
