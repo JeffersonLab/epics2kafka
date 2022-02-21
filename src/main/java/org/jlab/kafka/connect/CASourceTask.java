@@ -134,9 +134,9 @@ public class CASourceTask extends SourceTask {
         }
 
         for(SpecKey key: updatedChannels) {
-            MonitorEvent record = latest.remove(key);
+            MonitorEvent event = latest.remove(key);
             ChannelSpec spec = specLookup.get(key);
-            Struct value = eventToStruct(record, spec);
+            Struct value = eventToStruct(event);
 
             String outkey = spec.getOutkey();
 
@@ -144,13 +144,17 @@ public class CASourceTask extends SourceTask {
                 outkey = key.getChannel();
             }
 
-            TimeStamp stamp = ((TIME)record.getDBR()).getTimeStamp();
+            TimeStamp stamp = ((TIME)event.getDBR()).getTimeStamp();
             Instant timestamp = Instant.ofEpochSecond(stamp.secPastEpoch(), stamp.nsec());
             long epochMillis = timestamp.toEpochMilli();
-            Map<String, Long> offsetValue = offsetValue(epochMillis);
+            Map<String, Long> offsetValue = offsetValue(Instant.now().toEpochMilli());
 
-            recordList.add(new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
-                    KEY_SCHEMA, outkey, VALUE_SCHEMA, value, epochMillis));
+            SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
+                    KEY_SCHEMA,  outkey + epochMillis, VALUE_SCHEMA, value, epochMillis);
+
+            log.trace("Record: {}", record);
+
+            recordList.add(record);
         }
 
         return recordList;
@@ -254,7 +258,7 @@ public class CASourceTask extends SourceTask {
         return time;
     }
 
-    private Struct eventToStruct(MonitorEvent event, ChannelSpec spec) {
+    private Struct eventToStruct(MonitorEvent event) {
         DBR dbr = event.getDBR();
 
         Struct struct = new Struct(VALUE_SCHEMA);
@@ -312,8 +316,6 @@ public class CASourceTask extends SourceTask {
 
         struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
         struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
-
-        log.debug("New value: {}={}",  spec.getName(), struct);
 
         return struct;
     }
