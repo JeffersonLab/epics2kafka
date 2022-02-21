@@ -1,14 +1,19 @@
 package org.jlab.kafka.connect.integration;
 
 import gov.aps.jca.CAException;
+import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.*;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
 
 public class BasicIntegrationTest {
     private static Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
@@ -16,24 +21,9 @@ public class BasicIntegrationTest {
     @ClassRule
     public static Network network = Network.newNetwork();
 
-    /**
-     * We don't use docker-compose support because it is limited and fails to launch if compose file contains
-     * container names for example.   This means a custom compose file would need to be created, and instead
-     * we simply use the testcontainers Container API directly to have full control.
-     */
-    //@ClassRule
-    //public static DockerComposeContainer environment = new DockerComposeContainer(new File("docker-compose.yml"));
-
-    public static GenericContainer<?> zookeeper = new GenericContainer<>("debezium/zookeeper:1.3")
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
             .withNetwork(network)
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("zookeeper"))
-            .withExposedPorts(2181);
-
-    public static GenericContainer<?> kafka = new GenericContainer<>("debezium/kafka:1.3")
-            .withNetwork(network)
-            .withExposedPorts(9092)
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("kafka"))
-            .withCreateContainerCmdModifier(cmd -> cmd.withHostName("kafka").withName("kafka"));
+            .withNetworkAliases("kafka");
 
     public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
             .withNetwork(network)
@@ -47,7 +37,7 @@ public class BasicIntegrationTest {
                     .withTty(true))
             .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("softioc"))
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
-            .withFileSystemBind("examples/softioc-db", "/db", BindMode.READ_ONLY);
+            .withFileSystemBind("examples/integration/softioc", "/db", BindMode.READ_ONLY);
 
     public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka")
             .withNetwork(network)
@@ -58,26 +48,22 @@ public class BasicIntegrationTest {
             .withEnv("MONITOR_CHANNELS", "/config/channels")
             .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("connect"))
             .waitingFor(Wait.forLogMessage(".*polling for changes.*", 1))
-            .withFileSystemBind("examples/connect-config/distributed", "/config", BindMode.READ_ONLY);
+            .withFileSystemBind("examples/integration/connect", "/config", BindMode.READ_ONLY);
 
-    private static String BOOTSTRAP_SERVERS;
+    private static String INTERNAL_BOOTSTRAP_SERVERS;
+    private static String EXTERNAL_BOOTSTRAP_SERVERS;
 
     @BeforeClass
     public static void setUp() throws CAException {
-        zookeeper.start();
-
         softioc.start();
-
-        String hostname = softioc.getHost();
-        //Integer port = softioc.getFirstMappedPort();
-
-        kafka.addEnv("ZOOKEEPER_CONNECT", zookeeper.getNetworkAliases().get(0) + ":2181");
 
         kafka.start();
 
-        BOOTSTRAP_SERVERS = kafka.getNetworkAliases().get(0) + ":9092";
+        EXTERNAL_BOOTSTRAP_SERVERS = kafka.getBootstrapServers();
 
-        connect.addEnv("BOOTSTRAP_SERVERS", BOOTSTRAP_SERVERS);
+        INTERNAL_BOOTSTRAP_SERVERS = kafka.getNetworkAliases().get(0)+":9092";
+
+        connect.addEnv("BOOTSTRAP_SERVERS", INTERNAL_BOOTSTRAP_SERVERS);
 
         connect.start();
     }
@@ -87,16 +73,63 @@ public class BasicIntegrationTest {
         softioc.stop();
         connect.stop();
         kafka.stop();
-        zookeeper.stop();
+    }
+
+    //@Test
+    public void testBasicMonitor() throws InterruptedException, IOException {
+        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channela"));
+
+        int WAIT_TIMEOUT_MILLIS = 1000;
+
+        consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        softioc.execInContainer("caput", "channela", "1");
+
+        Thread.sleep(2000);
+
+        ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        Assert.assertFalse(records.isEmpty());
+
+        ConsumerRecord<String, String> record = records.iterator().next();
+
+        Assert.assertEquals("ca", record.key());
+
+        String expectedValue = "{\"status\":3,\"severity\":2,\"doubleValues\":[1.0],\"floatValues\":null,\"stringValues\":null,\"intValues\":null,\"shortValues\":null,\"byteValues\":null}";
+
+        System.out.println("Expected: " + expectedValue);
+        System.out.println("Actual: " + record.value());
+
+        Assert.assertEquals(expectedValue, record.value());
     }
 
     @Test
-    public void testBasicMonitor() throws InterruptedException, IOException {
-        softioc.execInContainer("caput", "channel1", "1");
+    public void testFastUpdate() throws InterruptedException, IOException {
+        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelb"));
 
-        Container.ExecResult result = kafka.execInContainer("/kafka/bin/kafka-console-consumer.sh",  "--bootstrap-server", BOOTSTRAP_SERVERS, "--topic",  "channel1", "--timeout-ms", "3000", "--from-beginning");
+        int WAIT_TIMEOUT_MILLIS = 1000;
 
-        Assert.assertEquals(0, result.getExitCode());
-        Assert.assertEquals("{\"status\":3,\"severity\":2,\"doubleValues\":[1.0],\"floatValues\":null,\"stringValues\":null,\"intValues\":null,\"shortValues\":null,\"byteValues\":null}\n", result.getStdout());
+        consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        Thread.sleep(2000);
+
+        ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        Assert.assertFalse(records.isEmpty());
+
+        System.out.println("Messages received in 2 seconds: " + records.count());
+
+
+        for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
+            ConsumerRecord<String, String> record = it.next();
+
+            System.out.println("Record: " + record);
+        }
+
+        ConsumerRecord<String, String> record = records.iterator().next();
+
+        Assert.assertEquals("cb", record.key());
+
+        Assert.assertTrue(records.count() > 4);
     }
 }

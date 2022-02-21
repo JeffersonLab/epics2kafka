@@ -175,7 +175,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
 
             // Listen for changes
             while (state.get() == TRI_STATE.RUNNING) {
-                log.debug("polling for changes");
+                log.trace("ChannelManager.run polling for command changes");
                 ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(pollMillis));
 
                 if (records.count() > 0) { // We have changes

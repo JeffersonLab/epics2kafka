@@ -1,0 +1,2 @@
+{"topic":"channela","channel":"channela"}={"mask":"a", "outkey": "ca"}
+{"topic":"channelb","channel":"channelb"}={"mask":"v", "outkey": "cb"}

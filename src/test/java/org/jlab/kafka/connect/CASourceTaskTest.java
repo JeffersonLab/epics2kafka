@@ -7,7 +7,7 @@ import gov.aps.jca.dbr.DBRType;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
-import org.jlab.kafka.connect.org.jlab.kafka.connect.embedded.EmbeddedIoc;
+import org.jlab.kafka.connect.embedded.EmbeddedIoc;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;

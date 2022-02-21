@@ -1,4 +1,4 @@
-package org.jlab.kafka.connect.org.jlab.kafka.connect.embedded;
+package org.jlab.kafka.connect.embedded;
 
 import com.cosylab.epics.caj.cas.CAJServerContext;
 import com.cosylab.epics.caj.cas.util.DefaultServerImpl;

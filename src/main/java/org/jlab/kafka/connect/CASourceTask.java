@@ -78,6 +78,8 @@ public class CASourceTask extends SourceTask {
 
         pollMillis = config.getLong(CASourceConnectorConfig.MONITOR_POLL_MILLIS);
 
+        log.debug("pollMillis: {}", pollMillis);
+
         ObjectMapper objectMapper = new ObjectMapper();
 
         String json = props.get("task-channels");
@@ -113,6 +115,8 @@ public class CASourceTask extends SourceTask {
      */
     @Override
     public List<SourceRecord> poll() throws InterruptedException {
+        log.trace("CASourceTask.poll for channel updates");
+
         if(context == null) {
             createContext();
         }
@@ -132,7 +136,7 @@ public class CASourceTask extends SourceTask {
         for(SpecKey key: updatedChannels) {
             MonitorEvent record = latest.remove(key);
             ChannelSpec spec = specLookup.get(key);
-            Struct value = eventToStruct(record);
+            Struct value = eventToStruct(record, spec);
 
             String outkey = spec.getOutkey();
 
@@ -250,7 +254,7 @@ public class CASourceTask extends SourceTask {
         return time;
     }
 
-    private Struct eventToStruct(MonitorEvent event) {
+    private Struct eventToStruct(MonitorEvent event, ChannelSpec spec) {
         DBR dbr = event.getDBR();
 
         Struct struct = new Struct(VALUE_SCHEMA);
@@ -309,7 +313,7 @@ public class CASourceTask extends SourceTask {
         struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
         struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
 
-        log.debug("New value: {}", struct);
+        log.debug("New value: {}={}",  spec.getName(), struct);
 
         return struct;
     }
