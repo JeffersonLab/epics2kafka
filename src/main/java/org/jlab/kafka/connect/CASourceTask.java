@@ -150,7 +150,7 @@ public class CASourceTask extends SourceTask {
             Map<String, Long> offsetValue = offsetValue(Instant.now().toEpochMilli());
 
             SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
-                    KEY_SCHEMA,  outkey + epochMillis, VALUE_SCHEMA, value, epochMillis);
+                    KEY_SCHEMA,  outkey, VALUE_SCHEMA, value, epochMillis);
 
             log.trace("Record: {}", record);
 
