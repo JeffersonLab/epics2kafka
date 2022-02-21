@@ -86,10 +86,13 @@ public class BasicIntegrationTest {
         consumer.poll(WAIT_TIMEOUT_MILLIS);
 
         softioc.execInContainer("caput", "channela", "1");
+        softioc.execInContainer("caput", "channela", "2");
 
         Thread.sleep(2000);
 
         ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        consumer.close();
 
         Assert.assertFalse(records.isEmpty());
 
@@ -129,6 +132,8 @@ public class BasicIntegrationTest {
                 recordCache.add(record);
             }
         }
+
+        consumer.close();
 
         System.out.println("Total Records: " + recordCache.size());
 

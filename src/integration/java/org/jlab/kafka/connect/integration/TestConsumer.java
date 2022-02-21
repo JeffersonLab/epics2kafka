@@ -28,4 +28,8 @@ public class TestConsumer {
 
         return records;
     }
+
+    public void close() {
+        consumer.close();
+    }
 }
