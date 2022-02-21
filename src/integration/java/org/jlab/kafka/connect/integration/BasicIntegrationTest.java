@@ -12,8 +12,10 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 public class BasicIntegrationTest {
     private static Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
@@ -75,7 +77,7 @@ public class BasicIntegrationTest {
         kafka.stop();
     }
 
-    //@Test
+    @Test
     public void testBasicMonitor() throws InterruptedException, IOException {
         TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channela"));
 
@@ -107,29 +109,30 @@ public class BasicIntegrationTest {
     public void testFastUpdate() throws InterruptedException, IOException {
         TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelb"));
 
-        int WAIT_TIMEOUT_MILLIS = 1000;
+        int POLL_MILLIS = 200;
 
-        consumer.poll(WAIT_TIMEOUT_MILLIS);
+        List<ConsumerRecord<String, String>> recordCache = new ArrayList<>();
 
-        Thread.sleep(2000);
+        long nowMillis = System.currentTimeMillis();
+        long endMillis = nowMillis + 5000;
 
-        ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+        while(System.currentTimeMillis() < endMillis) {
+            ConsumerRecords<String, String> records = consumer.poll(POLL_MILLIS);
 
-        Assert.assertFalse(records.isEmpty());
+            System.out.println("Poll record count: " + records.count());
 
-        System.out.println("Messages received in 2 seconds: " + records.count());
+            for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
+                ConsumerRecord<String, String> record = it.next();
 
+                //System.out.println("Record Offset: " + record.offset());
 
-        for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
-            ConsumerRecord<String, String> record = it.next();
-
-            System.out.println("Record: " + record);
+                recordCache.add(record);
+            }
         }
 
-        ConsumerRecord<String, String> record = records.iterator().next();
+        System.out.println("Total Records: " + recordCache.size());
 
-        Assert.assertEquals("cb", record.key());
-
-        Assert.assertTrue(records.count() > 4);
+        // Kafka doesn't guarantee messages are delivered with low latency...
+        Assert.assertTrue(recordCache.size() > 5);
     }
 }
