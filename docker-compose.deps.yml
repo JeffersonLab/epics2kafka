@@ -1,0 +1,39 @@
+---
+version: '3.9'
+
+services:
+  softioc:
+    image: slominskir/softioc:1.1.0
+    tty: true
+    stdin_open: true
+    hostname: softioc
+    container_name: softioc
+    ports:
+      - "5064:5064/tcp"
+      - "5065:5065/tcp"
+      - "5064:5064/udp"
+      - "5065:5065/udp"
+    volumes:
+      - ./examples/softioc-db:/db
+      - ./examples/softioc-scripts:/scripts
+
+  zookeeper:
+    image: debezium/zookeeper:1.5.0.Final
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+
+  kafka:
+    image: debezium/kafka:1.5.0.Final
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      CREATE_TOPICS: 'channels:1:1:compact,topic1:1:1:compact,topic2:1:1:compact,topic3:1:1:compact'

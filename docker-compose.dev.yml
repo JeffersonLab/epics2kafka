@@ -1,0 +1,29 @@
+---
+version: '3.9'
+
+services:
+  softioc:
+    extends:
+      file: docker-compose.yml
+      service: softioc
+
+  zookeeper:
+    extends:
+      file: docker-compose.yml
+      service: zookeeper
+
+  kafka:
+    extends:
+      file: docker-compose.yml
+      service: kafka
+
+  connect:
+    extends:
+      file: docker-compose.yml
+      service: connect
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./build/install:/kafka/connect
+      - ./scripts:/scripts

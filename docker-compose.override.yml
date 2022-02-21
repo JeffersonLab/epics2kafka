@@ -1,0 +1,6 @@
+---
+version: '3.9'
+
+services:
+  connect:
+    image: slominskir/epics2kafka:1.2.0
