@@ -5,14 +5,13 @@
 # epics2kafka [![Java CI with Gradle](https://github.com/JeffersonLab/epics2kafka/workflows/Java%20CI%20with%20Gradle/badge.svg)](https://github.com/JeffersonLab/epics2kafka/actions?query=workflow%3A%22Java+CI+with+Gradle%22) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/slominskir/epics2kafka?sort=semver&label=DockerHub)](https://hub.docker.com/r/slominskir/epics2kafka)
 Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [Kafka](https://kafka.apache.org) via the [Kafka Connect](https://kafka.apache.org/documentation/#connect) interface.
 
-Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
-
 ---
  
-- [Deploy](https://github.com/JeffersonLab/epics2kafka#deploy)   
-   - [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)
-   - [Standalone](https://github.com/JeffersonLab/epics2kafka#standalone)
-   - [Distributed](https://github.com/JeffersonLab/epics2kafka#distributed)
+- [Overview](https://github.com/JeffersonLab/epics2kafka#overview) 
+- [Usage](https://github.com/JeffersonLab/epics2kafka#usage) 
+    - [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)
+    - [Standalone](https://github.com/JeffersonLab/epics2kafka#standalone)
+    - [Distributed](https://github.com/JeffersonLab/epics2kafka#distributed)
 - [Configure](https://github.com/JeffersonLab/epics2kafka#configure)
    - [EPICS Channels](https://github.com/JeffersonLab/epics2kafka#epics-channels)   
    - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
@@ -22,7 +21,10 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 
 ---
 
-## Deploy
+## Overview
+Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
+
+## Usage
 ## Quick Start with Compose
 1. Grab Project
 ```
