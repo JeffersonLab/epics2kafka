@@ -204,16 +204,7 @@ gradlew build
 
 **Note**: Jefferson Lab has an intercepting [proxy](https://gist.github.com/slominskir/92c25a033db93a90184a5994e71d0b78)  
 
-**Note**: When developing the app you can mount the build artifact into the container by substituting the `docker-compose up` command with:
-```
-docker-compose -f docker-compose.dev.yml up
-```
-
-To build from local source (as opposed from remote):
-
-```
-docker build . --build-arg BUILD_TYPE=local-src
-```
+**See**: [Docker Development Quick Reference](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c#development-quick-reference)
 
 ## See Also
    - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
