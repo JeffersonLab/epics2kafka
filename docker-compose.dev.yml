@@ -24,6 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        BUILD_TYPE: local-src
     volumes:
-      - ./build/install:/kafka/connect
       - ./scripts:/scripts
