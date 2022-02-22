@@ -198,7 +198,7 @@ This [Java 17](https://adoptium.net/) project (compiled to Java 8 bytecode) uses
 ```
 git clone https://github.com/JeffersonLab/epics2kafka
 cd epics2kafka
-gradlew build
+gradlew installDist
 ```
 **Note**: If you do not already have Gradle installed, it will be installed automatically by the wrapper script included in the source
 
