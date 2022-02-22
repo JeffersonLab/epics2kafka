@@ -4,17 +4,17 @@ version: '3.9'
 services:
   softioc:
     extends:
-      file: docker-compose.deps.yml
+      file: deps.yml
       service: softioc
 
   zookeeper:
     extends:
-      file: docker-compose.deps.yml
+      file: deps.yml
       service: zookeeper
 
   kafka:
     extends:
-      file: docker-compose.deps.yml
+      file: deps.yml
       service: kafka
 
   connect:

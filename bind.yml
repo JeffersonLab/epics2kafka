@@ -1,0 +1,26 @@
+---
+version: '3.9'
+
+services:
+  softioc:
+    extends:
+      file: build.yml
+      service: softioc
+
+  zookeeper:
+    extends:
+      file: build.yml
+      service: zookeeper
+
+  kafka:
+    extends:
+      file: build.yml
+      service: kafka
+
+  connect:
+    extends:
+      file: build.yml
+      service: connect
+    volumes:
+      - ./build/install:/kafka/connect
+      - ./scripts:/scripts
