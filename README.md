@@ -32,7 +32,7 @@ cd epics2kafka
 ```
 2. Launch Docker:
 ```
-docker-compose up
+docker compose up
 ```
 3. Put a value into the "channel1" EPICS channel
 ```
