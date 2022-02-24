@@ -27,7 +27,7 @@ public class BasicIntegrationTest {
             .withNetwork(network)
             .withNetworkAliases("kafka");
 
-    public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc")
+    public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc:1.1.0")
             .withNetwork(network)
             .withPrivilegedMode(true)
             .withCreateContainerCmdModifier(cmd -> cmd
@@ -41,7 +41,7 @@ public class BasicIntegrationTest {
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/integration/softioc", "/db", BindMode.READ_ONLY);
 
-    public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka")
+    public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka:1.3.0")
             .withNetwork(network)
             .withExposedPorts(8083)
             .withEnv("CONFIG_STORAGE_TOPIC", "connect-configs")
