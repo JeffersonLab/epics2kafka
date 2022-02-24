@@ -1,6 +1,3 @@
----
-version: '3.9'
-
 services:
   softioc:
     image: slominskir/softioc:1.1.0
