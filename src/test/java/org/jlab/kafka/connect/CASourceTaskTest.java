@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CASourceTaskTest {
-    private CASourceTask task = new CASourceTask();
+    private final CASourceTask task = new CASourceTask();
     private SourceTaskContext context;
-    private Map<String, String> props = new HashMap<>();
+    private final Map<String, String> props = new HashMap<>();
     private EmbeddedIoc ioc;
 
     @Before

@@ -29,15 +29,15 @@ import java.util.stream.Collectors;
  */
 public class ChannelManager extends Thread implements AutoCloseable {
     private final Logger log = LoggerFactory.getLogger(ChannelManager.class);
-    private AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
+    private final AtomicReference<TRI_STATE> state = new AtomicReference<>(TRI_STATE.INITIALIZED);
     private final ConnectorContext context;
     private final CASourceConnectorConfig config;
-    private HashMap<SpecKey, ChannelSpec> channels = new HashMap<>();
-    private KafkaConsumer<String, String> consumer;
+    private final HashMap<SpecKey, ChannelSpec> channels = new HashMap<>();
+    private final KafkaConsumer<String, String> consumer;
     private Map<Integer, TopicPartition> assignedPartitionsMap = new HashMap<>(); // empty map initially to avoid NPE
     private Map<TopicPartition, Long> endOffsets;
     private boolean reachedEnd = false;
-    private Long pollMillis;
+    private final Long pollMillis;
 
     public ChannelManager(ConnectorContext context, CASourceConnectorConfig config) {
         this.context = context;
@@ -273,7 +273,7 @@ public class ChannelManager extends Thread implements AutoCloseable {
     }
 
     private enum TRI_STATE {
-        INITIALIZED, RUNNING, CLOSED;
+        INITIALIZED, RUNNING, CLOSED
     }
 }
 
@@ -286,9 +286,9 @@ class ChannelSpec {
      */
     public static final ChannelSpec KEEP_ALIVE = new ChannelSpec();
     @JsonIgnore
-    private SpecKey key;
+    private final SpecKey key;
     @JsonIgnore
-    private SpecValue value;
+    private final SpecValue value;
 
     public ChannelSpec() {
         key = new SpecKey();

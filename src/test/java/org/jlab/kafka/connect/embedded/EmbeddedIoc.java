@@ -8,9 +8,9 @@ import gov.aps.jca.cas.ProcessVariable;
 
 public class EmbeddedIoc {
 
-    private JCALibrary jca;
-    private DefaultServerImpl server;
-    private CAJServerContext context;
+    private final JCALibrary jca;
+    private final DefaultServerImpl server;
+    private final CAJServerContext context;
 
     public EmbeddedIoc() throws CAException {
         jca = JCALibrary.getInstance();

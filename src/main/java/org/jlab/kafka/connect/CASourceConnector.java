@@ -105,7 +105,7 @@ public class CASourceConnector extends SourceConnector {
      */
     @Override
     public ConfigDef config() {
-        return config.configDef();
+        return CASourceConnectorConfig.configDef();
     }
 
     /**

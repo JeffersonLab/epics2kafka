@@ -30,11 +30,11 @@ import java.util.stream.Stream;
 public class CASourceTask extends SourceTask {
     private static final Logger log = LoggerFactory.getLogger(CASourceTask.class);
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
-    private DefaultConfiguration dc = new DefaultConfiguration("config");
+    private final DefaultConfiguration dc = new DefaultConfiguration("config");
     private CAJContext context;
     private List<ChannelSpec> channels;
-    private Map<SpecKey, ChannelSpec> specLookup = new HashMap<>();
-    private Map<SpecKey, MonitorEvent> latest = new ConcurrentHashMap<>();
+    private final Map<SpecKey, ChannelSpec> specLookup = new HashMap<>();
+    private final Map<SpecKey, MonitorEvent> latest = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
     private long pollMillis;

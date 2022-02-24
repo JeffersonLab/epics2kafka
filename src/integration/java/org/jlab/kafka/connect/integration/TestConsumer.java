@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.Properties;
 
 public class TestConsumer {
-    private Properties props = new Properties();
-    private KafkaConsumer<String, String> consumer;
+    private final Properties props = new Properties();
+    private final KafkaConsumer<String, String> consumer;
 
     public TestConsumer(String bootstrapServers, List<String> topics) {
         props.setProperty("bootstrap.servers", bootstrapServers);

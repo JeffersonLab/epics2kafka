@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.List;
 
 public class BasicIntegrationTest {
-    private static Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
 
     @ClassRule
     public static Network network = Network.newNetwork();
