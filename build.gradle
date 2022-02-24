@@ -15,9 +15,6 @@ compileJava {
 
 repositories {
     mavenCentral()
-    maven {
-        url  "https://dl.bintray.com/slominskir/maven"
-    }
 }
 
 sourceSets {
