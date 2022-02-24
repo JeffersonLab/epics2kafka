@@ -7,7 +7,7 @@ plugins {
 group 'org.jlab.kafka.connect'
 version '1.3.0'
 
-compileJava {
+tasks.withType(JavaCompile) {
     options.release = 8
     options.encoding = 'UTF-8'
     options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
