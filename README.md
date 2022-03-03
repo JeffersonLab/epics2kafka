@@ -7,10 +7,9 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
 
 ---
  
-- [Overview](https://github.com/JeffersonLab/epics2kafka#overview) 
-- [Usage](https://github.com/JeffersonLab/epics2kafka#usage) 
-    - [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)
-    - [Install](https://github.com/JeffersonLab/epics2kafka#install)
+- [Overview](https://github.com/JeffersonLab/epics2kafka#overview)  
+- [Quick Start with Compose](https://github.com/JeffersonLab/epics2kafka#quick-start-with-compose)
+- [Install](https://github.com/JeffersonLab/epics2kafka#install)
 - [Configure](https://github.com/JeffersonLab/epics2kafka#configure)
    - [EPICS Channels](https://github.com/JeffersonLab/epics2kafka#epics-channels)   
    - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
@@ -23,7 +22,6 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
 ## Overview
 Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a higher degree of fault-tolerance, scalability, and security that would be hard to achieve with ad-hoc implementations using the Kafka Producer API. 
 
-## Usage
 ## Quick Start with Compose
 1. Grab Project
 ```
@@ -59,9 +57,9 @@ docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:
 
 **See**: [Docker Compose Strategy](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c)
 
-### Install
+## Install
 
-#### Standalone
+### Standalone
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation in standalone mode:
 
 1. Copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://github.com/JeffersonLab/epics2kafka/raw/master/lib/jca-2.4.6.jar) jar files into a plugin directory:
@@ -93,7 +91,7 @@ cd /opt/kafka
 bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.properties
 ```
 
-#### Distributed
+### Distributed
 For distributed mode you must copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://github.com/JeffersonLab/epics2kafka/raw/master/lib/jca-2.4.6.jar) jar files to all nodes in the cluster.    Ensure plugin path is set in _config/connect-distributed.properties_ instead of _config/connect-standalone.properties_.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
