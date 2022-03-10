@@ -23,7 +23,7 @@ public class BasicIntegrationTest {
     @ClassRule
     public static Network network = Network.newNetwork();
 
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:6.2.1"))
+    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1"))
             .withNetwork(network)
             .withNetworkAliases("kafka");
 
