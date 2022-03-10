@@ -13,4 +13,6 @@ BOOTSTRAP_SERVER=${tmpArray[0]}
 $KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server $BOOTSTRAP_SERVER \
              --create \
              --topic epics-channels \
+             --partitions 1 \
+             --replication-factor 1 \
              --config cleanup.policy=compact
