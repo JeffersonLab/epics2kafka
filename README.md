@@ -92,7 +92,7 @@ bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.
 ```
 
 ### Distributed
-For distributed mode you must copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://github.com/JeffersonLab/epics2kafka/raw/master/lib/jca-2.4.6.jar) jar files to all nodes in the cluster.    Ensure plugin path is set in _config/connect-distributed.properties_ instead of _config/connect-standalone.properties_.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
+For distributed mode you must copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://repo1.maven.org/maven2/org/epics/jca/) jar files to all nodes in the cluster.    Ensure plugin path is set in _config/connect-distributed.properties_ instead of _config/connect-standalone.properties_.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, to start the connector:
 ```
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
 ```
