@@ -8,8 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.aps.jca.*;
 import gov.aps.jca.configuration.DefaultConfiguration;
 import gov.aps.jca.dbr.*;
-import gov.aps.jca.event.ConnectionEvent;
-import gov.aps.jca.event.MonitorEvent;
+import gov.aps.jca.event.*;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
@@ -35,7 +34,7 @@ public class CASourceTask extends SourceTask {
     private static final Logger log = LoggerFactory.getLogger(CASourceTask.class);
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
     private final DefaultConfiguration dc = new DefaultConfiguration("config");
-    private CAJContext context;
+    private CAJContext cajContext;
     private List<ChannelSpec> channels;
     private final Map<CAJChannel, CAJMonitor> monitorMap = new HashMap<>();
     private final Map<SpecKey, CAJChannel> channelMap = new HashMap<>();
@@ -135,7 +134,7 @@ public class CASourceTask extends SourceTask {
     public List<SourceRecord> poll() throws InterruptedException {
         log.trace("CASourceTask.poll for channel updates");
 
-        if(context == null) {
+        if(cajContext == null) {
             createContext();
         }
 
@@ -165,10 +164,10 @@ public class CASourceTask extends SourceTask {
         }
 
         try {
-            context.flushIO();
+            cajContext.flushIO();
         } catch(CAException e) {
             log.error("Error while flushing CAJ IO");
-            throw new ConnectException(e); // TODO: request reconfigure instead of simply dying as a sort-of forced reboot?
+            throw new ConnectException(e);
         }
 
         Set<SpecKey> updatedMonitors = monitorEvents.keySet();
@@ -261,9 +260,9 @@ public class CASourceTask extends SourceTask {
      */
     @Override
     public synchronized void stop() {
-        if(context != null) {
+        if(cajContext != null) {
             try {
-                context.destroy();
+                cajContext.destroy();
             } catch (CAException e) {
                 log.error("Failed to destroy CAJContext", e);
             }
@@ -273,22 +272,40 @@ public class CASourceTask extends SourceTask {
 
     private void createContext() {
         try {
-            context = (CAJContext) JCA_LIBRARY.createContext(dc);
-
+            cajContext = (CAJContext) JCA_LIBRARY.createContext(dc);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             PrintStream ps = new PrintStream(baos, true, "utf8"); // StandardCharsets.UTF_8 is Java 10+
-            context.printInfo(ps);
+            cajContext.printInfo(ps);
             log.debug(baos.toString("utf8"));
 
+            cajContext.addContextExceptionListener(new ContextExceptionListener() {
+                @Override
+                public void contextException(ContextExceptionEvent ev) {
+                    log.warn("ContextException: {0}, Channel: {1}, DBR: {2}, Source: {3}", ev.getMessage(), ev.getChannel() == null ? "N/A" : ev.getChannel().getName(), ev.getDBR(), ev.getSource());
+                }
+
+                @Override
+                public void contextVirtualCircuitException(ContextVirtualCircuitExceptionEvent ev) {
+                    log.warn("ContextVirtualCircuitExceptionEvent Circuit: {0}, Status: {1}, Source: {2}", ev.getVirtualCircuit(), ev.getStatus(), ev.getSource());
+                }
+            });
+
+            cajContext.addContextMessageListener(new ContextMessageListener() {
+                @Override
+                public void contextMessage(ContextMessageEvent ev) {
+                    log.warn("ContextMessage:{0}, Source: {1}", ev.getMessage(), ev.getSource());
+                }
+            });
+
             for(ChannelSpec spec: channels) {
-                CAJChannel channel = (CAJChannel)context.createChannel(spec.getName(), ev -> connectionEvents.put(spec.getKey(), ev));
+                CAJChannel channel = (CAJChannel) cajContext.createChannel(spec.getName(), ev -> connectionEvents.put(spec.getKey(), ev));
                 channelMap.put(spec.getKey(), channel);
                 specMap.put(spec.getKey(), spec);
                 errorMap.put(spec.getKey(), "Never Connected");
             }
 
-            context.flushIO();
+            cajContext.flushIO();
 
         } catch(CAException | UnsupportedEncodingException e) {
             log.error("Error while trying to create CAJContext");
