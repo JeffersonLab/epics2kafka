@@ -147,7 +147,7 @@ docker exec connect /scripts/list-monitored.sh
 The connector listens to the command topic and re-configures the connector tasks dynamically so no manual restart is required.  Kafka [Incremental Cooperative Rebalancing](https://www.confluent.io/blog/incremental-cooperative-rebalancing-in-kafka/) attempts to avoid a stop-the-world restart of the connector, but some EPICS CA events can be missed.  When an EPICS monitor is established (or re-established) it always reports the current state - so although changes during a rebalance may be missed, the state of the system will be re-reported at the end of the rebalance.  Channel monitors are divided as evenly as possible among the configured number of tasks.   It is recommended to populate the initial set of channels to monitor before starting the connector to avoid task rebalancing being triggered repeatedly.  You may wish to configure `scheduled.rebalance.max.delay.ms` to a small number to avoid long periods of waiting to see if an assigned task is coming back or not in a task failure scenario.
 
 ### Connector Options
-All of the [common options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
+All of the [common Connect options](https://kafka.apache.org/documentation.html#connect_configuring) apply, plus the following Connector specific ones:
 
 | Option | Description | Default |
 |---|---|---|
@@ -162,6 +162,8 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 | command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
 | command.poll.millis | Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
 | command.bootstrap.servers | Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic | localhost:9092 |
+
+**Note**: The monitor options (except poll.millis) map to [Java Channel Access (JCA) options](https://www.javadoc.io/static/org.epics/jca/2.4.6/gov/aps/jca/JCALibrary.html#CHANNEL_ACCESS_SERVER_JAVA).
 
 Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
 
