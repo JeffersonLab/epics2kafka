@@ -32,6 +32,7 @@ public class CASourceTaskTest {
         List<ChannelSpec> group = new ArrayList<>();
         group.add(new ChannelSpec(new SpecKey("topic1", "channel1"), new SpecValue("a", null)));
         group.add(new ChannelSpec(new SpecKey("topic2", "channel2"), new SpecValue("a", null)));
+        group.add(new ChannelSpec(new SpecKey("topic3", "bogus-missing-pv"), new SpecValue("a", null)));
 
         String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
 
@@ -58,13 +59,27 @@ public class CASourceTaskTest {
 
     @Test
     public void basicTest() throws InterruptedException {
-        List<SourceRecord> records = task.poll(); // Grabs most recent update, if any
+        List<SourceRecord> records = task.poll(); // First poll handles CAJConnection events
+        Thread.sleep(2000);
+        List<SourceRecord> records2 = task.poll(); // Grabs most recent update, if any
+
+        if(records == null) {
+            records = new ArrayList<>();
+        }
+
+        if(records2 == null) {
+            records2 = new ArrayList<>();
+        }
+
+        records.addAll(records2);
 
         int actualCount = records.size();
         String actualC2Value = null;
 
         for(SourceRecord record: records) {
             String channel = (String)record.key();
+
+            //System.out.println(record);
 
             if("channel2".equals(channel)) {
                 Struct struct = (Struct)record.value();
@@ -73,7 +88,7 @@ public class CASourceTaskTest {
             }
         }
 
-        Assert.assertEquals(2, actualCount);
+        Assert.assertEquals(3, actualCount);
         Assert.assertEquals("Hello!", actualC2Value);
     }
 }

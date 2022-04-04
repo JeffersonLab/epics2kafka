@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.aps.jca.*;
 import gov.aps.jca.configuration.DefaultConfiguration;
 import gov.aps.jca.dbr.*;
+import gov.aps.jca.event.ConnectionEvent;
 import gov.aps.jca.event.MonitorEvent;
 import org.apache.kafka.connect.connector.Connector;
 import org.apache.kafka.connect.data.Schema;
@@ -36,8 +37,12 @@ public class CASourceTask extends SourceTask {
     private final DefaultConfiguration dc = new DefaultConfiguration("config");
     private CAJContext context;
     private List<ChannelSpec> channels;
-    private final Map<SpecKey, ChannelSpec> specLookup = new HashMap<>();
-    private final Map<SpecKey, MonitorEvent> latest = new ConcurrentHashMap<>();
+    private final Map<CAJChannel, CAJMonitor> monitorMap = new HashMap<>();
+    private final Map<SpecKey, CAJChannel> channelMap = new HashMap<>();
+    private final Map<SpecKey, ChannelSpec> specMap = new HashMap<>();
+    private final Map<SpecKey, String> errorMap = new ConcurrentHashMap<>();
+    private final Map<SpecKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
+    private final Map<SpecKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
     private long pollMillis;
@@ -45,6 +50,7 @@ public class CASourceTask extends SourceTask {
     static {
         VALUE_SCHEMA = SchemaBuilder.struct()
                 .name("org.jlab.kafka.connect.EPICS_CA_DBR").version(1).doc("An EPICS Channel Access (CA) Time Database Record (DBR) MonitorEvent value")
+                .field("error", SchemaBuilder.string().optional().doc("CA error message, if any").build())
                 .field("status", SchemaBuilder.int8().optional().doc("CA Alarm Status: 0=NO_ALARM,1=READ,2=WRITE,3=HIHI,4=HIGH,5=LOLO,6=LOW,7=STATE,8=COS,9=COMM,10=TIMEOUT,11=HW_LIMIT,12=CALC,13=SCAN,14=LINK,15=SOFT,16=BAD_SUB,17=UDF,18=DISABLE,19=SIMM,20=READ_ACCESS,21=WRITE_ACCESS").build())
                 .field("severity", SchemaBuilder.int8().optional().doc("CA Alarm Severity: 0=NO_ALARM,1=MINOR,2=MAJOR,3=INVALID").build())
                 .field("doubleValues", SchemaBuilder.array(Schema.OPTIONAL_FLOAT64_SCHEMA).optional().doc("EPICS DBR_DOUBLE").build())
@@ -139,37 +145,115 @@ public class CASourceTask extends SourceTask {
 
         ArrayList<SourceRecord> recordList = null; // Must return null if no updates
 
-        Set<SpecKey> updatedChannels = latest.keySet();
+        Set<SpecKey> updatedConnections = connectionEvents.keySet();
+        for(SpecKey key: updatedConnections) {
+            ConnectionEvent event = connectionEvents.remove(key);
+            ChannelSpec spec = specMap.get(key);
 
-        if(!updatedChannels.isEmpty()) {
+            if(event.isConnected()) {
+                errorMap.remove(key); // Remove "Never Connected" error
+                try {
+                    channelConnected(key);
+                } catch(CAException e) {
+                    errorMap.put(key, e.getMessage());
+                }
+            } else {
+                // handle disconnect event
+                errorMap.put(spec.getKey(), "Disconnected");
+                // CAJ *MAY* automatically re-connect in the future.
+            }
+        }
+
+        try {
+            context.flushIO();
+        } catch(CAException e) {
+            log.error("Error while flushing CAJ IO");
+            throw new ConnectException(e); // TODO: request reconfigure instead of simply dying as a sort-of forced reboot?
+        }
+
+        Set<SpecKey> updatedMonitors = monitorEvents.keySet();
+
+        if(!updatedMonitors.isEmpty() || !errorMap.isEmpty()) {
             recordList = new ArrayList<>();
         }
 
-        for(SpecKey key: updatedChannels) {
-            MonitorEvent event = latest.remove(key);
-            ChannelSpec spec = specLookup.get(key);
-            Struct value = eventToStruct(event);
+        for(SpecKey key: updatedMonitors) {
+            SourceRecord record = toSourceRecord(key);
 
-            String outkey = spec.getOutkey();
+            recordList.add(record);
+        }
 
-            if(outkey == null) {
-                outkey = key.getChannel();
-            }
-
-            TimeStamp stamp = ((TIME)event.getDBR()).getTimeStamp();
-            Instant timestamp = Instant.ofEpochSecond(stamp.secPastEpoch(), stamp.nsec());
-            long epochMillis = timestamp.toEpochMilli();
-            Map<String, Long> offsetValue = offsetValue(Instant.now().toEpochMilli());
-
-            SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
-                    KEY_SCHEMA,  outkey, VALUE_SCHEMA, value, epochMillis);
-
-            log.trace("Record: {}", record);
+        // Errors matching monitors removed above; these errors don't have associated monitor update
+        for(SpecKey key: errorMap.keySet()) {
+            SourceRecord record = toSourceRecord(key);
 
             recordList.add(record);
         }
 
         return recordList;
+    }
+
+    private SourceRecord toSourceRecord(SpecKey key) {
+        MonitorEvent event = monitorEvents.remove(key);
+        ChannelSpec spec = specMap.get(key);
+        String error = errorMap.remove(key);
+        Struct value = eventToStruct(event, error);
+
+        String outkey = spec.getOutkey();
+
+        if(outkey == null) {
+            outkey = key.getChannel();
+        }
+
+        Instant timestamp;
+
+        if(event != null) {
+            TimeStamp stamp = ((TIME) event.getDBR()).getTimeStamp();
+            timestamp = Instant.ofEpochSecond(stamp.secPastEpoch(), stamp.nsec());
+        } else {
+            timestamp = Instant.now();
+        }
+        long epochMillis = timestamp.toEpochMilli();
+        Map<String, Long> offsetValue = offsetValue(Instant.now().toEpochMilli());
+
+        SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
+                KEY_SCHEMA,  outkey, VALUE_SCHEMA, value, epochMillis);
+
+        log.trace("Record: {}", record);
+
+        return record;
+    }
+
+    private void channelConnected(SpecKey key) throws CAException {
+        CAJChannel channel = channelMap.get(key);
+        ChannelSpec spec = specMap.get(key);
+
+        log.debug("Creating monitor for channel: {}", spec);
+
+        int mask = 0;
+
+        if(spec.getMask().contains("v")) {
+            mask = mask | Monitor.VALUE;
+        }
+
+        if(spec.getMask().contains("a")) {
+            mask = mask | Monitor.ALARM;
+        }
+
+        DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
+
+        CAJMonitor monitor = monitorMap.get(key);
+
+        if(monitor == null) {
+            monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), mask);
+
+            monitor.addMonitorListener(ev -> monitorEvents.put(key, ev));
+
+            monitorMap.put(channel, monitor);
+        } else {
+            // Presumably CAJ will automatically resume monitoring...
+            log.debug("Channel re-connected with existing monitor (fingers crossed monitor resumes automatically): " + key);
+        }
     }
 
     /**
@@ -197,42 +281,16 @@ public class CASourceTask extends SourceTask {
             context.printInfo(ps);
             log.debug(baos.toString("utf8"));
 
-            Map<SpecKey, CAJChannel> cajMap = new HashMap<>();
             for(ChannelSpec spec: channels) {
-                cajMap.put(spec.getKey(), (CAJChannel)context.createChannel(spec.getName()));
-                specLookup.put(spec.getKey(), spec);
+                CAJChannel channel = (CAJChannel)context.createChannel(spec.getName(), ev -> connectionEvents.put(spec.getKey(), ev));
+                channelMap.put(spec.getKey(), channel);
+                specMap.put(spec.getKey(), spec);
+                errorMap.put(spec.getKey(), "Never Connected");
             }
 
-            context.pendIO(2.0);
+            context.flushIO();
 
-            Set<SpecKey> keySet = cajMap.keySet();
-
-            for(SpecKey key: keySet) {
-                CAJChannel channel = cajMap.get(key);
-                ChannelSpec spec = specLookup.get(key);
-
-                log.debug("Creating monitor for channel: {}", spec);
-
-                int mask = 0;
-
-                if(spec.getMask().contains("v")) {
-                    mask = mask | Monitor.VALUE;
-                }
-
-                if(spec.getMask().contains("a")) {
-                    mask = mask | Monitor.ALARM;
-                }
-
-                DBRType type = getTimeTypeFromFieldType(channel.getFieldType());
-
-                CAJMonitor monitor = (CAJMonitor) channel.addMonitor(type, channel.getElementCount(), mask);
-
-                monitor.addMonitorListener(ev -> latest.put(key, ev));
-            }
-
-            context.pendIO(2.0);
-
-        } catch(CAException | TimeoutException | UnsupportedEncodingException e) {
+        } catch(CAException | UnsupportedEncodingException e) {
             log.error("Error while trying to create CAJContext");
             throw new ConnectException(e);
         }
@@ -276,7 +334,24 @@ public class CASourceTask extends SourceTask {
         return time;
     }
 
-    private Struct eventToStruct(MonitorEvent event) {
+    private Struct eventToStruct(MonitorEvent event, String error) {
+        Struct struct;
+
+        if(event != null) {
+            struct = eventToStructNotNull(event, error);
+        } else {
+            struct = new Struct(VALUE_SCHEMA);
+
+            if(error != null) {
+                struct.put("error", error);
+            }
+        }
+
+        return struct;
+    }
+
+
+    private Struct eventToStructNotNull(MonitorEvent event, String error) {
         DBR dbr = event.getDBR();
 
         Struct struct = new Struct(VALUE_SCHEMA);
@@ -334,6 +409,10 @@ public class CASourceTask extends SourceTask {
 
         struct.put("status", (byte)status.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 3 bits needed
         struct.put("severity", (byte)severity.getValue()); // JCA uses 32-bits, CA uses 16-bits, only 5 bits needed
+
+        if(error != null) {
+            struct.put("error", error);
+        }
 
         return struct;
     }
