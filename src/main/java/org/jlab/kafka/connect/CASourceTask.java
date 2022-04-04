@@ -75,6 +75,11 @@ public class CASourceTask extends SourceTask {
         CASourceConnectorConfig config =  new CASourceConnectorConfig(props);
 
         String epicsAddrList = config.getString(CASourceConnectorConfig.MONITOR_ADDR_LIST);
+        Boolean epicsAutoAddrList = config.getBoolean(CASourceConnectorConfig.MONITOR_AUTO_ADDR_LIST);
+        Double epicsConnectionTimeout = config.getDouble(CASourceConnectorConfig.MONITOR_CONNECTION_TIMEOUT);
+        Long epicsRepeaterPort = config.getLong(CASourceConnectorConfig.MONITOR_REPEATER_PORT);
+        Long epicsMaxArrayBytes = config.getLong(CASourceConnectorConfig.MONITOR_MAX_ARRAY_BYTES);
+        Integer epicsThreadPoolSize = config.getInt(CASourceConnectorConfig.MONITOR_THREAD_POOL_SIZE);
 
         pollMillis = config.getLong(CASourceConnectorConfig.MONITOR_POLL_MILLIS);
 
@@ -95,8 +100,12 @@ public class CASourceTask extends SourceTask {
         }
 
         dc.setAttribute("class", JCALibrary.CHANNEL_ACCESS_JAVA);
-        dc.setAttribute("auto_addr_list", "false");
         dc.setAttribute("addr_list", epicsAddrList);
+        dc.setAttribute("auto_addr_list", epicsAutoAddrList.toString());
+        dc.setAttribute("connection_timeout", epicsConnectionTimeout.toString());
+        dc.setAttribute("repeater_port", epicsRepeaterPort.toString());
+        dc.setAttribute("max_array_bytes", epicsMaxArrayBytes.toString());
+        dc.setAttribute("thread_pool_size", epicsThreadPoolSize.toString());
     }
 
     /**
