@@ -151,7 +151,12 @@ All of the [common options](https://kafka.apache.org/documentation.html#connect_
 
 | Option | Description | Default |
 |---|---|---|
-| monitor.addr.list | List of EPICS CA addresses | |
+| monitor.addr.list | Space-separated list of addresses for PV resolution.  Each address should be of the form `ip:port` or `hostname:port` | |
+| monitor.auto.addr.list | Whether or not network interfaces should be discovered at runtime for the purpose of PV resolution | true |
+| monitor.connection.timeout | Time in seconds between CA beacons before client initiates health-check query which may result in disconnect if not promptly responded to | 30.0 |
+| monitor.repeater.port | Port number to use for the beacon repeater process, which will automatically be started if not already running | 5065 |
+| monitor.max.array.bytes | Maximum size of CA array, in bytes | 16384 |
+| monitor.thread.pool.size | Number of threads for processing network events | 5 |
 | monitor.poll.millis | Milliseconds between polls for CA changes - sets max CA monitor update frequency | 1000 |
 | command.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
 | command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
