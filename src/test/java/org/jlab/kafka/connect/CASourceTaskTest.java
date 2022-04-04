@@ -39,6 +39,7 @@ public class CASourceTaskTest {
         ioc.registerPv(new MemoryProcessVariable("channel2", null, DBRType.STRING, new String[]{"Hello!"}));
 
         props.put(CASourceConnectorConfig.MONITOR_ADDR_LIST, ioc.getAddress());
+        props.put(CASourceConnectorConfig.MONITOR_AUTO_ADDR_LIST, "false");
         props.put("task-channels", jsonArray);
 
         task.initialize(context);

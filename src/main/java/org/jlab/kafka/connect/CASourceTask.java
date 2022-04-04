@@ -19,6 +19,9 @@ import org.apache.kafka.connect.source.SourceTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -188,6 +191,12 @@ public class CASourceTask extends SourceTask {
         try {
             context = (CAJContext) JCA_LIBRARY.createContext(dc);
 
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(baos, true, "utf8"); // StandardCharsets.UTF_8 is Java 10+
+            context.printInfo(ps);
+            log.debug(baos.toString("utf8"));
+
             Map<SpecKey, CAJChannel> cajMap = new HashMap<>();
             for(ChannelSpec spec: channels) {
                 cajMap.put(spec.getKey(), (CAJChannel)context.createChannel(spec.getName()));
@@ -223,7 +232,7 @@ public class CASourceTask extends SourceTask {
 
             context.pendIO(2.0);
 
-        } catch(CAException | TimeoutException e) {
+        } catch(CAException | TimeoutException | UnsupportedEncodingException e) {
             log.error("Error while trying to create CAJContext");
             throw new ConnectException(e);
         }
