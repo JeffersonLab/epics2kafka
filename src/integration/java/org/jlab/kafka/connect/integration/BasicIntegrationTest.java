@@ -9,9 +9,12 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.*;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -41,7 +44,8 @@ public class BasicIntegrationTest {
             .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
             .withFileSystemBind("examples/integration/softioc", "/db", BindMode.READ_ONLY);
 
-    public static GenericContainer<?> connect = new GenericContainer<>("slominskir/epics2kafka:1.3.0")
+    public static GenericContainer<?> connect = new GenericContainer<>(new ImageFromDockerfile("epics2kafka:snapshot")
+            .withFileFromPath(".", new File(".").toPath()))
             .withNetwork(network)
             .withExposedPorts(8083)
             .withEnv("CONFIG_STORAGE_TOPIC", "connect-configs")
@@ -153,5 +157,33 @@ public class BasicIntegrationTest {
 
         // Kafka doesn't guarantee messages are delivered with low latency...
         Assert.assertTrue(recordCache.size() > 5);
+    }
+
+    @Test
+    public void testPVNeverConnected() throws InterruptedException {
+        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelc"));
+
+        int WAIT_TIMEOUT_MILLIS = 1000;
+
+        consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        Thread.sleep(2000);
+
+        ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+
+        consumer.close();
+
+        Assert.assertFalse(records.isEmpty());
+
+        ConsumerRecord<String, String> record = records.iterator().next();
+
+        Assert.assertEquals("cc", record.key());
+
+        String expectedValue = "{\"error\":3}";
+
+        System.out.println("Expected: " + expectedValue);
+        System.out.println("Actual: " + record.value());
+
+        Assert.assertEquals(expectedValue, record.value());
     }
 }
