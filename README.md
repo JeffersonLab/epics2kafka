@@ -32,18 +32,19 @@ cd epics2kafka
 ```
 docker compose up
 ```
-3. Put a value into the "channel1" EPICS channel
+3. Listen to the Kafka topic "topic1"
+```
+docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic topic1 --from-beginning
+```
+4. Put a value into the "channel1" EPICS channel
+ 
+**Single**:
 ```
 docker exec softioc caput channel1 1
 ```
-Or feed a continuous incrementing stream of values:
-
+**Continuous**:
 ```
 docker exec -it softioc /scripts/feed-ca.sh channel1
-```
-4. Listen to the Kafka topic "topic1"
-```
-docker exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --topic topic1 --from-beginning
 ```
 **Note**: The Docker Compose project creates the following containers: 
    - [softioc](https://github.com/JeffersonLab/softioc)
