@@ -75,6 +75,7 @@ public class CASourceTaskTest {
 
         int actualCount = records.size();
         String actualC2Value = null;
+        String missingError = null;
 
         for(SourceRecord record: records) {
             String channel = (String)record.key();
@@ -86,9 +87,15 @@ public class CASourceTaskTest {
                 List<String> strArray = struct.getArray("stringValues");
                 actualC2Value = strArray.get(0);
             }
+
+            if("bogus-missing-pv".equals(channel)) {
+                Struct struct = (Struct)record.value();
+                missingError = struct.getString("error");
+            }
         }
 
         Assert.assertEquals(3, actualCount);
         Assert.assertEquals("Hello!", actualC2Value);
+        Assert.assertEquals("Never Connected", missingError);
     }
 }
