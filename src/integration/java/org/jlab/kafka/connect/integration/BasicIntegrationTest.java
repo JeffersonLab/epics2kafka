@@ -164,45 +164,42 @@ public class BasicIntegrationTest {
         Assert.assertTrue(recordCache.size() > 5);
     }
 
-    //@Test
-    public void testPVNeverConnected() throws InterruptedException {
+    @Test
+    public void testPVNeverConnected() throws InterruptedException, IOException {
         TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelc"), "never-connected-consumer");
 
-        int WAIT_TIMEOUT_MILLIS = 1000;
+        int POLL_MILLIS = 200;
 
-        List<ConsumerRecord<String, String>> allRecords = new ArrayList<>();
+        List<ConsumerRecord<String, String>> recordCache = new ArrayList<>();
 
-        ConsumerRecords<String, String> pollRecords = consumer.poll(WAIT_TIMEOUT_MILLIS);
+        long nowMillis = System.currentTimeMillis();
+        long endMillis = nowMillis + 5000;
 
-        System.err.println(">>>>>>>>>>>>> Poll count: " + pollRecords.count());
+        while(System.currentTimeMillis() < endMillis) {
+            ConsumerRecords<String, String> records = consumer.poll(POLL_MILLIS);
 
-        for (Iterator<ConsumerRecord<String, String>> it = pollRecords.iterator(); it.hasNext(); ) {
-            ConsumerRecord<String, String> record = it.next();
-            System.out.println("Record: " + record);
-            allRecords.add(record);
-        }
+            System.out.println("Poll record count: " + records.count());
 
-        Thread.sleep(2000);
+            for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
+                ConsumerRecord<String, String> record = it.next();
 
-        pollRecords = consumer.poll(WAIT_TIMEOUT_MILLIS);
+                //System.out.println("Record Offset: " + record.offset());
 
-        System.err.println(">>>>>>>>>>>>> Poll count: " + pollRecords.count());
-
-        for (Iterator<ConsumerRecord<String, String>> it = pollRecords.iterator(); it.hasNext(); ) {
-            ConsumerRecord<String, String> record = it.next();
-            System.out.println("Record: " + record);
-            allRecords.add(record);
+                recordCache.add(record);
+            }
         }
 
         consumer.close();
 
-        Assert.assertFalse(allRecords.isEmpty());
+        System.out.println("Total Records: " + recordCache.size());
 
-        ConsumerRecord<String, String> record = allRecords.iterator().next();
+        Assert.assertFalse(recordCache.isEmpty());
+
+        ConsumerRecord<String, String> record = recordCache.iterator().next();
 
         Assert.assertEquals("cc", record.key());
 
-        String expectedValue = "{\"error\":3}";
+        String expectedValue = "{\"error\":\"Never Connected\",\"status\":null,\"severity\":null,\"doubleValues\":null,\"floatValues\":null,\"stringValues\":null,\"intValues\":null,\"shortValues\":null,\"byteValues\":null}";
 
         System.out.println("Expected: " + expectedValue);
         System.out.println("Actual: " + record.value());
