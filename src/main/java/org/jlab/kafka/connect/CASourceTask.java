@@ -282,19 +282,19 @@ public class CASourceTask extends SourceTask {
             cajContext.addContextExceptionListener(new ContextExceptionListener() {
                 @Override
                 public void contextException(ContextExceptionEvent ev) {
-                    log.warn("ContextException: {0}, Channel: {1}, DBR: {2}, Source: {3}", ev.getMessage(), ev.getChannel() == null ? "N/A" : ev.getChannel().getName(), ev.getDBR(), ev.getSource());
+                    log.warn("ContextException: {0}, Channel: {}, DBR: {}, Source: {}", ev.getMessage(), ev.getChannel() == null ? "N/A" : ev.getChannel().getName(), ev.getDBR(), ev.getSource());
                 }
 
                 @Override
                 public void contextVirtualCircuitException(ContextVirtualCircuitExceptionEvent ev) {
-                    log.warn("ContextVirtualCircuitExceptionEvent Circuit: {0}, Status: {1}, Source: {2}", ev.getVirtualCircuit(), ev.getStatus(), ev.getSource());
+                    log.warn("ContextVirtualCircuitExceptionEvent Circuit: {}, Status: {}, Source: {}", ev.getVirtualCircuit(), ev.getStatus(), ev.getSource());
                 }
             });
 
             cajContext.addContextMessageListener(new ContextMessageListener() {
                 @Override
                 public void contextMessage(ContextMessageEvent ev) {
-                    log.warn("ContextMessage:{0}, Source: {1}", ev.getMessage(), ev.getSource());
+                    log.warn("ContextMessage:{}, Source: {}", ev.getMessage(), ev.getSource());
                 }
             });
 
