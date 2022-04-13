@@ -11,9 +11,9 @@ public class TestConsumer {
     private final Properties props = new Properties();
     private final KafkaConsumer<String, String> consumer;
 
-    public TestConsumer(String bootstrapServers, List<String> topics) {
+    public TestConsumer(String bootstrapServers, List<String> topics, String groupId) {
         props.setProperty("bootstrap.servers", bootstrapServers);
-        props.setProperty("group.id", "test");
+        props.setProperty("group.id", groupId);
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "200");
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
