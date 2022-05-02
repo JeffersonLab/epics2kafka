@@ -84,7 +84,7 @@ plugin.path=/opt/kafka/plugins
 # Create new config file for connector
 vi config/ca-source.properties
 ```
-Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)
+Example [ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/main/examples/connect-config/standalone/ca-source.properties)
 
 3. Launch the Kafka Connect server:
 ```
@@ -98,7 +98,7 @@ For distributed mode you must copy the [connector](https://github.com/JeffersonL
 curl -X POST -H "Content-Type:application/json" -d @./examples/connect-config/distributed/ca-source.json http://localhost:8083/connectors
 ```
 
-Example [ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)
+Example [ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/main/examples/connect-config/distributed/ca-source.json)
 
 ## Configure 
 ### EPICS Channels
@@ -125,7 +125,7 @@ docker exec -it kafka /kafka/bin/kafka-console-producer.sh --bootstrap-server ka
 >
 ```
 2. Bulk from File      
-Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/channels) found in the Connect docker image:
+Channels can be batch loaded from a file using shell file redirection such as with the [example channels file](https://github.com/JeffersonLab/epics2kafka/blob/main/examples/connect-config/distributed/channels) found in the Connect docker image:
 ```
   /kafka/bin/kafka-console-producer.sh --bootstrap-server kafka:9092 --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < /config/channels
 ```
@@ -166,7 +166,7 @@ All of the [common Connect options](https://kafka.apache.org/documentation.html#
 
 **Note**: The monitor options (except poll.millis) map to [Java Channel Access (JCA) options](https://www.javadoc.io/static/org.epics/jca/2.4.6/gov/aps/jca/JCALibrary.html#CHANNEL_ACCESS_SERVER_JAVA).
 
-Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/master/examples/connect-config/standalone/ca-source.properties)).
+Options are specified in JSON format when running the connector in distributed mode ([ca-source.json](https://github.com/JeffersonLab/epics2kafka/blob/main/examples/connect-config/distributed/ca-source.json)).  In standalone mode the options are specified in a Java properties file ([ca-source.properties](https://github.com/JeffersonLab/epics2kafka/blob/main/examples/connect-config/standalone/ca-source.properties)).
 
 #### Converters
 The internal Schema structure can be serialized to various forms using Converters.  The following are common converters:
