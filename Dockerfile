@@ -27,7 +27,7 @@ COPY --from=builder /app/examples/logging/log4j.properties /kafka/config
 COPY --from=builder /app/examples/logging/logging.properties /kafka/config
 RUN if [ -z "${CUSTOM_CRT_URL}" ] ; then echo "No custom cert needed"; else \
        mkdir -p /usr/local/share/ca-certificates \
-       && wget -O /usr/local/share/ca-certificates/customcert.crt $CUSTOM_CRT_URL \
+       && curl -o /usr/local/share/ca-certificates/customcert.crt $CUSTOM_CRT_URL \
        && cat /usr/local/share/ca-certificates/customcert.crt >> /etc/ssl/certs/ca-certificates.crt \
        && keytool -import -alias custom -file /usr/local/share/ca-certificates/customcert.crt -cacerts -storepass changeit -noprompt \
     ; fi \
