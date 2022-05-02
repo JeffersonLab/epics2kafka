@@ -1,5 +1,5 @@
 ARG BUILD_IMAGE=gradle:7.4-jdk17-alpine
-ARG RUN_IMAGE=debezium/connect-base:1.8.1.Final
+ARG RUN_IMAGE=debezium/connect-base:1.9.2.Final
 
 ################## Stage 0
 FROM ${BUILD_IMAGE} as builder
