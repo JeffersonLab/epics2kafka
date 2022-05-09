@@ -92,6 +92,7 @@ public class CASourceConnector extends SourceConnector {
         consumer.start();
 
         try {
+            // TODO: await should return boolean indicating whether timeout occurred; and an exception should be thrown.
             consumer.awaitHighWaterOffset(config.getLong(CASourceConnectorConfig.COMMAND_LOAD_TIMEOUT_SECONDS), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while waiting for command topic high water", e);
