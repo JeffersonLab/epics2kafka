@@ -78,8 +78,8 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         ConfigDef.Importance.HIGH,
                         "Milliseconds between polls for command topic changes")
                 .define(CASourceConnectorConfig.COMMAND_MAX_POLL_RECORDS,
-                        ConfigDef.Type.LONG,
-                        5000l,
+                        ConfigDef.Type.INT,
+                        5000,
                         ConfigDef.Importance.HIGH,
                         "The maximum number of records returned in a single call to poll(), and also the maximum batch size returned in the batch call-back.")
                 .define(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS,

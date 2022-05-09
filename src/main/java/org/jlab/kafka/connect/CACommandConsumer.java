@@ -84,7 +84,7 @@ public class CACommandConsumer extends CommandConsumer {
         String channelsTopic = config.getString(CASourceConnectorConfig.COMMAND_TOPIC);
         String channelsGroup = config.getString(CASourceConnectorConfig.COMMAND_GROUP);
         long pollMillis = config.getLong(CASourceConnectorConfig.COMMAND_POLL_MILLIS);
-        long maxPollRecords = config.getLong(CASourceConnectorConfig.COMMAND_MAX_POLL_RECORDS);
+        int maxPollRecords = config.getInt(CASourceConnectorConfig.COMMAND_MAX_POLL_RECORDS);
 
         props.put("bootstrap.servers", kafkaUrl);
         props.put("group.id", channelsGroup);
