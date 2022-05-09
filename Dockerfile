@@ -1,5 +1,5 @@
 ARG BUILD_IMAGE=gradle:7.4-jdk17-alpine
-ARG RUN_IMAGE=debezium/connect-base:1.9.2.Final
+ARG RUN_IMAGE=slominskir/epics2kafka-base:1.0.0
 
 ################## Stage 0
 FROM ${BUILD_IMAGE} as builder
@@ -25,16 +25,8 @@ COPY --from=builder /app/build/install $KAFKA_CONNECT_PLUGINS_DIR
 COPY --from=builder /app/scripts /scripts
 COPY --from=builder /app/examples/logging/log4j.properties /kafka/config
 COPY --from=builder /app/examples/logging/logging.properties /kafka/config
-RUN if [ -z "${CUSTOM_CRT_URL}" ] ; then echo "No custom cert needed"; else \
-       mkdir -p /usr/local/share/ca-certificates \
-       && curl -o /usr/local/share/ca-certificates/customcert.crt $CUSTOM_CRT_URL \
-       && cat /usr/local/share/ca-certificates/customcert.crt >> /etc/ssl/certs/ca-certificates.crt \
-       && keytool -import -alias custom -file /usr/local/share/ca-certificates/customcert.crt -cacerts -storepass changeit -noprompt \
-    ; fi \
-    && chown -R ${RUN_USER}:0 /scripts \
-    && chmod -R g+rw /scripts \
-    && microdnf install -y hostname jq java-11-openjdk-devel vim \
-    && microdnf clean all
+RUN chown -R ${RUN_USER}:0 /scripts \
+    && chmod -R g+rw /scripts
 USER ${RUN_USER}
 WORKDIR /scripts
 ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
