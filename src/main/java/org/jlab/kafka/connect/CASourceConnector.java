@@ -4,10 +4,18 @@ import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.source.SourceConnector;
 import org.apache.kafka.connect.util.ConnectorUtils;
+import org.jlab.kafka.connect.command.ChannelCommand;
+import org.jlab.kafka.connect.command.CommandKey;
+import org.jlab.kafka.connect.command.CommandValue;
+import org.jlab.kafka.eventsource.EventSourceListener;
+import org.jlab.kafka.eventsource.EventSourceRecord;
+import org.jlab.kafka.serde.JsonSerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -19,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public class CASourceConnector extends SourceConnector {
     public static final String version;
-    private ChannelManager channelManager;
+    private CACommandConsumer consumer;
     private Map<String, String> props;
     private CASourceConnectorConfig config;
 
@@ -50,11 +58,7 @@ public class CASourceConnector extends SourceConnector {
 
         config = new CASourceConnectorConfig(props);
 
-        // Creating channel manager fetches initial list of channels
-        channelManager = new ChannelManager(context, config);
-
-        // Listen for changes
-        channelManager.start();
+        consumer = new CACommandConsumer(context, config);
     }
 
     /**
@@ -74,16 +78,35 @@ public class CASourceConnector extends SourceConnector {
      */
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
-        Set<ChannelSpec> pvs = channelManager.getChannels();
+        Set<ChannelCommand> pvs = new LinkedHashSet<>();
 
-        pvs.add(ChannelSpec.KEEP_ALIVE); // This ensures we don't go into FAILED state from having no work to do
+        consumer.addListener(new EventSourceListener<CommandKey, CommandValue>() {
+            @Override
+            public void highWaterOffset(LinkedHashMap<CommandKey, EventSourceRecord<CommandKey, CommandValue>> records) {
+                for(EventSourceRecord<CommandKey, CommandValue> record: records.values()) {
+                    pvs.add(new ChannelCommand(record.getKey(), record.getValue()));
+                }
+            }
+        });
+
+        consumer.start();
+
+        try {
+            consumer.awaitHighWaterOffset(config.getLong(CASourceConnectorConfig.COMMAND_LOAD_TIMEOUT_SECONDS), TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException("Interrupted while waiting for command topic high water", e);
+        }
+
+        pvs.add(ChannelCommand.KEEP_ALIVE); // This ensures we don't go into FAILED state from having no work to do
 
         int numGroups = Math.min(pvs.size(), maxTasks);
-        List<List<ChannelSpec>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
+        List<List<ChannelCommand>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());
-        for (List<ChannelSpec> group : groupedPvs) {
+        JsonSerializer<ChannelCommand> serializer  = new JsonSerializer<>();
+        for (List<ChannelCommand> group : groupedPvs) {
             Map<String, String> taskProps = new HashMap<>(props);
-            String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
+            String jsonArray = "[" + group.stream().map( c -> new String(serializer.serialize(null, c),
+                    StandardCharsets.UTF_8) ).collect(Collectors.joining(",")) + "]";
             taskProps.put("task-channels", jsonArray);
             taskConfigs.add(taskProps);
         }
@@ -95,7 +118,7 @@ public class CASourceConnector extends SourceConnector {
      */
     @Override
     public void stop() {
-        channelManager.close();
+        consumer.close();
     }
 
     /**

@@ -7,12 +7,17 @@ import gov.aps.jca.dbr.DBRType;
 import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTaskContext;
+import org.jlab.kafka.connect.command.ChannelCommand;
+import org.jlab.kafka.connect.command.CommandKey;
+import org.jlab.kafka.connect.command.CommandValue;
 import org.jlab.kafka.connect.embedded.EmbeddedIoc;
+import org.jlab.kafka.serde.JsonSerializer;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,12 +34,15 @@ public class CASourceTaskTest {
     public void setup() throws CAException {
         ioc = new EmbeddedIoc();
 
-        List<ChannelSpec> group = new ArrayList<>();
-        group.add(new ChannelSpec(new SpecKey("topic1", "channel1"), new SpecValue("a", null)));
-        group.add(new ChannelSpec(new SpecKey("topic2", "channel2"), new SpecValue("a", null)));
-        group.add(new ChannelSpec(new SpecKey("topic3", "bogus-missing-pv"), new SpecValue("a", null)));
+        List<ChannelCommand> group = new ArrayList<>();
+        group.add(new ChannelCommand(new CommandKey("topic1", "channel1"), new CommandValue("a", null)));
+        group.add(new ChannelCommand(new CommandKey("topic2", "channel2"), new CommandValue("a", null)));
+        group.add(new ChannelCommand(new CommandKey("topic3", "bogus-missing-pv"), new CommandValue("a", null)));
 
-        String jsonArray = "[" + group.stream().map( c -> c.toJSON() ).collect(Collectors.joining(",")) + "]";
+        JsonSerializer<ChannelCommand> serializer  = new JsonSerializer<>();
+
+        String jsonArray = "[" + group.stream().map( c -> new String(serializer.serialize(null, c),
+                StandardCharsets.UTF_8) ).collect(Collectors.joining(",")) + "]";
 
         ioc.registerPv(new CounterProcessVariable("channel1", null, 0, Integer.MAX_VALUE, 1, 1000, 0, 100, 0, 100));
         ioc.registerPv(new MemoryProcessVariable("channel2", null, DBRType.STRING, new String[]{"Hello!"}));

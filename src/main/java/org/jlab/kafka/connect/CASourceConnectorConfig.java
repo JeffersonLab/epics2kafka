@@ -16,7 +16,10 @@ public class CASourceConnectorConfig extends AbstractConfig {
     public static final String COMMAND_TOPIC = "command.topic";
     public static final String COMMAND_GROUP = "command.group";
     public static final String COMMAND_POLL_MILLIS = "command.poll.millis";
+    public static final String COMMAND_MAX_POLL_RECORDS = "command.max.poll.records";
     public static final String COMMAND_BOOTSTRAP_SERVERS = "command.bootstrap.servers";
+    public static final String COMMAND_LOAD_TIMEOUT_SECONDS = "command.load.timeout.seconds";
+    public static final String COMMAND_SETTLE_SECONDS = "command.settle.seconds";
 
     public CASourceConnectorConfig(Map originals) {
         super(configDef(), originals, false);
@@ -73,11 +76,26 @@ public class CASourceConnectorConfig extends AbstractConfig {
                         ConfigDef.Type.LONG,
                         5000l,
                         ConfigDef.Importance.HIGH,
-                        "Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure")
+                        "Milliseconds between polls for command topic changes")
+                .define(CASourceConnectorConfig.COMMAND_MAX_POLL_RECORDS,
+                        ConfigDef.Type.LONG,
+                        5000l,
+                        ConfigDef.Importance.HIGH,
+                        "The maximum number of records returned in a single call to poll(), and also the maximum batch size returned in the batch call-back.")
                 .define(CASourceConnectorConfig.COMMAND_BOOTSTRAP_SERVERS,
                         ConfigDef.Type.STRING,
                         "localhost:9092",
                         ConfigDef.Importance.HIGH,
-                        "Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic");
+                        "Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic")
+                .define(CASourceConnectorConfig.COMMAND_LOAD_TIMEOUT_SECONDS,
+                    ConfigDef.Type.LONG,
+                    30l,
+                    ConfigDef.Importance.MEDIUM,
+                    "How many seconds to wait loading the initial channels list before timeout")
+                .define(CASourceConnectorConfig.COMMAND_SETTLE_SECONDS,
+                    ConfigDef.Type.LONG,
+                    15l,
+                    ConfigDef.Importance.MEDIUM,
+                    "How many seconds to wait after a command is issued for no more commands before requesting reconfigure.  This is done because reconfigure is a heavy operation so batching commands is ideal.");
     }
 }

@@ -16,6 +16,9 @@ import org.apache.kafka.connect.data.Struct;
 import org.apache.kafka.connect.errors.ConnectException;
 import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
+import org.jlab.kafka.connect.command.ChannelCommand;
+import org.jlab.kafka.connect.command.CommandKey;
+import org.jlab.kafka.connect.command.CommandValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +38,13 @@ public class CASourceTask extends SourceTask {
     private static final JCALibrary JCA_LIBRARY = JCALibrary.getInstance();
     private final DefaultConfiguration dc = new DefaultConfiguration("config");
     private CAJContext cajContext;
-    private List<ChannelSpec> channels;
+    private List<ChannelCommand> channels;
     private final Map<CAJChannel, CAJMonitor> monitorMap = new HashMap<>();
-    private final Map<SpecKey, CAJChannel> channelMap = new HashMap<>();
-    private final Map<SpecKey, ChannelSpec> specMap = new HashMap<>();
-    private final Map<SpecKey, String> errorMap = new ConcurrentHashMap<>();
-    private final Map<SpecKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
-    private final Map<SpecKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
+    private final Map<CommandKey, CAJChannel> channelMap = new HashMap<>();
+    private final Map<CommandKey, ChannelCommand> specMap = new HashMap<>();
+    private final Map<CommandKey, String> errorMap = new ConcurrentHashMap<>();
+    private final Map<CommandKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
+    private final Map<CommandKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
     private long pollMillis;
@@ -98,11 +101,11 @@ public class CASourceTask extends SourceTask {
         String json = props.get("task-channels");
 
         try {
-            ChannelSpec[] specArray = objectMapper.readValue(json, ChannelSpec[].class);
+            ChannelCommand[] specArray = objectMapper.readValue(json, ChannelCommand[].class);
 
             channels = new LinkedList<>(Arrays.asList(specArray));
 
-            channels.remove(ChannelSpec.KEEP_ALIVE); // One lucky task has this placeholder, but don't actually monitor!
+            channels.remove(ChannelCommand.KEEP_ALIVE); // One lucky task has this placeholder, but don't actually monitor!
         } catch(JsonProcessingException e) {
             throw new RuntimeException("Unable to parse JSON task config", e);
         }
@@ -144,10 +147,10 @@ public class CASourceTask extends SourceTask {
 
         ArrayList<SourceRecord> recordList = null; // Must return null if no updates
 
-        Set<SpecKey> updatedConnections = connectionEvents.keySet();
-        for(SpecKey key: updatedConnections) {
+        Set<CommandKey> updatedConnections = connectionEvents.keySet();
+        for(CommandKey key: updatedConnections) {
             ConnectionEvent event = connectionEvents.remove(key);
-            ChannelSpec spec = specMap.get(key);
+            ChannelCommand spec = specMap.get(key);
 
             if(event.isConnected()) {
                 errorMap.remove(key); // Remove "Never Connected" error
@@ -170,20 +173,20 @@ public class CASourceTask extends SourceTask {
             throw new ConnectException(e);
         }
 
-        Set<SpecKey> updatedMonitors = monitorEvents.keySet();
+        Set<CommandKey> updatedMonitors = monitorEvents.keySet();
 
         if(!updatedMonitors.isEmpty() || !errorMap.isEmpty()) {
             recordList = new ArrayList<>();
         }
 
-        for(SpecKey key: updatedMonitors) {
+        for(CommandKey key: updatedMonitors) {
             SourceRecord record = toSourceRecord(key);
 
             recordList.add(record);
         }
 
         // Errors matching monitors removed above; these errors don't have associated monitor update
-        for(SpecKey key: errorMap.keySet()) {
+        for(CommandKey key: errorMap.keySet()) {
             SourceRecord record = toSourceRecord(key);
 
             recordList.add(record);
@@ -192,13 +195,13 @@ public class CASourceTask extends SourceTask {
         return recordList;
     }
 
-    private SourceRecord toSourceRecord(SpecKey key) {
+    private SourceRecord toSourceRecord(CommandKey key) {
         MonitorEvent event = monitorEvents.remove(key);
-        ChannelSpec spec = specMap.get(key);
+        ChannelCommand spec = specMap.get(key);
         String error = errorMap.remove(key);
         Struct value = eventToStruct(event, error);
 
-        String outkey = spec.getOutkey();
+        String outkey = spec.getValue().getOutkey();
 
         if(outkey == null) {
             outkey = key.getChannel();
@@ -215,7 +218,7 @@ public class CASourceTask extends SourceTask {
         long epochMillis = timestamp.toEpochMilli();
         Map<String, Long> offsetValue = offsetValue(Instant.now().toEpochMilli());
 
-        SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getTopic(), null,
+        SourceRecord record = new SourceRecord(offsetKey(outkey), offsetValue, spec.getKey().getTopic(), null,
                 KEY_SCHEMA,  outkey, VALUE_SCHEMA, value, epochMillis);
 
         log.trace("Record: {}", record);
@@ -223,19 +226,19 @@ public class CASourceTask extends SourceTask {
         return record;
     }
 
-    private void channelConnected(SpecKey key) throws CAException {
+    private void channelConnected(CommandKey key) throws CAException {
         CAJChannel channel = channelMap.get(key);
-        ChannelSpec spec = specMap.get(key);
+        ChannelCommand spec = specMap.get(key);
 
         log.debug("Creating monitor for channel: {}", spec);
 
         int mask = 0;
 
-        if(spec.getMask().contains("v")) {
+        if(spec.getValue().getMask().contains("v")) {
             mask = mask | Monitor.VALUE;
         }
 
-        if(spec.getMask().contains("a")) {
+        if(spec.getValue().getMask().contains("a")) {
             mask = mask | Monitor.ALARM;
         }
 
@@ -298,8 +301,8 @@ public class CASourceTask extends SourceTask {
                 }
             });
 
-            for(ChannelSpec spec: channels) {
-                CAJChannel channel = (CAJChannel) cajContext.createChannel(spec.getName(), ev -> connectionEvents.put(spec.getKey(), ev));
+            for(ChannelCommand spec: channels) {
+                CAJChannel channel = (CAJChannel) cajContext.createChannel(spec.getKey().getChannel(), ev -> connectionEvents.put(spec.getKey(), ev));
                 channelMap.put(spec.getKey(), channel);
                 specMap.put(spec.getKey(), spec);
                 errorMap.put(spec.getKey(), "Never Connected");

@@ -33,7 +33,8 @@ configurations {
 }
 
 dependencies {
-    implementation 'org.epics:jca:2.4.6'
+    implementation 'org.epics:jca:2.4.6',
+            'org.jlab:kafka-common:1.0.0'
     compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.13.2.2'
     compileOnly 'org.apache.kafka:connect-api:3.1.0'
     compileOnly 'org.slf4j:slf4j-log4j12:1.7.36'
