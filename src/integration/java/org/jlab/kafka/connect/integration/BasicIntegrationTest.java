@@ -1,19 +1,14 @@
 package org.jlab.kafka.connect.integration;
 
 import gov.aps.jca.CAException;
+import gov.aps.jca.TimeoutException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.*;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
-import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -22,94 +17,24 @@ import java.util.List;
 public class BasicIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
 
-    @ClassRule
-    public static Network network = Network.newNetwork();
-
-    public static KafkaContainer kafka = new KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.0.1"))
-            .withNetwork(network)
-            .withNetworkAliases("kafka");
-
-    public static GenericContainer<?> softioc = new GenericContainer<>("slominskir/softioc:1.1.0")
-            .withNetwork(network)
-            .withPrivilegedMode(true)
-            .withCreateContainerCmdModifier(cmd -> cmd
-                    .withHostName("softioc")
-                    .withName("softioc")
-                    .withUser("root")
-                    .withAttachStdin(true)
-                    .withStdinOpen(true)
-                    .withTty(true))
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("softioc"))
-            .waitingFor(Wait.forLogMessage("iocRun: All initialization complete", 1))
-            .withFileSystemBind("examples/integration/softioc", "/db", BindMode.READ_ONLY);
-
-    //public static GenericContainer<?> connect = new GenericContainer<>("epics2kafka:snapshot")
-    public static GenericContainer<?> connect = new GenericContainer<>(new ImageFromDockerfile("epics2kafka:snapshot", false)
-            .withDockerfile(Paths.get("./Dockerfile")))
-            //.withFileFromPath(".", Paths.get(".")))
-            .withNetwork(network)
-            .withExposedPorts(8083)
-            .withEnv("CONFIG_STORAGE_TOPIC", "connect-configs")
-            .withEnv("OFFSET_STORAGE_TOPIC", "connect-offsets")
-            .withEnv("STATUS_STORAGE_TOPIC", "connect-status")
-            .withEnv("MONITOR_CHANNELS", "/config/channels")
-            .withLogConsumer(new Slf4jLogConsumer(LOGGER).withPrefix("connect"))
-            .waitingFor(Wait.forLogMessage(".*ChannelManager started.*", 1))
-            .withFileSystemBind("examples/integration/connect", "/config", BindMode.READ_ONLY);
-
-    private static String INTERNAL_BOOTSTRAP_SERVERS;
-    private static String EXTERNAL_BOOTSTRAP_SERVERS;
-
-    @BeforeClass
-    public static void setUp() throws CAException, IOException, InterruptedException {
-        softioc.start();
-
-        kafka.start();
-
-        EXTERNAL_BOOTSTRAP_SERVERS = kafka.getBootstrapServers();
-
-        INTERNAL_BOOTSTRAP_SERVERS = kafka.getNetworkAliases().get(0)+":9092";
-
-        // Setup topics with compact (Connector automatically creates topics without compact)
-        Container.ExecResult result = kafka.execInContainer("kafka-topics", "--bootstrap-server", INTERNAL_BOOTSTRAP_SERVERS, "--create", "--topic", "channela", "--config", "cleanup.policy=compact");
-        warnIfError(result);
-        result = kafka.execInContainer("kafka-topics", "--bootstrap-server", INTERNAL_BOOTSTRAP_SERVERS, "--create", "--topic", "channelb", "--config", "cleanup.policy=compact");
-        warnIfError(result);
-        result = kafka.execInContainer("kafka-topics", "--bootstrap-server", INTERNAL_BOOTSTRAP_SERVERS, "--create", "--topic", "channelc", "--config", "cleanup.policy=compact");
-        warnIfError(result);
-
-        connect.addEnv("BOOTSTRAP_SERVERS", INTERNAL_BOOTSTRAP_SERVERS);
-
-        connect.start();
-
-        Thread.sleep(1000);
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        softioc.stop();
-        connect.stop();
-        kafka.stop();
-    }
-
-    public static void warnIfError(Container.ExecResult result) {
-        if(result.getExitCode() != 0) {
-            System.out.println("Return code: " + result.getExitCode());
-            System.out.println("STDOUT: " + result.getStdout());
-            System.out.println("STDERR: " + result.getStderr());
-        }
+    @Test
+    public void testCAPut() throws CAException, TimeoutException {
+        CAWriter writer = new CAWriter("channel1", null);
+        //writer.put(1);
     }
 
     @Test
-    public void testBasicMonitor() throws InterruptedException, IOException {
-        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channela"), "basic-monitor-consumer");
+    public void testBasicMonitor() throws InterruptedException, IOException, CAException, TimeoutException {
+        TestConsumer consumer = new TestConsumer(Arrays.asList("channela"), "basic-monitor-consumer");
 
         int WAIT_TIMEOUT_MILLIS = 1000;
 
         consumer.poll(WAIT_TIMEOUT_MILLIS);
 
-        softioc.execInContainer("caput", "channela", "1");
-        softioc.execInContainer("caput", "channela", "2");
+
+        CAWriter writer = new CAWriter("channela", null);
+        writer.put(1);
+        writer.put(2);
 
         Thread.sleep(2000);
 
@@ -133,7 +58,7 @@ public class BasicIntegrationTest {
 
     @Test
     public void testFastUpdate() throws InterruptedException, IOException {
-        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelb"), "fast-update-consumer");
+        TestConsumer consumer = new TestConsumer(Arrays.asList("channelb"), "fast-update-consumer");
 
         int POLL_MILLIS = 200;
 
@@ -166,7 +91,7 @@ public class BasicIntegrationTest {
 
     @Test
     public void testPVNeverConnected() throws InterruptedException, IOException {
-        TestConsumer consumer = new TestConsumer(EXTERNAL_BOOTSTRAP_SERVERS, Arrays.asList("channelc"), "never-connected-consumer");
+        TestConsumer consumer = new TestConsumer(Arrays.asList("channelc"), "never-connected-consumer");
 
         int POLL_MILLIS = 200;
 

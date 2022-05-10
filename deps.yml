@@ -8,8 +8,8 @@ services:
     ports:
       - "5064:5064/tcp"
       - "5065:5065/tcp"
-      - "5063:5064/udp"
-      - "5066:5065/udp"
+      - "5064:5064/udp"
+      - "5065:5065/udp"
     volumes:
       - ./examples/softioc-db:/db
       - ./examples/softioc-scripts:/scripts

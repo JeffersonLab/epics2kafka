@@ -11,7 +11,10 @@ public class TestConsumer {
     private final Properties props = new Properties();
     private final KafkaConsumer<String, String> consumer;
 
-    public TestConsumer(String bootstrapServers, List<String> topics, String groupId) {
+    public TestConsumer(List<String> topics, String groupId) {
+
+        String bootstrapServers = getBootstrapServers();
+
         props.setProperty("bootstrap.servers", bootstrapServers);
         props.setProperty("group.id", groupId);
         props.setProperty("enable.auto.commit", "true");
@@ -22,6 +25,16 @@ public class TestConsumer {
 
         consumer = new KafkaConsumer<>(props);
         consumer.subscribe(topics);
+    }
+
+    private String getBootstrapServers() {
+        String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
+
+        if(bootstrapServers == null) {
+            bootstrapServers = "localhost:9092";
+        }
+
+        return bootstrapServers;
     }
 
     public ConsumerRecords<String, String> poll(int timeoutMillis) {
