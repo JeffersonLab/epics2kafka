@@ -18,9 +18,13 @@ public class BasicIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
 
     @Test
-    public void testCAPut() throws CAException, TimeoutException {
-        CAWriter writer = new CAWriter("channel1", null);
-        //writer.put(1);
+    public void testCAPut() {
+        try {
+            CAWriter writer = new CAWriter("channela", null);
+            writer.put(7);
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

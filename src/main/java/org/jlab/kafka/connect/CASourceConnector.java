@@ -10,7 +10,6 @@ import org.jlab.kafka.connect.command.CommandValue;
 import org.jlab.kafka.connect.serde.ChannelCommandSerializer;
 import org.jlab.kafka.eventsource.EventSourceListener;
 import org.jlab.kafka.eventsource.EventSourceRecord;
-import org.jlab.kafka.connect.serde.CommandKeySerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,8 +57,6 @@ public class CASourceConnector extends SourceConnector {
         this.props = props;
 
         config = new CASourceConnectorConfig(props);
-
-        consumer = new CACommandConsumer(context, config);
     }
 
     /**
@@ -80,6 +77,15 @@ public class CASourceConnector extends SourceConnector {
     @Override
     public List<Map<String, String>> taskConfigs(int maxTasks) {
         Set<ChannelCommand> pvs = new LinkedHashSet<>();
+
+        if(consumer != null) {
+            System.err.println("Consumer is NOT null in taskConfigs");
+            consumer.close();
+        } else {
+            System.err.println("Consumer is null in taskConfigs");
+        }
+
+        consumer = new CACommandConsumer(context, config);
 
         consumer.addListener(new EventSourceListener<CommandKey, CommandValue>() {
             @Override

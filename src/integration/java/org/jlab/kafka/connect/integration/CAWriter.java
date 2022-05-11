@@ -31,20 +31,17 @@ public class CAWriter implements AutoCloseable{
 
         context = (CAJContext) JCA_LIBRARY.createContext(dc);
 
-        channel = (CAJChannel) context.createChannel(channelName, new ConnectionListener() {
-            @Override
-            public void connectionChanged(ConnectionEvent ev) {
-                System.err.println("connectionChanged: " + ev);
-            }
-        });
-
         context.flushIO();
 
         context.printInfo();
 
         context.pendIO(5.0);
 
-        channel.get();
+        // TODO: Figure out if I'm losing my mind or if simply adding a ConnectonListener here results in
+        // NEVER_CONNECTED on next caget/caput.  It appears mixing async and sync is a no-go?
+        channel = (CAJChannel) context.createChannel(channelName);
+
+        context.pendIO(5.0);
     }
 
     public static Properties getDefaults(Properties overrides) {
