@@ -1,5 +1,7 @@
 package org.jlab.kafka.connect.command;
 
+import java.util.Objects;
+
 public class CommandValue {
     private String mask;
     private String outkey;
@@ -27,6 +29,20 @@ public class CommandValue {
 
     public void setOutkey(String outkey) {
         this.outkey = outkey;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandValue other = (CommandValue) o;
+        return Objects.equals(mask, other.mask) &&
+                Objects.equals(outkey, other.outkey);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mask, outkey);
     }
 
     @Override

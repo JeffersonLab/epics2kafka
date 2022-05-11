@@ -1,4 +1,4 @@
-package org.jlab.kafka.connect.integration;
+package org.jlab.kafka.connect.util;
 
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;

@@ -4,6 +4,7 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
+import org.jlab.kafka.eventsource.EventSourceConfig;
 
 import java.time.Instant;
 import java.util.Properties;
@@ -27,6 +28,7 @@ public class CommandProducer extends KafkaProducer<CommandKey, CommandValue> {
             overrides = new Properties();
         }
 
+        defaults.put(EventSourceConfig.EVENT_SOURCE_BOOTSTRAP_SERVERS, CommandConsumer.getDefaultBootstrapServers());
         defaults.put(ProducerConfig.CLIENT_ID_CONFIG, "epics2kafka-command-producer" + Instant.now().toString() + "-" + Math.random());
         defaults.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.connect.serde.CommandKeySerializer");
         defaults.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.connect.serde.CommandValueSerializer");

@@ -55,24 +55,6 @@ task integrationTest(type: Test) {
     }
 }
 
-task integrationTestOutsideNetwork(type: Test) {
-    description = 'Runs integration tests using Kafka OUTSIDE Advertised Listener explicit BOOTSTRAP_SERVERS.'
-    group = 'verification'
-
-    environment "BOOTSTRAP_SERVERS", "localhost:9094"
-    environment "EPICS_CA_ADDR_LIST", "localhost:5064"
-
-    testClassesDirs = sourceSets.integration.output.classesDirs
-    classpath = sourceSets.integration.runtimeClasspath
-
-    testLogging {
-        events "passed", "skipped", "failed"
-        exceptionFormat "full"
-        showStandardStreams = true
-    }
-}
-
-
 test {
     testLogging {
         events "passed", "skipped", "failed"

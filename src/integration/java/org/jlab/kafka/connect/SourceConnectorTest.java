@@ -1,9 +1,11 @@
-package org.jlab.kafka.connect.integration;
+package org.jlab.kafka.connect;
 
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.jlab.kafka.connect.util.CAWriter;
+import org.jlab.kafka.connect.util.TestConsumer;
 import org.junit.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +16,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-public class BasicIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BasicIntegrationTest.class);
+public class SourceConnectorTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SourceConnectorTest.class);
 
     @Test
     public void testCAPut() {

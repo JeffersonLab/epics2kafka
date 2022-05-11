@@ -1,4 +1,4 @@
-package org.jlab.kafka.connect.integration;
+package org.jlab.kafka.connect.util;
 
 import com.cosylab.epics.caj.CAJChannel;
 import com.cosylab.epics.caj.CAJContext;

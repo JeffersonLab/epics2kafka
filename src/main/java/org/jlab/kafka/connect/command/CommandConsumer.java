@@ -23,6 +23,7 @@ public class CommandConsumer extends EventSourceTable<CommandKey, CommandValue> 
             overrides = new Properties();
         }
 
+        defaults.put(EventSourceConfig.EVENT_SOURCE_BOOTSTRAP_SERVERS, getDefaultBootstrapServers());
         defaults.put(EventSourceConfig.EVENT_SOURCE_GROUP, "epics2kafka-command-consumer" + Instant.now().toString() + "-" + Math.random());
         defaults.put(EventSourceConfig.EVENT_SOURCE_TOPIC, CommandProducer.TOPIC);
         defaults.put(EventSourceConfig.EVENT_SOURCE_KEY_DESERIALIZER, "org.jlab.kafka.connect.serde.CommandKeyDeserializer");
@@ -31,5 +32,15 @@ public class CommandConsumer extends EventSourceTable<CommandKey, CommandValue> 
         defaults.putAll(overrides);
 
         return defaults;
+    }
+
+    public static String getDefaultBootstrapServers() {
+        String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
+
+        if(bootstrapServers == null) {
+            bootstrapServers = "localhost:9092";
+        }
+
+        return bootstrapServers;
     }
 }
