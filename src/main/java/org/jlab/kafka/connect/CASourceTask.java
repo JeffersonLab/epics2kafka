@@ -302,6 +302,7 @@ public class CASourceTask extends SourceTask {
             });
 
             for(ChannelCommand spec: channels) {
+                log.debug("Handling Spec: {}", spec);
                 CAJChannel channel = (CAJChannel) cajContext.createChannel(spec.getKey().getChannel(), ev -> connectionEvents.put(spec.getKey(), ev));
                 channelMap.put(spec.getKey(), channel);
                 specMap.put(spec.getKey(), spec);

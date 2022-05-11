@@ -7,9 +7,10 @@ import org.apache.kafka.connect.util.ConnectorUtils;
 import org.jlab.kafka.connect.command.ChannelCommand;
 import org.jlab.kafka.connect.command.CommandKey;
 import org.jlab.kafka.connect.command.CommandValue;
+import org.jlab.kafka.connect.serde.ChannelCommandSerializer;
 import org.jlab.kafka.eventsource.EventSourceListener;
 import org.jlab.kafka.eventsource.EventSourceRecord;
-import org.jlab.kafka.serde.JsonSerializer;
+import org.jlab.kafka.connect.serde.CommandKeySerializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -103,7 +104,7 @@ public class CASourceConnector extends SourceConnector {
         int numGroups = Math.min(pvs.size(), maxTasks);
         List<List<ChannelCommand>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());
-        JsonSerializer<ChannelCommand> serializer  = new JsonSerializer<>();
+        ChannelCommandSerializer serializer  = new ChannelCommandSerializer();
         for (List<ChannelCommand> group : groupedPvs) {
             Map<String, String> taskProps = new HashMap<>(props);
             String jsonArray = "[" + group.stream().map( c -> new String(serializer.serialize(null, c),

@@ -28,4 +28,16 @@ public class CommandValue {
     public void setOutkey(String outkey) {
         this.outkey = outkey;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("Mask: ");
+        builder.append(this.mask);
+        builder.append(", Outkey: ");
+        builder.append(this.outkey);
+
+        return builder.toString();
+    }
 }

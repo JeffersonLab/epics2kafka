@@ -25,8 +25,8 @@ public class CommandConsumer extends EventSourceTable<CommandKey, CommandValue> 
 
         defaults.put(EventSourceConfig.EVENT_SOURCE_GROUP, "epics2kafka-command-consumer" + Instant.now().toString() + "-" + Math.random());
         defaults.put(EventSourceConfig.EVENT_SOURCE_TOPIC, CommandProducer.TOPIC);
-        defaults.put(EventSourceConfig.EVENT_SOURCE_KEY_DESERIALIZER, "org.jlab.kafka.serde.JsonDeserializer");
-        defaults.put(EventSourceConfig.EVENT_SOURCE_VALUE_DESERIALIZER, "org.jlab.kafka.serde.JsonDeserializer");
+        defaults.put(EventSourceConfig.EVENT_SOURCE_KEY_DESERIALIZER, "org.jlab.kafka.connect.serde.CommandKeyDeserializer");
+        defaults.put(EventSourceConfig.EVENT_SOURCE_VALUE_DESERIALIZER, "org.jlab.kafka.connect.serde.CommandValueDeserializer");
 
         defaults.putAll(overrides);
 

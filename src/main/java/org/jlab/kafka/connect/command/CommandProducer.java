@@ -28,8 +28,8 @@ public class CommandProducer extends KafkaProducer<CommandKey, CommandValue> {
         }
 
         defaults.put(ProducerConfig.CLIENT_ID_CONFIG, "epics2kafka-command-producer" + Instant.now().toString() + "-" + Math.random());
-        defaults.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.serde.JsonSerializer");
-        defaults.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.serde.JsonSerializer");
+        defaults.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.connect.serde.CommandKeySerializer");
+        defaults.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.jlab.kafka.connect.serde.CommandValueSerializer");
 
         defaults.putAll(overrides);
 

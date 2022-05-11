@@ -44,4 +44,16 @@ public class CommandKey {
     public int hashCode() {
         return Objects.hash(topic, channel);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("Topic: ");
+        builder.append(this.topic);
+        builder.append(", Channel: ");
+        builder.append(this.channel);
+
+        return builder.toString();
+    }
 }
