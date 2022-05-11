@@ -18,6 +18,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class CommandTopicTest {
+
+    @Test
     public void testCommandTopic() throws ExecutionException, InterruptedException, TimeoutException {
         LinkedHashMap<CommandKey, EventSourceRecord<CommandKey, CommandValue>> results = new LinkedHashMap<>();
 
@@ -64,15 +66,6 @@ public class CommandTopicTest {
                 // Block until sent or an exception is thrown
                 future.get(2, TimeUnit.SECONDS);
             }
-        }
-    }
-
-    @Test
-    public void doTest() {
-        try {
-            this.testCommandTopic();
-        } catch(Exception e) {
-            e.printStackTrace();
         }
     }
 }
