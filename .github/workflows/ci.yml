@@ -19,9 +19,9 @@ jobs:
         run: docker exec -i jaws bash -c "sleep 20"
       - name: Run integration test
         run: docker exec -i tester sh -c "cd /app; gradle integrationTest"
-      - name: Dump jaws logs
+      - name: Dump connect logs
         if: always()
-        run: docker logs jaws
+        run: docker logs connect
       - name: Dump tester logs
         if: always()
         run: docker logs tester
