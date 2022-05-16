@@ -4,6 +4,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Properties;
 
@@ -16,7 +17,7 @@ public class TestConsumer {
         String bootstrapServers = getBootstrapServers();
 
         props.setProperty("bootstrap.servers", bootstrapServers);
-        props.setProperty("group.id", groupId);
+        props.setProperty("group.id", groupId + Instant.now().getEpochSecond());
         props.setProperty("enable.auto.commit", "true");
         props.setProperty("auto.commit.interval.ms", "200");
         props.setProperty("auto.offset.reset", "earliest");

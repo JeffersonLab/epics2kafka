@@ -33,7 +33,7 @@ public class CAWriter implements AutoCloseable{
 
         context.flushIO();
 
-        context.printInfo();
+        //context.printInfo();
 
         context.pendIO(5.0);
 
@@ -59,7 +59,7 @@ public class CAWriter implements AutoCloseable{
 
         defaults.setProperty("class", JCALibrary.CHANNEL_ACCESS_JAVA);
         defaults.setProperty("addr_list", addr_list);
-        defaults.setProperty("auto_addr_list", "true");
+        defaults.setProperty("auto_addr_list", "false");
         defaults.setProperty("connection_timeout", "30.0");
         defaults.setProperty("repeater_port", "5065");
         defaults.setProperty("max_array_bytes", "16384");

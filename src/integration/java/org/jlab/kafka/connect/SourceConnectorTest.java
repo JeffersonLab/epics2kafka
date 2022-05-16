@@ -2,6 +2,7 @@ package org.jlab.kafka.connect;
 
 import gov.aps.jca.CAException;
 import gov.aps.jca.TimeoutException;
+import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.jlab.kafka.connect.util.CAWriter;
@@ -33,24 +34,42 @@ public class SourceConnectorTest {
     public void testBasicMonitor() throws InterruptedException, IOException, CAException, TimeoutException {
         TestConsumer consumer = new TestConsumer(Arrays.asList("channela"), "basic-monitor-consumer");
 
-        int WAIT_TIMEOUT_MILLIS = 1000;
-
-        consumer.poll(WAIT_TIMEOUT_MILLIS);
-
-
         CAWriter writer = new CAWriter("channela", null);
-        writer.put(1);
-        writer.put(2);
-
+        writer.put(0);
         Thread.sleep(2000);
+        writer.put(1);
 
-        ConsumerRecords<String, String> records = consumer.poll(WAIT_TIMEOUT_MILLIS);
+        int POLL_MILLIS = 200;
+
+        List<ConsumerRecord<String, String>> recordCache = new ArrayList<>();
+
+        long nowMillis = System.currentTimeMillis();
+        long endMillis = nowMillis + 5000;
+
+        while(System.currentTimeMillis() < endMillis) {
+            ConsumerRecords<String, String> records = consumer.poll(POLL_MILLIS);
+
+            //System.out.println("Poll record count: " + records.count());
+
+            for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
+                ConsumerRecord<String, String> record = it.next();
+
+                //System.out.println("Record Offset: " + record.offset());
+
+                recordCache.add(record);
+            }
+        }
 
         consumer.close();
 
-        Assert.assertFalse(records.isEmpty());
+        Assert.assertFalse(recordCache.isEmpty());
 
-        ConsumerRecord<String, String> record = records.iterator().next();
+        Iterator<ConsumerRecord<String, String>> iterator = recordCache.iterator();
+        ConsumerRecord<String, String> record = null;
+        while(iterator.hasNext()) { // Loop to get last one
+            record = iterator.next();
+            System.out.println(record.key() + "=" + record.value());
+        }
 
         Assert.assertEquals("ca", record.key());
 
@@ -76,7 +95,7 @@ public class SourceConnectorTest {
         while(System.currentTimeMillis() < endMillis) {
             ConsumerRecords<String, String> records = consumer.poll(POLL_MILLIS);
 
-            System.out.println("Poll record count: " + records.count());
+            //System.out.println("Poll record count: " + records.count());
 
             for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
                 ConsumerRecord<String, String> record = it.next();
@@ -89,7 +108,7 @@ public class SourceConnectorTest {
 
         consumer.close();
 
-        System.out.println("Total Records: " + recordCache.size());
+        //System.out.println("Total Records: " + recordCache.size());
 
         // Kafka doesn't guarantee messages are delivered with low latency...
         Assert.assertTrue(recordCache.size() > 5);
@@ -109,7 +128,7 @@ public class SourceConnectorTest {
         while(System.currentTimeMillis() < endMillis) {
             ConsumerRecords<String, String> records = consumer.poll(POLL_MILLIS);
 
-            System.out.println("Poll record count: " + records.count());
+            //System.out.println("Poll record count: " + records.count());
 
             for (Iterator<ConsumerRecord<String, String>> it = records.iterator(); it.hasNext(); ) {
                 ConsumerRecord<String, String> record = it.next();
@@ -122,7 +141,7 @@ public class SourceConnectorTest {
 
         consumer.close();
 
-        System.out.println("Total Records: " + recordCache.size());
+        //System.out.println("Total Records: " + recordCache.size());
 
         Assert.assertFalse(recordCache.isEmpty());
 
@@ -132,8 +151,8 @@ public class SourceConnectorTest {
 
         String expectedValue = "{\"error\":\"Never Connected\",\"status\":null,\"severity\":null,\"doubleValues\":null,\"floatValues\":null,\"stringValues\":null,\"intValues\":null,\"shortValues\":null,\"byteValues\":null}";
 
-        System.out.println("Expected: " + expectedValue);
-        System.out.println("Actual: " + record.value());
+        //System.out.println("Expected: " + expectedValue);
+        //System.out.println("Actual: " + record.value());
 
         Assert.assertEquals(expectedValue, record.value());
     }

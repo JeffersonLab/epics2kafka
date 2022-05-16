@@ -91,7 +91,9 @@ public class CASourceConnector extends SourceConnector {
             @Override
             public void highWaterOffset(LinkedHashMap<CommandKey, EventSourceRecord<CommandKey, CommandValue>> records) {
                 for(EventSourceRecord<CommandKey, CommandValue> record: records.values()) {
-                    pvs.add(new ChannelCommand(record.getKey(), record.getValue()));
+                    if(record.getValue() != null) { // Ignore tombstones
+                        pvs.add(new ChannelCommand(record.getKey(), record.getValue()));
+                    }
                 }
             }
         });
