@@ -15,6 +15,7 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
    - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)  
    - [Scripts](https://github.com/JeffersonLab/epics2kafka#scripts)    
 - [Build](https://github.com/JeffersonLab/epics2kafka#build) 
+- [Test](https://github.com/JeffersonLab/epics2kafka#test)  
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ---
@@ -218,6 +219,20 @@ gradlew installDist
 **Note for JLab On-Site Users**: Jefferson Lab has an intercepting [proxy](https://gist.github.com/slominskir/92c25a033db93a90184a5994e71d0b78)  
 
 **See**: [Docker Development Quick Reference](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c#development-quick-reference)
+
+## Test
+Unit tests are run automatically upon building the project.
+
+The integration tests require a docker container environment and are run automatically as a GitHub Action on git push.   You can also run tests from a local workstation using the following instructions:
+
+1. Start Docker Test environment
+```
+docker compose -f test.yml up
+```
+2. Execute Tests
+```
+docker exec -i tester sh -c "cd /app; gradle integrationTest"
+```
 
 ## See Also
    - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
