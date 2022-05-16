@@ -16,7 +16,7 @@ jobs:
       - name: Start containers
         run: docker compose -f "test.yml" up -d
       - name: Wait for containers to settle
-        run: docker exec -i jaws bash -c "sleep 20"
+        run: docker exec -i connect bash -c "sleep 20"
       - name: Run integration test
         run: docker exec -i tester sh -c "cd /app; gradle integrationTest"
       - name: Dump connect logs
