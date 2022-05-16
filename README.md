@@ -166,8 +166,11 @@ All of the [common Connect options](https://kafka.apache.org/documentation.html#
 | monitor.poll.millis | Milliseconds between polls for CA changes - sets max CA monitor update frequency | 1000 |
 | command.topic | Name of Kafka command topic to monitor for channels list | epics-channels |
 | command.group | Name of Kafka consumer group to use when monitoring the command topic | ca-source | 
-| command.poll.millis | Milliseconds between polls for command topic changes - reconfigure delay is twice this value since the command thread waits for 'no changes' poll response before requesting reconfigure | 5000 |
+| command.poll.millis | Milliseconds between polls for command topic changes | 5000 |
+| command.max.poll.records | The maximum number of records returned in a single call to poll(), and also the maximum batch size returned in the batch call-back. | 5000 |
 | command.bootstrap.servers | Comma-separated list of host and port pairs that are the addresses of the Kafka brokers used to query the command topic | localhost:9092 |
+| command.settle.seconds | How many seconds to wait loading the initial channels list before timeout | 30 |
+| command.load.timeout.seconds | How many seconds to wait after a command is issued for no more commands before requesting reconfigure.  This is done because reconfigure is a heavy operation so batching commands is ideal. | 15 |
 
 **Note**: The monitor options (except poll.millis) map to [Java Channel Access (JCA) options](https://www.javadoc.io/static/org.epics/jca/2.4.6/gov/aps/jca/JCALibrary.html#CHANNEL_ACCESS_SERVER_JAVA).
 
