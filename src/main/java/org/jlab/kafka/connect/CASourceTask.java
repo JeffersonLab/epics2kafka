@@ -23,8 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,7 +101,14 @@ public class CASourceTask extends SourceTask {
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        String json = props.get("task-channels");
+        String jsonFile = props.get("task-channels-file");
+
+        String json = null;
+        try {
+            json = Files.readString(Paths.get(jsonFile));
+        } catch (IOException e) {
+            throw new RuntimeException("Unable to read task-channels json", e);
+        }
 
         try {
             ChannelCommand[] specArray = objectMapper.readValue(json, ChannelCommand[].class);

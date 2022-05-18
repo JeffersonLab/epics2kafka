@@ -19,5 +19,6 @@ services:
       file: build.yml
       service: connect
     volumes:
+      - ./examples/logging/log4j.properties:/kafka/config/log4j.properties
       - ./build/install:/kafka/connect
       - ./scripts:/scripts

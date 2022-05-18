@@ -17,7 +17,10 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,7 +52,17 @@ public class CASourceTaskTest {
 
         props.put(CASourceConnectorConfig.MONITOR_ADDR_LIST, ioc.getAddress());
         props.put(CASourceConnectorConfig.MONITOR_AUTO_ADDR_LIST, "false");
-        props.put("task-channels", jsonArray);
+
+        File tempFile;
+
+        try {
+            tempFile = File.createTempFile("epics2kafka-task", ".json");
+            Files.writeString(tempFile.toPath(), jsonArray);
+        } catch(IOException e) {
+            throw new RuntimeException("Unable to create task json file");
+        }
+
+        props.put("task-channels-file", tempFile.getAbsolutePath());
 
         task.initialize(context);
         ioc.start();

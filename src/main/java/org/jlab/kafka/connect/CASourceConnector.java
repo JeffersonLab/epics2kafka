@@ -10,10 +10,13 @@ import org.jlab.kafka.connect.command.CommandValue;
 import org.jlab.kafka.connect.serde.ChannelCommandSerializer;
 import org.jlab.kafka.eventsource.EventSourceListener;
 import org.jlab.kafka.eventsource.EventSourceRecord;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import java.util.stream.Collectors;
  *   - https://github.com/confluentinc/kafka-connect-jdbc/tree/master/src/main/java/io/confluent/connect/jdbc
  */
 public class CASourceConnector extends SourceConnector {
+    private static final Logger log = LoggerFactory.getLogger(CASourceConnector.class);
     public static final String version;
     private CACommandConsumer consumer;
     private Map<String, String> props;
@@ -79,10 +83,10 @@ public class CASourceConnector extends SourceConnector {
         Set<ChannelCommand> pvs = new LinkedHashSet<>();
 
         if(consumer != null) {
-            System.err.println("Consumer is NOT null in taskConfigs");
+            log.debug("Consumer is NOT null in taskConfigs");
             consumer.close();
         } else {
-            System.err.println("Consumer is null in taskConfigs");
+            log.debug("Consumer is null in taskConfigs");
         }
 
         consumer = new CACommandConsumer(context, config);
@@ -101,11 +105,14 @@ public class CASourceConnector extends SourceConnector {
         consumer.start();
 
         try {
+            log.debug("awaitHighWaterOffset");
             // TODO: await should return boolean indicating whether timeout occurred; and an exception should be thrown.
             consumer.awaitHighWaterOffset(config.getLong(CASourceConnectorConfig.COMMAND_LOAD_TIMEOUT_SECONDS), TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while waiting for command topic high water", e);
         }
+
+        log.debug("done with awaitHighWaterOffset");
 
         pvs.add(ChannelCommand.KEEP_ALIVE); // This ensures we don't go into FAILED state from having no work to do
 
@@ -113,13 +120,27 @@ public class CASourceConnector extends SourceConnector {
         List<List<ChannelCommand>> groupedPvs = ConnectorUtils.groupPartitions(new ArrayList<>(pvs), numGroups);
         List<Map<String, String>> taskConfigs = new ArrayList<>(groupedPvs.size());
         ChannelCommandSerializer serializer  = new ChannelCommandSerializer();
+        int i = 0;
         for (List<ChannelCommand> group : groupedPvs) {
             Map<String, String> taskProps = new HashMap<>(props);
             String jsonArray = "[" + group.stream().map( c -> new String(serializer.serialize(null, c),
                     StandardCharsets.UTF_8) ).collect(Collectors.joining(",")) + "]";
-            taskProps.put("task-channels", jsonArray);
+
+            File tempFile;
+
+            try {
+                 tempFile = File.createTempFile("epics2kafka-task" + i++, ".json");
+                 Files.writeString(tempFile.toPath(), jsonArray);
+            } catch(IOException e) {
+                throw new RuntimeException("Unable to create task json file");
+            }
+
+            taskProps.put("task-channels-file", tempFile.getAbsolutePath());
             taskConfigs.add(taskProps);
         }
+
+        log.debug("done with taskConfigs");
+
         return taskConfigs;
     }
 
