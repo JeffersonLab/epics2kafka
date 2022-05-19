@@ -1,0 +1,35 @@
+services:
+  zookeeper:
+    extends:
+      file: build.yml
+      service: zookeeper
+
+  kafka:
+    extends:
+      file: build.yml
+      service: kafka
+    environment:
+      CREATE_TOPICS: 'alarm-activations:1:1:compact'
+
+  connect:
+    extends:
+      file: build.yml
+      service: connect
+    environment:
+      MONITOR_CHANNELS: "/config/channels"
+    volumes:
+      - ./examples/connect-config/large-config:/config
+
+  tester:
+    hostname: tester
+    container_name: tester
+    build:
+      context: .
+      dockerfile: Dockerfile-test
+      args:
+        - CUSTOM_CRT_URL=http://pki.jlab.org/JLabCA.crt
+    environment:
+      BOOTSTRAP_SERVERS: "kafka:9092"
+      SCHEMA_REGISTRY: "http://registry:8081"
+    volumes:
+      - ./:/app
