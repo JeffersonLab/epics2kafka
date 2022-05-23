@@ -18,9 +18,7 @@ services:
     hostname: connect
     container_name: connect
     depends_on:
-      - zookeeper
       - kafka
-      - softioc
     ports:
       - 8083:8083
     environment:

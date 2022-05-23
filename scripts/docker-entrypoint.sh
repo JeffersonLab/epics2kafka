@@ -4,19 +4,6 @@
 # - all this just to quiet some noisy log messages from some third party dependency
 export EXTRA_ARGS="-Djava.util.logging.config.file=/kafka/config/logging.properties"
 
-# Launch original container ENTRYPOINT in background
-/docker-entrypoint.sh start &
-
-echo "----------------------------------------------------"
-echo "Step 1: Waiting for Kafka Connect to start listening"
-echo "----------------------------------------------------"
-host=`hostname`
-echo "hostname: $host"
-while [ $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) -eq 000 ] ; do
-  echo -e $(date) " Kafka Connect listener HTTP state: " $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) " (waiting for 200)"
-  sleep 5
-done
-
 # Grab first SERVER from SERVERS CSV env
 IFS=','
 read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
@@ -24,15 +11,39 @@ read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
 export BOOTSTRAP_SERVER=${tmpArray[0]}
 echo "BOOTSTRAP_SERVER: $BOOTSTRAP_SERVER"
 
-echo "------------------------------------"
-echo "Step 2: Create epics-channels topic "
-echo "------------------------------------"
-/scripts/create-command-topic.sh
+# tools-log4j.properties doesn't exist initially
+cp -rn $KAFKA_HOME/config.orig/* $KAFKA_HOME/config
 
+echo "----------------------------------------------"
+echo " Step 1: Waiting for Kafka to start listening "
+echo "----------------------------------------------"
+# The kafka-topics.sh script keeps retrying by default (blocking), until connected
+$KAFKA_HOME/bin/kafka-topics.sh --bootstrap-server $BOOTSTRAP_SERVER --list
 
-echo "-----------------------------------------"
-echo "Step 3: Configuring epics-channels topic "
-echo "-----------------------------------------"
+echo "----------------------"
+echo "Step 2: Create topics "
+echo "----------------------"
+/scripts/create-topics.sh
+
+echo "---------------------------"
+echo " Step 3: Launching Connect "
+echo "---------------------------"
+# Launch original container ENTRYPOINT in background
+/docker-entrypoint.sh start &
+
+echo "------------------------------------------------"
+echo " Step 4: Waiting for Connect to start listening "
+echo "------------------------------------------------"
+host=`hostname`
+echo "hostname: $host"
+while [ $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) -eq 000 ] ; do
+  echo -e $(date) " Kafka Connect listener HTTP state: " $(curl -s -o /dev/null -w %{http_code} http://$host:8083/connectors) " (waiting for 200)"
+  sleep 5
+done
+
+echo "---------------------------------------------------"
+echo " Step 5: Configuring epics-channels topic from env "
+echo "---------------------------------------------------"
 if [[ -z "${MONITOR_CHANNELS}" ]]; then
   echo "No channels specified to be monitored"
 elif [[ -f "$MONITOR_CHANNELS" ]]; then
@@ -55,9 +66,9 @@ else
     done
 fi
 
-echo "---------------------------------"
-echo "Step 4: Creating Kafka Connector "
-echo "---------------------------------"
+echo "----------------------------------"
+echo " Step 6: Creating Kafka Connector "
+echo "----------------------------------"
 FILE=/config/ca-source.json
 if [ -f "$FILE" ]; then
     /scripts/start.sh
