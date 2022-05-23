@@ -26,6 +26,7 @@ services:
       CONFIG_STORAGE_TOPIC: connect-configs
       OFFSET_STORAGE_TOPIC: connect-offsets
       STATUS_STORAGE_TOPIC: connect-status
+      CONNECT_MAX_REQUEST_SIZE: 5242880
       #MONITOR_CHANNELS: "/config/channels"
       MONITOR_CHANNELS: "channel1|topic1|v|key1,channel2|topic2|v|key2,channel3|topic3|v|key3"
     volumes:
