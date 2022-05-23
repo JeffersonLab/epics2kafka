@@ -18,7 +18,6 @@ import org.apache.kafka.connect.source.SourceRecord;
 import org.apache.kafka.connect.source.SourceTask;
 import org.jlab.kafka.connect.command.ChannelCommand;
 import org.jlab.kafka.connect.command.CommandKey;
-import org.jlab.kafka.connect.command.CommandValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +41,7 @@ public class CASourceTask extends SourceTask {
     private final Map<CAJChannel, CAJMonitor> monitorMap = new HashMap<>();
     private final Map<CommandKey, CAJChannel> channelMap = new HashMap<>();
     private final Map<CommandKey, ChannelCommand> specMap = new HashMap<>();
-    private final Map<CommandKey, String> errorMap = new ConcurrentHashMap<>();
+    private final Map<CommandKey, String> errorEvents = new ConcurrentHashMap<>();
     private final Map<CommandKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
     private final Map<CommandKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
@@ -119,6 +118,17 @@ public class CASourceTask extends SourceTask {
         dc.setAttribute("thread_pool_size", epicsThreadPoolSize.toString());
     }
 
+    private <K, V> HashMap<K, V> removeSnapshot(Map<K, V> input) {
+        HashMap<K, V> output = new HashMap<K, V>();
+        Iterator<Map.Entry<K, V>> conIt = input.entrySet().iterator();
+        while(conIt.hasNext()) {
+            Map.Entry<K, V> entry = conIt.next();
+            conIt.remove();
+            output.put(entry.getKey(), entry.getValue());
+        }
+        return output;
+    }
+
     /**
      * <p>
      * Poll this source task for new records. If no data is currently available, this method
@@ -147,21 +157,26 @@ public class CASourceTask extends SourceTask {
 
         ArrayList<SourceRecord> recordList = null; // Must return null if no updates
 
-        Set<CommandKey> updatedConnections = connectionEvents.keySet();
+        // Remove snapshot of all three concurrent event maps
+        HashMap<CommandKey, ConnectionEvent> connectionSnaphotMap = removeSnapshot(connectionEvents);
+        HashMap<CommandKey, MonitorEvent> monitorSnaphotMap = removeSnapshot(monitorEvents);
+        HashMap<CommandKey, String> errorSnaphotMap = removeSnapshot(errorEvents);
+
+        Set<CommandKey> updatedConnections = connectionSnaphotMap.keySet();
         for(CommandKey key: updatedConnections) {
-            ConnectionEvent event = connectionEvents.remove(key);
+            ConnectionEvent event = connectionSnaphotMap.get(key);
             ChannelCommand spec = specMap.get(key);
 
             if(event.isConnected()) {
-                errorMap.remove(key); // Remove "Never Connected" error
+                errorSnaphotMap.remove(key); // Remove "Never Connected" error
                 try {
                     channelConnected(key);
                 } catch(CAException e) {
-                    errorMap.put(key, e.getMessage());
+                    errorSnaphotMap.put(key, e.getMessage());
                 }
             } else {
                 // handle disconnect event
-                errorMap.put(spec.getKey(), "Disconnected");
+                errorSnaphotMap.put(spec.getKey(), "Disconnected");
                 // CAJ *MAY* automatically re-connect in the future.
             }
         }
@@ -173,21 +188,24 @@ public class CASourceTask extends SourceTask {
             throw new ConnectException(e);
         }
 
-        Set<CommandKey> updatedMonitors = monitorEvents.keySet();
+        Set<CommandKey> updatedMonitors = monitorSnaphotMap.keySet();
 
-        if(!updatedMonitors.isEmpty() || !errorMap.isEmpty()) {
+        if(!updatedMonitors.isEmpty() || !errorSnaphotMap.isEmpty()) {
             recordList = new ArrayList<>();
         }
 
         for(CommandKey key: updatedMonitors) {
-            SourceRecord record = toSourceRecord(key);
+            MonitorEvent monitorEvent = monitorSnaphotMap.get(key);
+            String errorEvent = errorSnaphotMap.remove(key);
+            SourceRecord record = toSourceRecord(key, monitorEvent, errorEvent);
 
             recordList.add(record);
         }
 
         // Errors matching monitors removed above; these errors don't have associated monitor update
-        for(CommandKey key: errorMap.keySet()) {
-            SourceRecord record = toSourceRecord(key);
+        for(CommandKey key: errorSnaphotMap.keySet()) {
+            String errorEvent = errorSnaphotMap.get(key);
+            SourceRecord record = toSourceRecord(key, null, errorEvent);
 
             recordList.add(record);
         }
@@ -195,11 +213,9 @@ public class CASourceTask extends SourceTask {
         return recordList;
     }
 
-    private SourceRecord toSourceRecord(CommandKey key) {
-        MonitorEvent event = monitorEvents.remove(key);
+    private SourceRecord toSourceRecord(CommandKey key, MonitorEvent monitorEvent, String errorEvent) {
         ChannelCommand spec = specMap.get(key);
-        String error = errorMap.remove(key);
-        Struct value = eventToStruct(event, error);
+        Struct value = eventToStruct(monitorEvent, errorEvent);
 
         String outkey = spec.getValue().getOutkey();
 
@@ -209,8 +225,8 @@ public class CASourceTask extends SourceTask {
 
         Instant timestamp;
 
-        if(event != null) {
-            TimeStamp stamp = ((TIME) event.getDBR()).getTimeStamp();
+        if(monitorEvent != null) {
+            TimeStamp stamp = ((TIME) monitorEvent.getDBR()).getTimeStamp();
             timestamp = Instant.ofEpochSecond(stamp.secPastEpoch(), stamp.nsec());
         } else {
             timestamp = Instant.now();
@@ -306,7 +322,7 @@ public class CASourceTask extends SourceTask {
                 CAJChannel channel = (CAJChannel) cajContext.createChannel(spec.getKey().getChannel(), ev -> connectionEvents.put(spec.getKey(), ev));
                 channelMap.put(spec.getKey(), channel);
                 specMap.put(spec.getKey(), spec);
-                errorMap.put(spec.getKey(), "Never Connected");
+                errorEvents.put(spec.getKey(), "Never Connected");
             }
 
             cajContext.flushIO();
