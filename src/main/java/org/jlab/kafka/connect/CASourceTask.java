@@ -41,9 +41,9 @@ public class CASourceTask extends SourceTask {
     private final Map<CAJChannel, CAJMonitor> monitorMap = new HashMap<>();
     private final Map<CommandKey, CAJChannel> channelMap = new HashMap<>();
     private final Map<CommandKey, ChannelCommand> specMap = new HashMap<>();
-    private final Map<CommandKey, String> errorEvents = new ConcurrentHashMap<>();
-    private final Map<CommandKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
-    private final Map<CommandKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<CommandKey, String> errorEvents = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<CommandKey, MonitorEvent> monitorEvents = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<CommandKey, ConnectionEvent> connectionEvents = new ConcurrentHashMap<>();
     private static final Schema KEY_SCHEMA = Schema.STRING_SCHEMA;
     private static final Schema VALUE_SCHEMA;
     private long pollMillis;
@@ -118,12 +118,45 @@ public class CASourceTask extends SourceTask {
         dc.setAttribute("thread_pool_size", epicsThreadPoolSize.toString());
     }
 
-    private <K, V> HashMap<K, V> removeSnapshot(Map<K, V> input) {
+    /**
+     * Remove a snapshot of a ConcurrentHashMap.  Since a ConcurrentHashMap is weakly consistent this is actually
+     * a possibly blurry snapshot (modifications may occur while we iterate and remove elements).  A
+     * CopyOnWriteArrayList would have given us a true "snapshot", but it's not a Map.
+     *
+     * We can tolerate eventually consistent because our use case is to power a polling thread that holds similar
+     * timing related consistency guarantees (if you poll slower than updates you'll never see some
+     * intermediate updates).  It doesn't matter if an update shows up in this snapshot or the next, as
+     * long as the most up-to-date value is eventually provided (and not silently dropped - whereas silently dropping
+     * intermediate values is fine).
+     *
+     * Unfortunately Java's weakly consistent doesn't seem to mean eventually consistent as the Iterator.remove()
+     * appears to remove an entry using only the key (ignoring the possibly changing value, and therefore possibly
+     * removing a value not viewable by the iterator):
+     * https://github.com/openjdk/jdk/blob/5974f5fed3ef888e8e64b1bf33793a7bcc4ca77c/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java#L3446
+     *
+     * It appears one workaround is to avoid the Iterator.remove() and explicitly use map.remove(key,value) to ensure
+     * only the entry with a key and value given by the current view of iteration is removed.  This means in the rare
+     * scenario where a concurrent modification occurs the modified value will be left in the Map for the next
+     * invocation of this method:
+     * https://stackoverflow.com/questions/37127285/iterate-over-concurrenthashmap-while-deleting-entries
+     *
+     * @param input The ConcurrentHashMap to remove a "snapshot" from
+     * @return A regular old HashMap (not thread safe), containing the "snapshot"
+     * @param <K> The Key type
+     * @param <V> The Value type
+     */
+    private <K, V> HashMap<K, V> removeSnapshot(ConcurrentHashMap<K, V> input) {
         HashMap<K, V> output = new HashMap<K, V>();
         Iterator<Map.Entry<K, V>> conIt = input.entrySet().iterator();
         while(conIt.hasNext()) {
             Map.Entry<K, V> entry = conIt.next();
-            conIt.remove();
+
+            // We ignore the return value (boolean indicating whether removed or not) because
+            // we include the value in the snapshot regardless, as if it's changed we'll get the new value next time!
+            boolean removed = input.remove(entry.getKey(), entry.getValue());
+
+            if(!removed) log.info("Concurrent modification detected. Cool story bro");
+
             output.put(entry.getKey(), entry.getValue());
         }
         return output;
