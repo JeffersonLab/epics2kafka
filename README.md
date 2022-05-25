@@ -65,13 +65,15 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 ### Standalone
 Three steps are required to deploy the CA Source Connector to an existing Kafka installation in standalone mode:
 
-1. Copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://repo1.maven.org/maven2/org/epics/jca/) jar files into a plugin directory:
+1. Copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and dependency jar files into a plugin directory:
 ```
 mkdir /opt/kafka/plugins/epics2kafka
 cp /tmp/epics2kafka.jar /opt/kafka/plugins/epics2kafka
 cp /tmp/jca-2.4.6.jar /opt/kafka/plugins/epics2kafka
 cp /tmp/kafka-common*.jar /opt/kafka/plugins/epics2kafka
 ```
+**Note**: Dependencies already found in the kafka/libs directory should NOT be included in the plugin subdirectory.  Jars needed by multiple plugins should be placed in kafka/libs instead of in each plugin subdirectory to avoid odd class loader and symbol resolution [errors](https://github.com/JeffersonLab/epics2kafka/issues/10).
+
 2. Update the Kafka config (standalone environment shown):
 ```
 # Edit existing config file for server
@@ -96,7 +98,7 @@ bin/connect-standalone.sh config/connect-standalone.properties config/ca-source.
 ```
 
 ### Distributed
-For distributed mode you must copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://repo1.maven.org/maven2/org/epics/jca/) jar files to all nodes in the cluster.    Ensure plugin path is set in _config/connect-distributed.properties_ instead of _config/connect-standalone.properties_.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, first start a distributed node:
+For distributed mode you must copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and dependency jar files to all nodes in the cluster.    Ensure plugin path is set in _config/connect-distributed.properties_ instead of _config/connect-standalone.properties_.  You control connectors in distributed mode using a [REST API](https://docs.confluent.io/current/connect/managing/monitoring.html).  For example, first start a distributed node:
 ```
 bin/connect-distributed.sh config/connect-distributed.properties
 ```
