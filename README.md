@@ -67,9 +67,10 @@ Three steps are required to deploy the CA Source Connector to an existing Kafka 
 
 1. Copy the [connector](https://github.com/JeffersonLab/epics2kafka/releases) and [dependency](https://repo1.maven.org/maven2/org/epics/jca/) jar files into a plugin directory:
 ```
-mkdir /opt/kafka/plugins/ca-source
-cp /tmp/epics2kafka.jar /opt/kafka/plugins/ca-source
-cp /tmp/jca-2.4.6.jar /opt/kafka/plugins/ca-source
+mkdir /opt/kafka/plugins/epics2kafka
+cp /tmp/epics2kafka.jar /opt/kafka/plugins/epics2kafka
+cp /tmp/jca-2.4.6.jar /opt/kafka/plugins/epics2kafka
+cp /tmp/kafka-common*.jar /opt/kafka/plugins/epics2kafka
 ```
 2. Update the Kafka config (standalone environment shown):
 ```
