@@ -93,9 +93,13 @@ distributions {
     main {
         contents {
             from jar
-            from (project.configurations.runtimeClasspath)
-            from("build/reports/dependency-license") {
-                into "dependency-license"
+
+            /*We only include jars not already provided in Kafka/libs dir*/
+            /*Example, we exclude log4j, slf4j, jackson, kafka */
+            from (project.configurations.runtimeClasspath).with {
+                include('epics2kafka*')
+                include('kafka-common*')
+                include('jca*')
             }
         }
     }
