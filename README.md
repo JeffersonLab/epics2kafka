@@ -30,7 +30,7 @@ Leverages Kafka as infrastructure - uses the Kafka Connect API to ensure a highe
 git clone https://github.com/JeffersonLab/epics2kafka
 cd epics2kafka
 ```
-2. Launch Docker:
+2. Launch [Compose](https://github.com/docker/compose)
 ```
 docker compose up
 ```
