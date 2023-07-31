@@ -17,23 +17,23 @@ public class EmbeddedIoc {
 
         server = new DefaultServerImpl();
         context = new CAJServerContext();
-        //context.setServerPort(0); // 0 means dynamically assign
-        context.setServerPort(5064);
+        context.setTcpServerPort(0); // 0 means dynamically assign; UDP will be too
+        //context.setServerPort(5064);
         context.initialize(server);
 
         context.printInfo();
     }
 
     public String getAddress() {
-        return "localhost:" + context.getServerPort();
+        return "localhost:" + context.getUdpServerPort();
     }
 
     public void registerPv(ProcessVariable pv) {
-        server.registerProcessVaribale(pv);
+        server.registerProcessVariable(pv);
     }
 
     public ProcessVariable unregisterPv(String name) {
-        return server.unregisterProcessVaribale(name);
+        return server.unregisterProcessVariable(name);
     }
 
     public void start() {
