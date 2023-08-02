@@ -1,3 +1,0 @@
-{"topic":"channela","channel":"channela"}={"mask":"a", "outkey": "ca"}
-{"topic":"channelb","channel":"channelb"}={"mask":"v", "outkey": "cb"}
-{"topic":"channelc","channel":"channelc"}={"mask":"va", "outkey": "cc"}
