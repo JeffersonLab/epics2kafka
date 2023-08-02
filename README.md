@@ -15,7 +15,8 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
    - [Connector Options](https://github.com/JeffersonLab/epics2kafka#connector-options)
    - [EPICS Channels](https://github.com/JeffersonLab/epics2kafka#epics-channels)      
    - [Scripts](https://github.com/JeffersonLab/epics2kafka#scripts)    
-- [Build](https://github.com/JeffersonLab/epics2kafka#build) 
+- [Build](https://github.com/JeffersonLab/epics2kafka#build)
+- [Develop](https://github.com/JeffersonLab/epics2kafka#develop)  
 - [Test](https://github.com/JeffersonLab/epics2kafka#test)
 - [Release](https://github.com/JeffersonLab/epics2kafka#release)   
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
@@ -231,16 +232,24 @@ gradlew installDist
 
 **See**: [Docker Development Quick Reference](https://gist.github.com/slominskir/a7da801e8259f5974c978f9c3091d52c#development-quick-reference)
 
-## Test
-Unit tests are run automatically upon building the project.
+## Develop
+Set up the build environment following the [Build](https://github.com/JeffersonLab/epics2kafka#build) instructions.
 
-The integration tests require a docker container environment and are run automatically as a GitHub Action on git push.   You can also run tests from a local workstation using the following instructions:
+In order to avoid installing Kafka locally and managing start/stop/reset of connect service you can use a Docker build:
 
-1. Start Docker Test environment
 ```
 docker compose -f build.yml up
 ```
-2. Execute Tests
+
+**Note**: To deploy new changes you must stop (`docker compose -f build.yml rm -svf connect`) and re-start (`docker compose -f build.yml -d up connect`) the connect container.  A full reset of all containers can be done with `docker compose -f build.yml down` followed by `docker compose -f build.yml up` 
+
+**Note**: Alternative methods of development (with potentialy quicker iteration) include (1) using the `bind.yml` to mount the build app artifact into a connect container and (2) running the app direclty on the local workstation and running service dependencies with `deps.yml`.
+
+## Test
+Unit tests are run automatically upon building the project.
+
+The integration tests depend on a running Kafka instance, generally in Docker. The tests run automatically via the CI GitHub Action on every commit (unless [no ci] is included in the commit message). The tests can be run locally during development. Set up the development environment following the [Develop](https://github.com/JeffersonLab/epics2kafka#develop) instructions. Then with the build.yml Docker containers running execute:
+
 ```
 gradlew integrationTest
 ```
