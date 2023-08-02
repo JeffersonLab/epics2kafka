@@ -17,7 +17,8 @@ public class EmbeddedIoc {
 
         server = new DefaultServerImpl();
         context = new CAJServerContext();
-        context.setTcpServerPort(0); // 0 means dynamically assign; UDP will be too
+        context.setTcpServerPort(0); // 0 means dynamically assign
+        context.setUdpServerPort(0);
         //context.setServerPort(5064);
         context.initialize(server);
 
