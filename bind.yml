@@ -14,5 +14,5 @@ services:
       file: build.yml
       service: connect
     volumes:
-      - ./build/install:/kafka/connect
+      - ./build/install:/plugins
       - ./scripts:/scripts
