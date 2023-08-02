@@ -4,11 +4,6 @@ services:
       file: deps.yml
       service: softioc
 
-  zookeeper:
-    extends:
-      file: deps.yml
-      service: zookeeper
-
   kafka:
     extends:
       file: deps.yml
@@ -29,5 +24,6 @@ services:
       CONNECT_MAX_REQUEST_SIZE: 5242880
       #MONITOR_CHANNELS: "/config/channels"
       MONITOR_CHANNELS: "channel1|topic1|v|key1,channel2|topic2|v|key2,channel3|topic3|v|key3"
+      #CREATE_TOPICS: "topic1:1:1:compact,topic2:1:1:compact,topic3:1:1:compact"
     volumes:
       - ./examples/connect-config/distributed:/config

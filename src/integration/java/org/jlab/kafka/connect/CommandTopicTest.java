@@ -10,8 +10,10 @@ import org.jlab.kafka.eventsource.EventSourceRecord;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -21,6 +23,8 @@ public class CommandTopicTest {
 
     @Test
     public void testCommandTopic() throws ExecutionException, InterruptedException, TimeoutException {
+        System.err.println("BOOTSTRAP_SERVERS: " + System.getenv("BOOTSTRAP_SERVERS"));
+
         LinkedHashMap<CommandKey, EventSourceRecord<CommandKey, CommandValue>> results = new LinkedHashMap<>();
 
         CommandKey expectedKey = new CommandKey("topic1", "channela");
@@ -38,13 +42,17 @@ public class CommandTopicTest {
                 Future<RecordMetadata> future = producer.send(expectedKey, expectedValue);
 
                 // Block until sent or an exception is thrown
-                future.get(2, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             }
 
             consumer.start();
 
             // highWaterOffset method is called before this method returns, so we should be good!
-            consumer.awaitHighWaterOffset(2, TimeUnit.SECONDS);
+            boolean reached = consumer.awaitHighWaterOffset(5, TimeUnit.SECONDS);
+
+            if(!reached) {
+                throw new TimeoutException("Timeout while waiting for highwater");
+            }
 
             ArrayList<EventSourceRecord<CommandKey, CommandValue>> list = new ArrayList<>(results.values());
 
@@ -64,7 +72,7 @@ public class CommandTopicTest {
                 Future<RecordMetadata> future = producer.send(expectedKey, null);
 
                 // Block until sent or an exception is thrown
-                future.get(2, TimeUnit.SECONDS);
+                future.get(5, TimeUnit.SECONDS);
             }
         }
     }

@@ -1,31 +1,38 @@
 services:
   softioc:
-    image: slominskir/softioc:1.1.0
+    image: jeffersonlab/softioc:1.1.0
     tty: true
     stdin_open: true
     hostname: softioc
     container_name: softioc
+    ports:
+      - "5065:5065/tcp"
+      - "5064:5064/tcp"
+      - "5065:5065/udp"
+      - "5064:5064/udp"
     volumes:
       - ./examples/softioc-db:/db
       - ./examples/softioc-scripts:/scripts
 
-  zookeeper:
-    image: debezium/zookeeper:1.9.2.Final
-    hostname: zookeeper
-    container_name: zookeeper
-    ports:
-      - "2181:2181"
-      - "2888:2888"
-      - "3888:3888"
-
   kafka:
-    image: debezium/kafka:1.9.2.Final
+    image: bitnami/kafka:3.5.0
     hostname: kafka
     container_name: kafka
-    depends_on:
-      - zookeeper
     ports:
-      - "9092:9092"
+      - "9094:9094"
     environment:
-      ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      CREATE_TOPICS: 'channels:1:1:compact,topic1:1:1:compact,topic2:1:1:compact,topic3:1:1:compact'
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_KRAFT_CLUSTER_ID=Cl1akjnHRoG9df2FiSicNg
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_LOG_CLEANER_MIN_CLEANABLE_RATIO=0.1
+      - KAFKA_CFG_LOG_CLEANER_MAX_COMPACTION_LAG_MS=600000
+      - KAFKA_CFG_LOG_CLEANER_MIN_COMPACTION_LAG_MS=300000
+      - KAFKA_CFG_LOG_ROLL_MS=300000
+    healthcheck:
+      test: kafka-topics.sh --bootstrap-server kafka:9092 --list
+      start_period: 10s
+      interval: 5s
+      timeout: 10s
+      retries: 5

@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# We need to configure java.util.logging option on JVM eventually launched by /kafka/bin/connect-distributed.sh
+export KAFKA_HOME=/opt/bitnami/kafka
+
+# We need to configure java.util.logging option on JVM eventually launched by kafka/bin/connect-distributed.sh
 # - all this just to quiet some noisy log messages from some third party dependency
-export EXTRA_ARGS="-Djava.util.logging.config.file=/kafka/config/logging.properties"
+export EXTRA_ARGS="-Djava.util.logging.config.file=$KAFKA_HOME/config/logging.properties"
 
 # Grab first SERVER from SERVERS CSV env
 IFS=','
@@ -10,9 +12,6 @@ read -ra tmpArray <<< "$BOOTSTRAP_SERVERS"
 
 export BOOTSTRAP_SERVER=${tmpArray[0]}
 echo "BOOTSTRAP_SERVER: $BOOTSTRAP_SERVER"
-
-# tools-log4j.properties doesn't exist initially
-cp -rn $KAFKA_HOME/config.orig/* $KAFKA_HOME/config
 
 echo "----------------------------------------------"
 echo " Step 1: Waiting for Kafka to start listening "
@@ -28,8 +27,8 @@ echo "----------------------"
 echo "---------------------------"
 echo " Step 3: Launching Connect "
 echo "---------------------------"
-# Launch original container ENTRYPOINT in background
-/docker-entrypoint.sh start &
+# Launch Connect in background
+/opt/bitnami/kafka/bin/connect-distributed.sh /config/connect-distributed.properties &
 
 echo "------------------------------------------------"
 echo " Step 4: Waiting for Connect to start listening "

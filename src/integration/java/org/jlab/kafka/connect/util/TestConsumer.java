@@ -32,7 +32,7 @@ public class TestConsumer {
         String bootstrapServers = System.getenv("BOOTSTRAP_SERVERS");
 
         if(bootstrapServers == null) {
-            bootstrapServers = "localhost:9092";
+            bootstrapServers = "localhost:9094";
         }
 
         return bootstrapServers;

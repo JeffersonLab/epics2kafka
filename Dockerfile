@@ -1,5 +1,6 @@
 ARG BUILD_IMAGE=gradle:7.4-jdk17-alpine
-ARG RUN_IMAGE=slominskir/epics2kafka-base:1.0.0
+ARG RUN_IMAGE=bitnami/kafka:3.5.0
+ARG CUSTOM_CRT_URL=http://pki.jlab.org/JLabCA.crt
 
 ################## Stage 0
 FROM ${BUILD_IMAGE} as builder
@@ -18,13 +19,15 @@ RUN cd /app && gradle build -x test --no-watch-fs $OPTIONAL_CERT_ARG
 ################## Stage 1
 FROM ${RUN_IMAGE} as runner
 ARG CUSTOM_CRT_URL
-ARG RUN_USER=kafka
+ARG RUN_USER=1001
 USER root
-ENV PATH="/kafka/bin:${PATH}"
+ENV KAFKA_HOME="/opt/bitnami/kafka"
+ENV KAFKA_CONNECT_PLUGINS_DIR="/plugins"
+ENV PATH="$KAfKA_HOME/bin:${PATH}"
 COPY --from=builder /app/build/install $KAFKA_CONNECT_PLUGINS_DIR
 COPY --from=builder /app/scripts /scripts
-COPY --from=builder /app/examples/logging/log4j.properties /kafka/config
-COPY --from=builder /app/examples/logging/logging.properties /kafka/config
+COPY --from=builder /app/examples/logging/log4j.properties $KAFKA_HOME/config
+COPY --from=builder /app/examples/logging/logging.properties $KAFKA_HOME/config
 RUN chown -R ${RUN_USER}:0 /scripts \
     && chmod -R g+rw /scripts
 USER ${RUN_USER}
