@@ -4,3 +4,6 @@
 {"topic":"channels","channel":"channel4"}={"mask":"a", "outkey": "c4"}
 {"topic":"channels","channel":"channel5"}={"mask":"a", "outkey": "c5"}
 {"topic":"channels","channel":"channel6"}={"mask":"a", "outkey": "c6"}
+{"topic":"channela","channel":"channela"}={"mask":"a", "outkey": "ca"}
+{"topic":"channelb","channel":"channelb"}={"mask":"v", "outkey": "cb"}
+{"topic":"channelc","channel":"channelc"}={"mask":"va", "outkey": "cc"}

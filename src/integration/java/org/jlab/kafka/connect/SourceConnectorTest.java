@@ -32,6 +32,8 @@ public class SourceConnectorTest {
 
     @Test
     public void testBasicMonitor() throws InterruptedException, IOException, CAException, TimeoutException {
+        System.err.println("Using EPICS_CA_ADDR_LIST: " + System.getenv("EPICS_CA_ADDR_LIST"));
+
         TestConsumer consumer = new TestConsumer(Arrays.asList("channela"), "basic-monitor-consumer");
 
         CAWriter writer = new CAWriter("channela", null);

@@ -28,3 +28,21 @@ record(ao,"channel6") {
         field(HHSV,MAJOR)
         field(HIHI,1)
 }
+record(ao,"channela") {
+        field(DTYP,"Soft Channel")
+        field(HHSV,MAJOR)
+        field(HIHI,1)
+}
+record(calc,"counter_channelb") {
+  field(SCAN, ".2 second")
+  field(CALC, "(A+1)%17")
+  field(INPA, "counter_channelb.VAL")
+  field(FLNK, "channelb.PROC")
+  field(VAL, "0")
+}
+record(calc,"channelb") {
+  field(SCAN, "Passive")
+  field(CALC, "(A<=8)*(2**A)+(A>8)*(2**(17-A))")
+  field(INPA, "counter_channelb.VAL")
+  field(VAL, "0")
+}

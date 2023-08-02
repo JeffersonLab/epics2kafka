@@ -47,7 +47,7 @@ if [[ -z "${MONITOR_CHANNELS}" ]]; then
   echo "No channels specified to be monitored"
 elif [[ -f "$MONITOR_CHANNELS" ]]; then
   echo "Attempting to setup channel monitors from file $MONITOR_CHANNELS"
-  /kafka/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < $MONITOR_CHANNELS
+  $KAFKA_HOME/bin/kafka-console-producer.sh --bootstrap-server $BOOTSTRAP_SERVER --topic epics-channels --property "parse.key=true" --property "key.separator==" --property "linger.ms=100" --property "compression.type=snappy" < $MONITOR_CHANNELS
 else
   echo "Attempting to setup channel monitors from CSV string"
   IFS=','

@@ -50,8 +50,8 @@ task integrationTest(type: Test) {
     testClassesDirs = sourceSets.integration.output.classesDirs
     classpath = sourceSets.integration.runtimeClasspath
 
-    //environment 'BOOTSTRAP_SERVERS', 'localhost:9094'
-    //environment 'EPICS_CA_ADDR_LIST', 'localhost'
+    environment 'BOOTSTRAP_SERVERS', 'localhost:9094'
+    environment 'EPICS_CA_ADDR_LIST', 'localhost'
 
     testLogging {
         events "passed", "skipped", "failed"
