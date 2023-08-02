@@ -29,7 +29,9 @@ COPY --from=builder /app/scripts /scripts
 COPY --from=builder /app/examples/logging/log4j.properties $KAFKA_HOME/config
 COPY --from=builder /app/examples/logging/logging.properties $KAFKA_HOME/config
 RUN chown -R ${RUN_USER}:0 /scripts \
-    && chmod -R g+rw /scripts
+    && chmod -R g+rw /scripts \
+    && apt-get update  \
+    && apt-get install -y jq
 USER ${RUN_USER}
 WORKDIR /scripts
 ENTRYPOINT ["/scripts/docker-entrypoint.sh"]
