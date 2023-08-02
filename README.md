@@ -238,11 +238,11 @@ The integration tests require a docker container environment and are run automat
 
 1. Start Docker Test environment
 ```
-docker compose -f test.yml up
+docker compose -f build.yml up
 ```
 2. Execute Tests
 ```
-docker exec -i tester sh -c "cd /app; gradle integrationTest"
+gradlew integrationTest
 ```
 
 ## See Also
