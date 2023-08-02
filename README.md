@@ -16,7 +16,8 @@ Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [
    - [EPICS Channels](https://github.com/JeffersonLab/epics2kafka#epics-channels)      
    - [Scripts](https://github.com/JeffersonLab/epics2kafka#scripts)    
 - [Build](https://github.com/JeffersonLab/epics2kafka#build) 
-- [Test](https://github.com/JeffersonLab/epics2kafka#test)  
+- [Test](https://github.com/JeffersonLab/epics2kafka#test)
+- [Release](https://github.com/JeffersonLab/epics2kafka#release)   
 - [See Also](https://github.com/JeffersonLab/epics2kafka#see-also)   
 
 ---
@@ -51,7 +52,6 @@ docker exec -it softioc /scripts/feed-ca.sh channel1
 **Note**: The Docker Compose project creates the following containers: 
    - [softioc](https://github.com/JeffersonLab/softioc)
    - Kafka
-   - Zookeeper
    - Connect
 
 **Note**: If running multiple times, and your containers are maintaining state you do not wish to keep use the command `docker compose down` to remove the images.
@@ -244,6 +244,12 @@ docker compose -f build.yml up
 ```
 gradlew integrationTest
 ```
+
+## Release
+1. Bump the version number in build.gradle and commit and push to GitHub (using [Semantic Versioning](https://semver.org/)).   
+1. Create a new release on the GitHub [Releases](https://github.com/JeffersonLab/epics2kafka/releases) page corresponding to same version in build.gradle (Enumerate changes and link issues)..
+1. [Publish to DockerHub](https://github.com/JeffersonLab/epics2kafka/actions/workflows/docker-publish.yml) GitHub Action should run automatically.
+1. Bump and commit quick start [image version](https://github.com/JeffersonLab/epics2kafka/blob/main/docker-compose.override.yml) after confirming new image works
 
 ## See Also
    - [Developer Notes](https://github.com/JeffersonLab/epics2kafka/wiki/Developer-Notes)
