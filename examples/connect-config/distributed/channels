@@ -7,3 +7,6 @@
 {"topic":"channela","channel":"channela"}={"mask":"a", "outkey": "ca"}
 {"topic":"channelb","channel":"channelb"}={"mask":"v", "outkey": "cb"}
 {"topic":"channelc","channel":"channelc"}={"mask":"va", "outkey": "cc"}
+{"topic":"topic1","channel":"channel1"}={"mask":"v", "outkey": "key1"}
+{"topic":"topic2","channel":"channel2"}={"mask":"v", "outkey": "key2"}
+{"topic":"topic3","channel":"channel3"}={"mask":"v", "outkey": "key3"}
