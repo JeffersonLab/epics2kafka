@@ -2,7 +2,7 @@
 <a href="#"><img align="right" width="100" height="100" src="https://raw.githubusercontent.com/github/explore/c883cba01679b6d613c92953df8f5c9426b980cd/topics/epics/epics.png"/></a>     
 </p>
 
-# epics2kafka [![CI](https://github.com/JeffersonLab/epics2kafka/actions/workflows/ci.yml/badge.svg)](https://github.com/JeffersonLab/epics2kafka/actions/workflows/ci.yml) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/slominskir/epics2kafka?sort=semver&label=DockerHub)](https://hub.docker.com/r/slominskir/epics2kafka)
+# epics2kafka [![CI](https://github.com/JeffersonLab/epics2kafka/actions/workflows/ci.yml/badge.svg)](https://github.com/JeffersonLab/epics2kafka/actions/workflows/ci.yml) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/jeffersonlab/epics2kafka?sort=semver&label=DockerHub)](https://hub.docker.com/r/jeffersonlab/epics2kafka)
 Transfer [EPICS Channel Access (CA)](https://epics-controls.org) messages into [Kafka](https://kafka.apache.org) via the [Kafka Connect](https://kafka.apache.org/documentation/#connect) interface.
 
 ---
@@ -256,7 +256,7 @@ gradlew integrationTest
 
 ## Release
 1. Bump the version number in build.gradle and commit and push to GitHub (using [Semantic Versioning](https://semver.org/)).   
-1. Create a new release on the GitHub [Releases](https://github.com/JeffersonLab/epics2kafka/releases) page corresponding to same version in build.gradle (Enumerate changes and link issues)..
+1. Create a new release on the GitHub [Releases](https://github.com/JeffersonLab/epics2kafka/releases) page corresponding to same version in build.gradle (Enumerate changes and link issues). Run dist build and attach zip to release.
 1. [Publish to DockerHub](https://github.com/JeffersonLab/epics2kafka/actions/workflows/docker-publish.yml) GitHub Action should run automatically.
 1. Bump and commit quick start [image version](https://github.com/JeffersonLab/epics2kafka/blob/main/docker-compose.override.yml) after confirming new image works
 
